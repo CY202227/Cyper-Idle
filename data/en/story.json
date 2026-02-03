@@ -1,0 +1,53 @@
+{
+    "start": {
+        "text": "System rebooting... ERROR: 0x800412. You wake up in a derelict access pod, surrounded by flickering neon lights and a low mechanical hum. You need energy to activate the core systems.",
+        "actions": {
+            "reboot": {
+                "label": "Try to reboot core",
+                "next_node": "activating_core",
+                "reward": {
+                    "energy": 5
+                }
+            }
+        }
+    },
+    "activating_core": {
+        "text": "The core systems slowly light up. Red warning characters scroll across the screen. It seems this node has been abandoned for a long time. You need more energy to maintain system stability.",
+        "requirements": {
+            "energy": 10
+        },
+        "actions": {
+            "scavenge": {
+                "label": "Scavenge for energy in the ruins",
+                "next_node": "energy_stable",
+                "reward": {
+                    "energy": 20
+                }
+            }
+        }
+    },
+    "energy_stable": {
+        "text": "System basically stable. You can now try to connect to the wider cyberspace, or continue gathering resources here.",
+        "requirements": {
+            "energy": 100
+        },
+        "actions": {
+            "deep_scan": {
+                "label": "Perform deep scan",
+                "next_node": "discovered_data",
+                "reward": {
+                    "data_scraps": 5
+                }
+            }
+        }
+    },
+    "discovered_data": {
+        "text": "You found some locked encrypted volumes. This data might be valuable or hide some secrets.",
+        "actions": {
+            "keep_searching": {
+                "label": "Continue searching",
+                "next_node": "energy_stable"
+            }
+        }
+    }
+}

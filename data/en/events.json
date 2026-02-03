@@ -1,0 +1,21 @@
+[
+    {
+        "id": "power_surge",
+        "description": "A power surge occurred, giving you some extra energy.",
+        "weight": 10,
+        "effect": {
+            "energy": 50
+        }
+    },
+    {
+        "id": "data_leak",
+        "description": "You intercepted an unencrypted data stream.",
+        "weight": 5,
+        "requirements": {
+            "energy": 100
+        },
+        "effect": {
+            "data_scraps": 10
+        }
+    }
+]

@@ -1,0 +1,17 @@
+{
+    "energy": {
+        "name": "电力",
+        "auto_gen": 0.1,
+        "description": "基础能源。"
+    },
+    "data_scraps": {
+        "name": "数据碎片",
+        "auto_gen": 0,
+        "description": "从废弃服务器中回收的有用信息。"
+    },
+    "credits": {
+        "name": "信用点",
+        "auto_gen": 0,
+        "description": "赛博世界的通用货币。"
+    }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber-Idle | 赛博放置</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+</head>
+<body class="cyber-theme">
+    <div id="loading-overlay">
+        <div class="glitch-text" data-text="SYSTEM INITIALIZING...">SYSTEM INITIALIZING...</div>
+    </div>
+
+    <div id="game-container" style="display: none;">
+        <header>
+            <h1 class="glitch-text" data-text="CYBER-IDLE">CYBER-IDLE</h1>
+            <div id="top-bar">
+                <span id="version">v0.1.0-ALPHA</span>
+                <div id="save-controls">
+                    <button id="btn-lang" py-click="switch_language">English</button>
+                    <button id="btn-export" py-click="export_save">导出存档</button>
+                    <button id="btn-import" py-click="import_save_dialog">导入存档</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section id="story-panel">
+                <div id="story-log"></div>
+                <div id="story-choices"></div>
+            </section>
+
+            <section id="resource-panel">
+                <h2>核心资产</h2>
+                <div id="resources-list">
+                    <!-- 资源将由 Python 动态渲染 -->
+                </div>
+            </section>
+
+            <section id="action-panel">
+                <h2>系统操作</h2>
+                <div id="actions-list">
+                    <!-- 操作将由 Python 动态渲染 -->
+                </div>
+            </section>
+        </main>
+
+        <footer id="status-bar">
+            <span id="status-text">系统就绪...</span>
+            <span id="tick-timer">TICK: 0</span>
+        </footer>
+    </div>
+
+    <section py-config>
+        packages = ["pybase64"]
+        [[fetch]]
+        from = "python/"
+        to_folder = "python"
+        files = ["main.py"]
+        [[fetch]]
+        from = "python/engine/"
+        to_folder = "python/engine"
+        files = ["state.py", "manager.py", "story.py"]
+        [[fetch]]
+        from = "python/utils/"
+        to_folder = "python/utils"
+        files = ["rng.py", "storage.py"]
+        [[fetch]]
+        from = "data/"
+        to_folder = "data"
+        files = ["ui.json"]
+        [[fetch]]
+        from = "data/zh/"
+        to_folder = "data/zh"
+        files = ["resources.json", "story.json", "events.json"]
+        [[fetch]]
+        from = "data/en/"
+        to_folder = "data/en"
+        files = ["resources.json", "story.json", "events.json"]
+    </section>
+
+    <script type="py" src="python/main.py" config="py-config"></script>
+</body>
+</html>

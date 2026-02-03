@@ -1,0 +1,21 @@
+[
+    {
+        "id": "power_surge",
+        "description": "发生了一次电力涌浪，你获得了一些额外的能源。",
+        "weight": 10,
+        "effect": {
+            "energy": 50
+        }
+    },
+    {
+        "id": "data_leak",
+        "description": "你截获了一段未加密的数据流。",
+        "weight": 5,
+        "requirements": {
+            "energy": 100
+        },
+        "effect": {
+            "data_scraps": 10
+        }
+    }
+]

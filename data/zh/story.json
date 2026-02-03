@@ -1,0 +1,53 @@
+{
+    "start": {
+        "text": "系统重启中... 错误: 0x800412. 你在一个废弃的接入舱中醒来，周围只有闪烁的霓虹灯和低沉的机器嗡嗡声。你需要能源来激活核心系统。",
+        "actions": {
+            "reboot": {
+                "label": "尝试重启核心",
+                "next_node": "activating_core",
+                "reward": {
+                    "energy": 5
+                }
+            }
+        }
+    },
+    "activating_core": {
+        "text": "核心系统缓慢亮起。屏幕上滚动着红色的警告字符。看起来你所在的这个节点已经被遗弃很久了。你需要更多的能源来维持系统的稳定。",
+        "requirements": {
+            "energy": 10
+        },
+        "actions": {
+            "scavenge": {
+                "label": "在废墟中搜寻能源",
+                "next_node": "energy_stable",
+                "reward": {
+                    "energy": 20
+                }
+            }
+        }
+    },
+    "energy_stable": {
+        "text": "系统已基本稳定。你现在可以开始尝试连接到更广阔的赛博空间，或者继续在这里收集资源。",
+        "requirements": {
+            "energy": 100
+        },
+        "actions": {
+            "deep_scan": {
+                "label": "进行深度扫描",
+                "next_node": "discovered_data",
+                "reward": {
+                    "data_scraps": 5
+                }
+            }
+        }
+    },
+    "discovered_data": {
+        "text": "你发现了一些被锁定的加密卷宗。这些数据可能价值不菲，或者隐藏着某些秘密。",
+        "actions": {
+            "keep_searching": {
+                "label": "继续搜索",
+                "next_node": "energy_stable"
+            }
+        }
+    }
+}

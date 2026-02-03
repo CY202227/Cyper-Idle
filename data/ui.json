@@ -1,0 +1,24 @@
+{
+    "zh": {
+        "export_save": "导出存档",
+        "import_save": "导入存档",
+        "core_assets": "核心资产",
+        "system_ops": "系统操作",
+        "status_ready": "系统就绪...",
+        "save_prompt": "请复制以下存档代码并妥善保存:",
+        "load_prompt": "请输入存档代码:",
+        "switch_lang": "English",
+        "ver_prefix": "版本"
+    },
+    "en": {
+        "export_save": "Export Save",
+        "import_save": "Import Save",
+        "core_assets": "Core Assets",
+        "system_ops": "System Operations",
+        "status_ready": "System Ready...",
+        "save_prompt": "Please copy the following save code and keep it safe:",
+        "load_prompt": "Please enter the save code:",
+        "switch_lang": "中文",
+        "ver_prefix": "VER"
+    }
+}

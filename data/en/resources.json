@@ -1,0 +1,17 @@
+{
+    "energy": {
+        "name": "Power",
+        "auto_gen": 0.1,
+        "description": "Basic energy source."
+    },
+    "data_scraps": {
+        "name": "Data Scraps",
+        "auto_gen": 0,
+        "description": "Useful information recovered from abandoned servers."
+    },
+    "credits": {
+        "name": "Credits",
+        "auto_gen": 0,
+        "description": "Common currency in the cyber world."
+    }
+}
