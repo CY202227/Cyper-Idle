@@ -14,39 +14,56 @@ from engine.manager import GameManager
 from engine.story import StoryManager
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
+from utils.i18n import I18nManager
 
 # 初始化全局实例
 state = GameState()
 rng = SeededRNG()
 manager = GameManager(state, rng)
 story = StoryManager(state)
+i18n = I18nManager(state)
 
 async def load_game_data():
     """加载 JSON 配置文件"""
-    # 在 PyScript 环境中，这些文件通过 fetch 宏预加载
+    lang = state.language
     try:
-        with open("data/resources.json", "r", encoding="utf-8") as f:
+        # 加载公共 UI 翻译
+        with open("data/ui.json", "r", encoding="utf-8") as f:
+            ui_data = f.read()
+        i18n.load_ui_translations(ui_data)
+
+        # 加载特定语言的游戏内容
+        with open(f"data/{lang}/resources.json", "r", encoding="utf-8") as f:
             res_data = f.read()
-        with open("data/events.json", "r", encoding="utf-8") as f:
+        with open(f"data/{lang}/events.json", "r", encoding="utf-8") as f:
             evt_data = f.read()
-        with open("data/story.json", "r", encoding="utf-8") as f:
+        with open(f"data/{lang}/story.json", "r", encoding="utf-8") as f:
             story_data = f.read()
             
         manager.load_definitions(res_data, evt_data)
         story.load_nodes(story_data)
     except Exception as e:
-        print(f"配置文件加载失败: {e}")
+        print(f"配置文件加载失败 ({lang}): {e}")
 
 def update_ui():
     """更新页面元素"""
+    # 更新静态 UI 文本
+    document.getElementById("btn-lang").innerText = i18n.get("switch_lang")
+    document.getElementById("btn-export").innerText = i18n.get("export_save")
+    document.getElementById("btn-import").innerText = i18n.get("import_save")
+    document.querySelector("#resource-panel h2").innerText = i18n.get("core_assets")
+    document.querySelector("#action-panel h2").innerText = i18n.get("system_ops")
+    document.getElementById("status-text").innerText = i18n.get("status_ready")
+    document.getElementById("version").innerText = f"{i18n.get('ver_prefix')} v0.1.0-ALPHA"
+
     # 更新资源显示
     res_list = document.getElementById("resources-list")
     res_list.innerHTML = ""
     for res_id, amount in state.resources.items():
         res_item = document.createElement("div")
         res_item.className = "resource-item"
-        # 格式化显示
-        display_name = res_id.replace("_", " ").upper()
+        # 使用 i18n 获取资源名称
+        display_name = i18n.get_res_name(res_id, manager.definitions["resources"])
         res_item.innerHTML = f"<span>{display_name}:</span> <span>{int(amount)}</span>"
         res_list.appendChild(res_item)
 
@@ -102,17 +119,32 @@ async def game_loop():
 
 # --- 按钮绑定函数 (由 HTML 中的 py-click 调用) ---
 
+async def switch_language(event=None):
+    state.language = "en" if state.language == "zh" else "zh"
+    await load_game_data()
+    # 强制重置剧情显示以刷新翻译
+    if hasattr(update_ui, "last_node"):
+        delattr(update_ui, "last_node")
+    update_ui()
+    save_to_local(state)
+
 def export_save(event=None):
     save_str = export_save_string(state)
-    window.prompt("请复制以下存档代码并妥善保存:", save_str)
+    window.prompt(i18n.get("save_prompt"), save_str)
 
-def import_save_dialog(event=None):
-    save_str = window.prompt("请输入存档代码:")
+async def import_save_dialog(event=None):
+    save_str = window.prompt(i18n.get("load_prompt"))
     if save_str:
         success, msg = import_save_string(state, save_str)
-        window.alert(msg)
         if success:
+            # 导入后可能语言变了，重新加载数据
+            await load_game_data()
+            # 强制重置剧情显示
+            if hasattr(update_ui, "last_node"):
+                delattr(update_ui, "last_node")
             update_ui()
+        else:
+            window.alert(msg)
 
 # --- 初始化流程 ---
 
