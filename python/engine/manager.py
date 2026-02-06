@@ -25,6 +25,10 @@ class GameManager:
                 amount = res_def["auto_gen"] * delta_time
                 self.state.resources[res_id] = self.state.resources.get(res_id, 0) + amount
 
+        # 检查收集类任务进度
+        # 注意：这里需要一个引用到 quest_mgr 的方式，或者在 main.py 中处理
+        # 暂时在 main.py 的循环中处理更方便
+
         # 随机事件检查
         if self.state.tick_count % 60 == 0: # 约每分钟检查一次（假设 1 tick/sec）
             self.check_random_events()

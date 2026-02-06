@@ -14,6 +14,8 @@ A cyberpunk-themed idle game implemented in Python (PyScript).
 - **Multi-language Support**: Built-in English and Chinese toggle. All content (resources, story, events) is easily extendable via JSON.
 - **Seeded RNG**: Uses a seeded random number generator for consistent and predictable random events.
 - **Story-Driven**: Includes a basic story engine supporting node jumping and branching choices based on resource requirements.
+- **Dungeon Exploration**: Procedurally generated network nodes using a Random Walk algorithm.
+- **Daemon System**: A unique nurturing system where players capture, level up, and optimize "Daemons" (combat scripts) to fight security programs through strategic growth and refactoring.
 
 ## 🚀 Quick Start
 

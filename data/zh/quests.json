@@ -1,0 +1,31 @@
+{
+    "collect_scraps_1": {
+        "name": "回收协议: 碎片",
+        "desc": "收集 10 个数据碎片以供分析。",
+        "type": "collect",
+        "target_id": "data_scraps",
+        "target_amount": 10,
+        "reward": { "credits": 200, "hacking_xp": 50 }
+    },
+    "combat_patrol_1": {
+        "name": "清理行动: 安全程序",
+        "desc": "在地牢中击败 5 个安全程序。",
+        "type": "combat",
+        "target_amount": 5,
+        "reward": { "compute": 10, "credits": 300 }
+    },
+    "deep_dive_1": {
+        "name": "深度潜入",
+        "desc": "到达子网地牢的第 3 层。",
+        "type": "explore",
+        "target_amount": 3,
+        "reward": { "credits": 500, "hacking_xp": 150 }
+    },
+    "unlock_data_ghost": {
+        "name": "黑市交易: 数据幽灵",
+        "desc": "在黑市购买数据幽灵程序。",
+        "type": "special",
+        "target_amount": 1,
+        "reward": { "hacking_xp": 100 }
+    }
+}

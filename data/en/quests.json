@@ -1,0 +1,31 @@
+{
+    "collect_scraps_1": {
+        "name": "Recycle Protocol: Scraps",
+        "desc": "Collect 10 data scraps for analysis.",
+        "type": "collect",
+        "target_id": "data_scraps",
+        "target_amount": 10,
+        "reward": { "credits": 200, "hacking_xp": 50 }
+    },
+    "combat_patrol_1": {
+        "name": "Purge Op: Security",
+        "desc": "Defeat 5 security programs in the dungeon.",
+        "type": "combat",
+        "target_amount": 5,
+        "reward": { "compute": 10, "credits": 300 }
+    },
+    "deep_dive_1": {
+        "name": "Deep Dive",
+        "desc": "Reach Level 3 of the subnet dungeon.",
+        "type": "explore",
+        "target_amount": 3,
+        "reward": { "credits": 500, "hacking_xp": 150 }
+    },
+    "unlock_data_ghost": {
+        "name": "Black Market: Data Ghost",
+        "desc": "Purchase the Data Ghost program from the Black Market.",
+        "type": "special",
+        "target_amount": 1,
+        "reward": { "hacking_xp": 100 }
+    }
+}

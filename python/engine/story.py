@@ -21,6 +21,12 @@ class StoryManager:
         if not action:
             return False
 
+        # 如果动作包含任务接受
+        if "quest_id" in action:
+            # 这里需要访问全局的 quest_mgr，或者通过某种方式传递
+            # 简单起见，我们在 main.py 中处理这个逻辑
+            pass
+
         # 应用奖励/后果
         if "reward" in action:
             for res, amount in action["reward"].items():

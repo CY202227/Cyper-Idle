@@ -32,11 +32,86 @@
             "energy": 100
         },
         "actions": {
+            "accept_contracts": {
+                "label": "查看可用合同",
+                "next_node": "contract_board"
+            },
             "deep_scan": {
                 "label": "进行深度扫描",
                 "next_node": "discovered_data",
                 "reward": {
                     "data_scraps": 5
+                }
+            },
+            "mysterious_signal": {
+                "label": "追踪微弱的加密信号",
+                "next_node": "mysterious_contact",
+                "requirements": {
+                    "hacking_xp": 100
+                }
+            },
+            "upgrade_core": {
+                "label": "升级核心架构",
+                "next_node": "core_upgrade_node",
+                "requirements": {
+                    "credits": 500,
+                    "data_scraps": 10
+                }
+            }
+        }
+    },
+    "mysterious_contact": {
+        "text": "你追踪信号来到了一个隐藏的子网。一个自称 'K' 的匿名实体向你发来了消息：'看来你在这个废墟里翻出了不少好东西。想要点真正的黑客工具吗？去黑市看看吧。'",
+        "actions": {
+            "enter_black_market": {
+                "label": "进入地下黑市",
+                "next_node": "black_market"
+            },
+            "ignore": {
+                "label": "忽略信号",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "black_market": {
+        "text": "这里是黑市。代码在这里比信用点更值钱。你可以用数据碎片交换一些稀有的资源或程序。",
+        "actions": {
+            "trade_scraps_compute": {
+                "label": "用 5 碎片换取 20 算力",
+                "next_node": "black_market",
+                "requirements": {
+                    "data_scraps": 5
+                },
+                "reward": {
+                    "data_scraps": -5,
+                    "compute": 20
+                }
+            },
+            "buy_rare_daemon": {
+                "label": "购买稀有守护程序：'数据幽灵' (500 信用点)",
+                "next_node": "black_market",
+                "requirements": {
+                    "credits": 500
+                },
+                "reward": {
+                    "credits": -500
+                },
+                "quest_id": "unlock_data_ghost"
+            },
+            "leave": {
+                "label": "离开黑市",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "core_upgrade_node": {
+        "text": "你开始重构核心架构。随着代码的优化，你感觉到系统的吞吐量大幅提升。你的电力产出效率提高了。",
+        "actions": {
+            "finish_upgrade": {
+                "label": "完成升级",
+                "next_node": "energy_stable",
+                "reward": {
+                    "energy": 50
                 }
             }
         }
@@ -89,6 +164,30 @@
         "actions": {
             "leave_dungeon": {
                 "label": "退出地牢",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "contract_board": {
+        "text": "加密频道中闪烁着几条悬赏任务。这些合同由匿名实体发布，报酬丰厚。",
+        "actions": {
+            "take_collect": {
+                "label": "接受: 数据回收 (10 碎片)",
+                "next_node": "energy_stable",
+                "quest_id": "collect_scraps_1"
+            },
+            "take_combat": {
+                "label": "接受: 清理行动 (5 敌人)",
+                "next_node": "energy_stable",
+                "quest_id": "combat_patrol_1"
+            },
+            "take_explore": {
+                "label": "接受: 深度潜入 (第 3 层)",
+                "next_node": "energy_stable",
+                "quest_id": "deep_dive_1"
+            },
+            "back": {
+                "label": "返回",
                 "next_node": "energy_stable"
             }
         }

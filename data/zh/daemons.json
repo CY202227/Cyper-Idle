@@ -1,0 +1,30 @@
+{
+    "bit_wolf": {
+        "name": "比特狼",
+        "description": "一种基础的攻击型守护程序，擅长快速突破初级防火墙。",
+        "base_stats": {
+            "intrusion": 15,
+            "shielding": 5,
+            "speed": 20
+        },
+        "growth": {
+            "intrusion": 3,
+            "shielding": 1,
+            "speed": 4
+        }
+    },
+    "data_ghost": {
+        "name": "数据幽灵",
+        "description": "隐匿性极高的程序，能够在不触发警报的情况下提取数据。",
+        "base_stats": {
+            "intrusion": 10,
+            "shielding": 15,
+            "speed": 10
+        },
+        "growth": {
+            "intrusion": 2,
+            "shielding": 3,
+            "speed": 2
+        }
+    }
+}

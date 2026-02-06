@@ -32,11 +32,86 @@
             "energy": 100
         },
         "actions": {
+            "accept_contracts": {
+                "label": "Check Available Contracts",
+                "next_node": "contract_board"
+            },
             "deep_scan": {
-                "label": "Perform deep scan",
+                "label": "Perform Deep Scan",
                 "next_node": "discovered_data",
                 "reward": {
                     "data_scraps": 5
+                }
+            },
+            "mysterious_signal": {
+                "label": "Trace Mysterious Signal",
+                "next_node": "mysterious_contact",
+                "requirements": {
+                    "hacking_xp": 100
+                }
+            },
+            "upgrade_core": {
+                "label": "Upgrade Core Architecture",
+                "next_node": "core_upgrade_node",
+                "requirements": {
+                    "credits": 500,
+                    "data_scraps": 10
+                }
+            }
+        }
+    },
+    "mysterious_contact": {
+        "text": "You trace the signal to a hidden subnet. An anonymous entity calling themselves 'K' sends you a message: 'Seems like you've dug up some interesting things in those ruins. Want some real hacker tools? Check out the Black Market.'",
+        "actions": {
+            "enter_black_market": {
+                "label": "Enter Black Market",
+                "next_node": "black_market"
+            },
+            "ignore": {
+                "label": "Ignore Signal",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "black_market": {
+        "text": "This is the Black Market. Code is worth more than credits here. You can trade data scraps for rare resources or programs.",
+        "actions": {
+            "trade_scraps_compute": {
+                "label": "Trade 5 Scraps for 20 Compute",
+                "next_node": "black_market",
+                "requirements": {
+                    "data_scraps": 5
+                },
+                "reward": {
+                    "data_scraps": -5,
+                    "compute": 20
+                }
+            },
+            "buy_rare_daemon": {
+                "label": "Buy Rare Daemon: 'Data Ghost' (500 Credits)",
+                "next_node": "black_market",
+                "requirements": {
+                    "credits": 500
+                },
+                "reward": {
+                    "credits": -500
+                },
+                "quest_id": "unlock_data_ghost"
+            },
+            "leave": {
+                "label": "Leave Black Market",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "core_upgrade_node": {
+        "text": "You begin refactoring the core architecture. As the code optimizes, you feel the system throughput increase significantly. Your energy production efficiency has improved.",
+        "actions": {
+            "finish_upgrade": {
+                "label": "Finish Upgrade",
+                "next_node": "energy_stable",
+                "reward": {
+                    "energy": 50
                 }
             }
         }
@@ -89,6 +164,30 @@
         "actions": {
             "leave_dungeon": {
                 "label": "Leave Dungeon",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "contract_board": {
+        "text": "Several bounty missions flicker in the encrypted channel. These contracts are posted by anonymous entities and offer generous rewards.",
+        "actions": {
+            "take_collect": {
+                "label": "Accept: Data Recovery (10 Scraps)",
+                "next_node": "energy_stable",
+                "quest_id": "collect_scraps_1"
+            },
+            "take_combat": {
+                "label": "Accept: Purge Op (5 Enemies)",
+                "next_node": "energy_stable",
+                "quest_id": "combat_patrol_1"
+            },
+            "take_explore": {
+                "label": "Accept: Deep Dive (Floor 3)",
+                "next_node": "energy_stable",
+                "quest_id": "deep_dive_1"
+            },
+            "back": {
+                "label": "Back",
                 "next_node": "energy_stable"
             }
         }

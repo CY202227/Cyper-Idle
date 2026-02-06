@@ -6,12 +6,15 @@ class GameState:
 
     def reset(self):
         self.resources = {
-            "energy": 0,
+            "energy": 100,
             "data_scraps": 0,
             "credits": 0,
             "compute": 0,
             "hacking_xp": 0
         }
+        self.daemons = [] # 存储拥有的守护程序
+        self.active_daemon_index = 0 # 当前选中的守护程序索引
+        self.active_quests = [] # 存储当前接受的任务
         self.story_flags = []
         self.current_story_node = "start"
         self.seed = None
@@ -29,6 +32,9 @@ class GameState:
     def to_json(self):
         return json.dumps({
             "resources": self.resources,
+            "daemons": self.daemons,
+            "active_daemon_index": self.active_daemon_index,
+            "active_quests": self.active_quests,
             "story_flags": self.story_flags,
             "current_story_node": self.current_story_node,
             "seed": self.seed,
@@ -41,6 +47,9 @@ class GameState:
     def from_json(self, json_str):
         data = json.loads(json_str)
         self.resources = data.get("resources", self.resources)
+        self.daemons = data.get("daemons", [])
+        self.active_daemon_index = data.get("active_daemon_index", 0)
+        self.active_quests = data.get("active_quests", [])
         self.story_flags = data.get("story_flags", self.story_flags)
         self.current_story_node = data.get("current_story_node", self.current_story_node)
         self.seed = data.get("seed", self.seed)

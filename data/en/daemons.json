@@ -1,0 +1,30 @@
+{
+    "bit_wolf": {
+        "name": "Bit Wolf",
+        "description": "A basic offensive daemon, skilled at rapidly breaching entry-level firewalls.",
+        "base_stats": {
+            "intrusion": 15,
+            "shielding": 5,
+            "speed": 20
+        },
+        "growth": {
+            "intrusion": 3,
+            "shielding": 1,
+            "speed": 4
+        }
+    },
+    "data_ghost": {
+        "name": "Data Ghost",
+        "description": "A highly stealthy program capable of extracting data without triggering alarms.",
+        "base_stats": {
+            "intrusion": 10,
+            "shielding": 15,
+            "speed": 10
+        },
+        "growth": {
+            "intrusion": 2,
+            "shielding": 3,
+            "speed": 2
+        }
+    }
+}
