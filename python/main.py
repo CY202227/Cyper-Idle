@@ -159,11 +159,19 @@ async def start_game():
         print("开启新游戏")
         state.seed = rng.get_seed()
 
-    # 3. 移除加载遮罩，显示游戏界面
-    document.getElementById("loading-overlay").style.display = "none"
-    document.getElementById("game-container").style.display = "flex"
+    # 3. 立即更新一次 UI，确保数据渲染
+    update_ui()
+
+    # 4. 移除加载遮罩，显示游戏界面
+    loading_overlay = document.getElementById("loading-overlay")
+    if loading_overlay:
+        loading_overlay.style.display = "none"
     
-    # 4. 启动循环
+    game_container = document.getElementById("game-container")
+    if game_container:
+        game_container.style.display = "flex"
+    
+    # 5. 启动循环
     await game_loop()
 
 # 启动游戏

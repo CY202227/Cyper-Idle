@@ -16,7 +16,7 @@ class GameState:
         self.tick_count = 0
         self.last_update = 0
         self.unlocked_actions = ["gather_energy"]
-        self.language = "zh"
+        self.language = "en"
 
     def to_json(self):
         return json.dumps({

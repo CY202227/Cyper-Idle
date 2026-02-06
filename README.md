@@ -1,76 +1,52 @@
-# Cyber-Idle | 赛博放置
+# Cyber-Idle
 
-一个基于 Python (PyScript) 实现的赛博朋克风格放置游戏 (Idle Game)。
+A cyberpunk-themed idle game implemented in Python (PyScript).
 
-## 🌟 特性
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-- **纯前端运行**: 使用 PyScript 技术，在浏览器中直接运行 Python 逻辑，无需后端服务器。
-- **赛博风格 UI**: 极简的高对比度配色，包含 CRT 扫描线和 Glitch 故障效果。
-- **无数据库存档**: 进度自动保存至浏览器 `localStorage`，支持仿 Evolve 风格的 Base64 字符串导出与导入。
-- **多语言支持**: 内置中英文双语切换，所有游戏内容（资源、剧情、事件）均可通过 JSON 轻松扩展。
-- **种子随机数**: 引入 Seeded RNG，确保游戏随机事件的一致性与可预测性。
-- **剧情驱动**: 包含基础的剧情引擎，支持基于资源条件的节点跳转和分支选择。
+---
 
-## 🚀 快速开始
+## 🌟 Features
 
-### 在线游玩
-1. 将本项目推送到 GitHub 仓库。
-2. 在仓库设置中开启 **GitHub Pages**。
-3. 访问生成的 URL 即可开始游戏。
+- **Pure Frontend**: Runs directly in the browser using PyScript, no backend server required.
+- **Cyberpunk UI**: Minimalist high-contrast color scheme with CRT scanlines and Glitch effects.
+- **No-DB Save System**: Progress is auto-saved to `localStorage`. Supports Evolve-style Base64 string export/import.
+- **Multi-language Support**: Built-in English and Chinese toggle. All content (resources, story, events) is easily extendable via JSON.
+- **Seeded RNG**: Uses a seeded random number generator for consistent and predictable random events.
+- **Story-Driven**: Includes a basic story engine supporting node jumping and branching choices based on resource requirements.
 
-### 本地运行
-1. 确保已安装 Python 环境。
-2. 在项目根目录下运行静态服务器：
+## 🚀 Quick Start
+
+### Play Online
+1. Push this project to a GitHub repository.
+2. Enable **GitHub Pages** in the repository settings.
+3. Visit the generated URL to start playing.
+
+### Run Locally
+1. Ensure you have a Python environment installed.
+2. Run a static server in the root directory:
    ```bash
    python -m http.server 8000
    ```
-3. 在浏览器访问 `http://localhost:8000`。
+3. Visit `http://localhost:8000` in your browser.
 
-## 🛠️ 项目结构
+## 🛠️ Project Structure
 
 ```text
 /
-├── index.html          # 主入口，加载 PyScript 环境
+├── index.html          # Main entry, loads PyScript environment
 ├── css/
-│   └── style.css       # 赛博风格样式 (CRT, 霓虹配色, 动画)
-├── data/               # 游戏配置文件
-│   ├── ui.json         # UI 翻译
-│   ├── zh/             # 中文内容 (资源, 剧情, 事件)
-│   └── en/             # 英文内容
-└── python/             # 游戏核心逻辑
-    ├── main.py         # 初始化、UI 绑定与主循环
-    ├── engine/         # 游戏引擎 (状态管理, 资源计算, 剧情系统)
-    └── utils/          # 工具类 (RNG, 存档管理, 国际化)
+│   └── style.css       # Cyberpunk styles (CRT, neon colors, animations)
+├── data/               # Game configuration files
+│   ├── ui.json         # UI translations
+│   ├── zh/             # Chinese content (resources, story, events)
+│   └── en/             # English content
+└── python/             # Core game logic
+    ├── main.py         # Initialization, UI binding, and main loop
+    ├── engine/         # Game engine (state, resource calculation, story system)
+    └── utils/          # Utilities (RNG, storage, i18n)
 ```
 
-## 📝 开发与扩展
+## 📜 License
 
-### 添加新剧情
-编辑 `data/zh/story.json` 和 `data/en/story.json`：
-```json
-"node_id": {
-    "text": "剧情描述文本",
-    "requirements": { "energy": 100 },
-    "actions": {
-        "action_id": {
-            "label": "选项文字",
-            "next_node": "target_node_id",
-            "reward": { "credits": 10 }
-        }
-    }
-}
-```
-
-### 添加新资源
-编辑 `data/zh/resources.json` 和 `data/en/resources.json`：
-```json
-"new_resource": {
-    "name": "资源名称",
-    "auto_gen": 0.5,
-    "description": "资源描述"
-}
-```
-
-## 📜 许可证
-
-本项目采用 MIT 许可证。
+This project is licensed under the MIT License.
