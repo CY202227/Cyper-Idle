@@ -13,5 +13,15 @@
         "name": "Credits",
         "auto_gen": 0,
         "description": "Common currency in the cyber world."
+    },
+    "compute": {
+        "name": "Compute",
+        "auto_gen": 0,
+        "description": "Processing power for cracking and research."
+    },
+    "hacking_xp": {
+        "name": "Hacking XP",
+        "auto_gen": 0,
+        "description": "Experience gained through cyber activities."
     }
 }

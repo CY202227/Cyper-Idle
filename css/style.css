@@ -187,6 +187,50 @@ button:hover {
     z-index: 100;
 }
 
+#dungeon-container {
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#dungeon-grid {
+    font-family: 'Courier New', monospace;
+    line-height: 1.1;
+    letter-spacing: 2px;
+    white-space: pre;
+    color: var(--text-color);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    font-size: 1.2rem;
+    box-shadow: inset 0 0 10px var(--panel-bg);
+}
+
+#dungeon-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.control-row {
+    display: flex;
+    gap: 5px;
+}
+
+#dungeon-controls button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
 .resource-item {
     display: flex;
     justify-content: space-between;

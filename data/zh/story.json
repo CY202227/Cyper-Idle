@@ -42,10 +42,53 @@
         }
     },
     "discovered_data": {
-        "text": "你发现了一些被锁定的加密卷宗。这些数据可能价值不菲，或者隐藏着某些秘密。",
+        "text": "你发现了一些被锁定的加密卷宗。这些数据可能价值不菲，或者隐藏着某些秘密。你需要算力来尝试破解它们。或者，你可以尝试直接潜入该节点的子网地牢。",
         "actions": {
+            "enter_dungeon": {
+                "label": "潜入子网地牢",
+                "next_node": "dungeon_start"
+            },
+            "crack_data": {
+                "label": "尝试破解卷宗 (消耗 10 算力)",
+                "next_node": "cracking_success",
+                "requirements": {
+                    "compute": 10
+                },
+                "reward": {
+                    "hacking_xp": 50,
+                    "credits": 100
+                }
+            },
+            "gather_compute": {
+                "label": "分配能源产生算力",
+                "next_node": "discovered_data",
+                "requirements": {
+                    "energy": 50
+                },
+                "reward": {
+                    "compute": 5
+                }
+            },
             "keep_searching": {
                 "label": "继续搜索",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "cracking_success": {
+        "text": "破解成功！你获得了宝贵的信用点，并且你的黑客技术得到了提升。你感觉到自己对这个网络的理解加深了。",
+        "actions": {
+            "return": {
+                "label": "返回",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "dungeon_start": {
+        "text": "你已进入子网地牢。使用 WASD 按钮进行移动。找到出口 (E) 以深入，或随时返回。",
+        "actions": {
+            "leave_dungeon": {
+                "label": "退出地牢",
                 "next_node": "energy_stable"
             }
         }

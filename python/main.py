@@ -5,13 +5,15 @@ import os
 from js import document, window, localStorage
 from pyodide.ffi import create_proxy
 
-# 将当前目录及其父目录添加到路径，以便导入
+# 将当前目录添加到路径，以便导入
+import os
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "python"))
 
 from engine.state import GameState
 from engine.manager import GameManager
 from engine.story import StoryManager
+from engine.dungeon import DungeonEngine
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
 from utils.i18n import I18nManager
@@ -22,6 +24,7 @@ rng = SeededRNG()
 manager = GameManager(state, rng)
 story = StoryManager(state)
 i18n = I18nManager(state)
+dungeon = DungeonEngine(state, rng)
 
 async def load_game_data():
     """加载 JSON 配置文件"""
@@ -55,6 +58,15 @@ def update_ui():
     document.querySelector("#action-panel h2").innerText = i18n.get("system_ops")
     document.getElementById("status-text").innerText = i18n.get("status_ready")
     document.getElementById("version").innerText = f"{i18n.get('ver_prefix')} v0.1.0-ALPHA"
+    
+    # 显示黑客等级
+    status_bar = document.getElementById("status-bar")
+    level_span = document.getElementById("level-display")
+    if not level_span:
+        level_span = document.createElement("span")
+        level_span.id = "level-display"
+        status_bar.insertBefore(level_span, status_bar.firstChild)
+    level_span.innerText = f"{i18n.get('hacking_level')}: {state.hacking_level} | "
 
     # 更新资源显示
     res_list = document.getElementById("resources-list")
@@ -100,6 +112,13 @@ def update_ui():
     # 更新状态栏
     document.getElementById("tick-timer").innerText = f"TICK: {state.tick_count}"
 
+    # 更新地牢显示
+    if state.current_story_node == "dungeon_start":
+        document.getElementById("dungeon-container").style.display = "flex"
+        document.getElementById("dungeon-grid").innerText = dungeon.render()
+    else:
+        document.getElementById("dungeon-container").style.display = "none"
+
 async def game_loop():
     """主游戏循环"""
     last_time = time.time()
@@ -118,6 +137,43 @@ async def game_loop():
         await asyncio.sleep(1)
 
 # --- 按钮绑定函数 (由 HTML 中的 py-click 调用) ---
+
+def move_up(event=None):
+    handle_move(0, -1)
+
+def move_down(event=None):
+    handle_move(0, 1)
+
+def move_left(event=None):
+    handle_move(-1, 0)
+
+def move_right(event=None):
+    handle_move(1, 0)
+
+def handle_move(dx, dy):
+    result, msg = dungeon.move_player(dx, dy)
+    if msg:
+        log_div = document.getElementById("story-log")
+        entry = document.createElement("div")
+        entry.className = "log-entry"
+        entry.innerText = f"> {msg}"
+        log_div.appendChild(entry)
+        log_div.scrollTop = log_div.scrollHeight
+    
+    # 根据结果给予奖励
+    if result == "LOOT":
+        state.resources["credits"] += 20
+        state.resources["data_scraps"] += 1
+    elif result == "ENEMY":
+        state.resources["energy"] = max(0, state.resources["energy"] - 10)
+    elif result == "INFO":
+        state.resources["hacking_xp"] += 10
+    elif result == "QUEST":
+        state.resources["compute"] += 2
+    elif result == "EXIT":
+        dungeon.generate_level(dungeon.current_level + 1)
+    
+    update_ui()
 
 async def switch_language(event=None):
     state.language = "en" if state.language == "zh" else "zh"
@@ -159,19 +215,14 @@ async def start_game():
         print("开启新游戏")
         state.seed = rng.get_seed()
 
-    # 3. 立即更新一次 UI，确保数据渲染
-    update_ui()
+    # 初始化地牢
+    dungeon.generate_level(1)
 
-    # 4. 移除加载遮罩，显示游戏界面
-    loading_overlay = document.getElementById("loading-overlay")
-    if loading_overlay:
-        loading_overlay.style.display = "none"
+    # 3. 移除加载遮罩，显示游戏界面
+    document.getElementById("loading-overlay").style.display = "none"
+    document.getElementById("game-container").style.display = "flex"
     
-    game_container = document.getElementById("game-container")
-    if game_container:
-        game_container.style.display = "flex"
-    
-    # 5. 启动循环
+    # 4. 启动循环
     await game_loop()
 
 # 启动游戏

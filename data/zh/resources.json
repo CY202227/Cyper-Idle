@@ -13,5 +13,15 @@
         "name": "信用点",
         "auto_gen": 0,
         "description": "赛博世界的通用货币。"
+    },
+    "compute": {
+        "name": "算力",
+        "auto_gen": 0,
+        "description": "用于破解和研究的处理能力。"
+    },
+    "hacking_xp": {
+        "name": "黑客经验",
+        "auto_gen": 0,
+        "description": "通过网络活动获得的经验。"
     }
 }

@@ -1,4 +1,4 @@
-import pybase64
+import base64
 import json
 from js import window, localStorage
 
@@ -23,9 +23,9 @@ def load_from_local(state):
 def export_save_string(state):
     """导出 Base64 加密的存档字符串"""
     json_str = state.to_json()
-    # 仿 Evolve 风格，增加一个简单的校验前缀
+    # 使用 Python 标准库 base64
     data_bytes = json_str.encode('utf-8')
-    b64_str = pybase64.b64encode(data_bytes).decode('utf-8')
+    b64_str = base64.b64encode(data_bytes).decode('utf-8')
     return f"CYBER-{b64_str}"
 
 def import_save_string(state, save_str):
@@ -35,7 +35,7 @@ def import_save_string(state, save_str):
     
     try:
         b64_part = save_str[6:]
-        json_bytes = pybase64.b64decode(b64_part)
+        json_bytes = base64.b64decode(b64_part)
         json_str = json_bytes.decode('utf-8')
         state.from_json(json_str)
         return True, "存档加载成功"

@@ -10,7 +10,7 @@ A cyberpunk-themed idle game implemented in Python (PyScript).
 
 - **Pure Frontend**: Runs directly in the browser using PyScript, no backend server required.
 - **Cyberpunk UI**: Minimalist high-contrast color scheme with CRT scanlines and Glitch effects.
-- **No-DB Save System**: Progress is auto-saved to `localStorage`. Supports Evolve-style Base64 string export/import.
+- **No-DB Save System**: Progress is auto-saved to `localStorage`. Supports Base64 string export/import.
 - **Multi-language Support**: Built-in English and Chinese toggle. All content (resources, story, events) is easily extendable via JSON.
 - **Seeded RNG**: Uses a seeded random number generator for consistent and predictable random events.
 - **Story-Driven**: Includes a basic story engine supporting node jumping and branching choices based on resource requirements.
@@ -18,11 +18,13 @@ A cyberpunk-themed idle game implemented in Python (PyScript).
 ## 🚀 Quick Start
 
 ### Play Online
+
 1. Push this project to a GitHub repository.
 2. Enable **GitHub Pages** in the repository settings.
 3. Visit the generated URL to start playing.
 
 ### Run Locally
+
 1. Ensure you have a Python environment installed.
 2. Run a static server in the root directory:
    ```bash

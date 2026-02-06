@@ -8,7 +8,8 @@
         "save_prompt": "请复制以下存档代码并妥善保存:",
         "load_prompt": "请输入存档代码:",
         "switch_lang": "English",
-        "ver_prefix": "版本"
+        "ver_prefix": "版本",
+        "hacking_level": "黑客等级"
     },
     "en": {
         "export_save": "Export Save",
@@ -19,6 +20,7 @@
         "save_prompt": "Please copy the following save code and keep it safe:",
         "load_prompt": "Please enter the save code:",
         "switch_lang": "中文",
-        "ver_prefix": "VER"
+        "ver_prefix": "VER",
+        "hacking_level": "Hacking Level"
     }
 }

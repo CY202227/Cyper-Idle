@@ -42,10 +42,53 @@
         }
     },
     "discovered_data": {
-        "text": "You found some locked encrypted volumes. This data might be valuable or hide some secrets.",
+        "text": "You found some locked encrypted volumes. This data might be valuable or hide some secrets. You need compute power to attempt to crack them. Alternatively, you can try to dive into the subnet dungeon.",
         "actions": {
+            "enter_dungeon": {
+                "label": "Dive into Subnet Dungeon",
+                "next_node": "dungeon_start"
+            },
+            "crack_data": {
+                "label": "Attempt to crack volumes (Costs 10 Compute)",
+                "next_node": "cracking_success",
+                "requirements": {
+                    "compute": 10
+                },
+                "reward": {
+                    "hacking_xp": 50,
+                    "credits": 100
+                }
+            },
+            "gather_compute": {
+                "label": "Allocate energy to generate compute",
+                "next_node": "discovered_data",
+                "requirements": {
+                    "energy": 50
+                },
+                "reward": {
+                    "compute": 5
+                }
+            },
             "keep_searching": {
                 "label": "Continue searching",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "cracking_success": {
+        "text": "Cracking successful! You've gained valuable credits, and your hacking proficiency has increased. You feel your understanding of this network deepening.",
+        "actions": {
+            "return": {
+                "label": "Return",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "dungeon_start": {
+        "text": "You have entered the subnet dungeon. Use WASD buttons to move. Find the exit (E) to go deeper, or leave anytime.",
+        "actions": {
+            "leave_dungeon": {
+                "label": "Leave Dungeon",
                 "next_node": "energy_stable"
             }
         }

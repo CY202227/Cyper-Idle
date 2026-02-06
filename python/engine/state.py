@@ -8,7 +8,9 @@ class GameState:
         self.resources = {
             "energy": 0,
             "data_scraps": 0,
-            "credits": 0
+            "credits": 0,
+            "compute": 0,
+            "hacking_xp": 0
         }
         self.story_flags = []
         self.current_story_node = "start"
@@ -17,6 +19,12 @@ class GameState:
         self.last_update = 0
         self.unlocked_actions = ["gather_energy"]
         self.language = "en"
+
+    @property
+    def hacking_level(self):
+        # 简单的等级公式：等级 = floor(sqrt(xp / 100)) + 1
+        import math
+        return math.floor(math.sqrt(self.resources.get("hacking_xp", 0) / 100)) + 1
 
     def to_json(self):
         return json.dumps({
