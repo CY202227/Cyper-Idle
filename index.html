@@ -47,6 +47,41 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 战斗场景 UI -->
+                <div id="combat-scene" style="display: none;">
+                    <div id="combat-header">
+                        <div id="enemy-intent">NEXT: [SCANNING...]</div>
+                    </div>
+                    
+                    <div id="combat-main">
+                        <div id="enemy-area">
+                            <div id="enemy-visual" class="glitch-text" data-text="UNKNOWN_PROC">UNKNOWN_PROC</div>
+                            <div class="combat-stats">
+                                <div class="label">STABILITY</div>
+                                <div class="stat-bar"><div id="enemy-hp-fill" style="width: 100%"></div></div>
+                            </div>
+                        </div>
+
+                        <div id="vs-divider">VS</div>
+
+                        <div id="player-combat-area">
+                            <div id="active-daemon-name">DAEMON_NAME</div>
+                            <div class="combat-stats">
+                                <div class="label">STABILITY</div>
+                                <div class="stat-bar"><div id="player-hp-fill" style="width: 100%"></div></div>
+                                <div class="label">BANDWIDTH</div>
+                                <div class="stat-bar bandwidth"><div id="player-bw-fill" style="width: 100%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="combat-log-area"></div>
+                    
+                    <div id="combat-actions">
+                        <!-- 按钮将由 Python 动态生成 -->
+                    </div>
+                </div>
             </section>
 
             <section id="resource-panel">
@@ -67,6 +102,25 @@
                 <div id="quests-list"></div>
             </section>
         </main>
+
+        <!-- 重构/技能树 UI -->
+        <div id="refactor-overlay" style="display: none;">
+            <div id="refactor-modal">
+                <div id="refactor-header">
+                    <h2 id="refactor-daemon-name">DAEMON_NAME</h2>
+                    <button id="close-refactor" py-click="close_refactor_ui">X</button>
+                </div>
+                <div id="refactor-body">
+                    <div id="refactor-stats">
+                        <p>Level: <span id="ref_level">1</span></p>
+                        <p>Available SP: <span id="ref_sp">0</span></p>
+                    </div>
+                    <div id="skill-tree-container">
+                        <!-- 技能树将由 Python 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <footer id="status-bar">
             <span id="status-text">System Ready...</span>

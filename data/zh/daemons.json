@@ -1,30 +1,144 @@
 {
-    "bit_wolf": {
-        "name": "比特狼",
-        "description": "一种基础的攻击型守护程序，擅长快速突破初级防火墙。",
-        "base_stats": {
-            "intrusion": 15,
-            "shielding": 5,
-            "speed": 20
-        },
-        "growth": {
-            "intrusion": 3,
-            "shielding": 1,
-            "speed": 4
-        }
-    },
-    "data_ghost": {
-        "name": "数据幽灵",
-        "description": "隐匿性极高的程序，能够在不触发警报的情况下提取数据。",
+    "vanguard": {
+        "id": "vanguard",
+        "name": "先锋 (Vanguard)",
+        "description": "高稳定性架构，侧重于防御与反击，是系统的第一道防线。",
         "base_stats": {
             "intrusion": 10,
             "shielding": 15,
-            "speed": 10
+            "speed": 10,
+            "stability": 100
         },
         "growth": {
             "intrusion": 2,
             "shielding": 3,
-            "speed": 2
-        }
+            "speed": 1,
+            "stability": 15
+        },
+        "skill_tree": [
+            {
+                "id": "hardened_shell",
+                "name": "硬化外壳",
+                "desc": "被动：永久提升 10% 屏蔽等级。",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive",
+                "stat_boost": {"shielding": 1.1}
+            },
+            {
+                "id": "counter_ping",
+                "name": "反击 Ping",
+                "desc": "在防御回合受到攻击时，自动反弹 50% 伤害。",
+                "sp_cost": 2,
+                "req": "hardened_shell",
+                "type": "active",
+                "bw_cost": 10,
+                "power": 0.5
+            },
+            {
+                "id": "fortress_protocol",
+                "name": "堡垒协议",
+                "desc": "大幅提升防御效果，本回合受损减免 80%。",
+                "sp_cost": 3,
+                "req": "counter_ping",
+                "type": "active",
+                "bw_cost": 30,
+                "power": 0
+            }
+        ]
+    },
+    "infiltrator": {
+        "id": "infiltrator",
+        "name": "渗透者 (Infiltrator)",
+        "description": "高速度架构，擅长寻找系统漏洞进行精准打击。",
+        "base_stats": {
+            "intrusion": 15,
+            "shielding": 5,
+            "speed": 25,
+            "stability": 60
+        },
+        "growth": {
+            "intrusion": 3,
+            "shielding": 1,
+            "speed": 5,
+            "stability": 8
+        },
+        "skill_tree": [
+            {
+                "id": "optimized_path",
+                "name": "优化路径",
+                "desc": "被动：基础攻击带宽消耗降低 5%。",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive"
+            },
+            {
+                "id": "rapid_injection",
+                "name": "快速注入",
+                "desc": "极快的一次攻击，消耗低但威力适中。",
+                "sp_cost": 2,
+                "req": "optimized_path",
+                "type": "active",
+                "bw_cost": 12,
+                "power": 0.9
+            },
+            {
+                "id": "zero_day_exploit",
+                "name": "零日漏洞",
+                "desc": "无视敌人 50% 的屏蔽等级造成伤害。",
+                "sp_cost": 4,
+                "req": "rapid_injection",
+                "type": "active",
+                "bw_cost": 40,
+                "power": 2.5
+            }
+        ]
+    },
+    "overclocker": {
+        "id": "overclocker",
+        "name": "超频者 (Overclocker)",
+        "description": "高入侵架构，通过牺牲稳定性换取瞬间的毁灭性算力。",
+        "base_stats": {
+            "intrusion": 25,
+            "shielding": 2,
+            "speed": 15,
+            "stability": 50
+        },
+        "growth": {
+            "intrusion": 6,
+            "shielding": 0.5,
+            "speed": 2,
+            "stability": 5
+        },
+        "skill_tree": [
+            {
+                "id": "voltage_boost",
+                "name": "电压提升",
+                "desc": "被动：入侵强度提升 15%，但每回合额外消耗 2% 带宽。",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive"
+            },
+            {
+                "id": "logic_bomb",
+                "name": "逻辑炸弹",
+                "desc": "造成巨大的范围伤害。",
+                "sp_cost": 2,
+                "req": "voltage_boost",
+                "type": "active",
+                "bw_cost": 50,
+                "power": 3.0
+            },
+            {
+                "id": "kernel_panic",
+                "name": "内核恐慌",
+                "desc": "终极技能：造成极大伤害并使敌人下回合无法行动，但自身带宽归零。",
+                "sp_cost": 5,
+                "req": "logic_bomb",
+                "type": "active",
+                "bw_cost": 80,
+                "power": 5.0
+            }
+        ]
     }
 }
