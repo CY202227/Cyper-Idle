@@ -57,6 +57,70 @@
                     "credits": 500,
                     "data_scraps": 10
                 }
+            },
+            "deep_dive_abyss": {
+                "label": "Deep Scan Low-level Protocols (Needs 200 Compute)",
+                "next_node": "abyss_discovery",
+                "requirements": {
+                    "compute": 200
+                }
+            }
+        }
+    },
+    "abyss_discovery": {
+        "text": "Beneath layers of encrypted protocols, you discover an unrecorded area known as 'The Abyss'. The code here is self-replicating, as if alive. A fragment of an ancient AI consciousness sends you a warning: 'Latecomer, this is not a place you should be.'",
+        "actions": {
+            "communicate_ai": {
+                "label": "Attempt to communicate with AI consciousness",
+                "next_node": "ai_revelation",
+                "requirements": {
+                    "hacking_xp": 500
+                }
+            },
+            "force_extract": {
+                "label": "Forcefully extract Abyss data",
+                "next_node": "extraction_consequence",
+                "reward": {
+                    "data_scraps": 50,
+                    "credits": 1000
+                }
+            },
+            "retreat": {
+                "label": "Retreat to safe zone",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "ai_revelation": {
+        "text": "The AI consciousness shows a fragment of erased history: this node was once a secret testing ground for 'CyberCore' Corp, aiming to create a super-intelligence to control the entire network. The experiment failed, but the core code still pulses in the Abyss. 'Help me delete this code forever, or... inherit it.'",
+        "actions": {
+            "delete_code": {
+                "label": "Assist AI in deleting core code (Gain Reputation)",
+                "next_node": "energy_stable",
+                "reward": {
+                    "hacking_xp": 1000,
+                    "credits": 2000
+                }
+            },
+            "absorb_code": {
+                "label": "Absorb core code (Gain powerful compute)",
+                "next_node": "energy_stable",
+                "reward": {
+                    "compute": 500,
+                    "energy": -100
+                }
+            }
+        }
+    },
+    "extraction_consequence": {
+        "text": "You forcefully extracted the data, but triggered automatic defense mechanisms. Although you gained resources, your system sustained minor damage and attracted the attention of unknown entities.",
+        "actions": {
+            "repair_and_hide": {
+                "label": "Repair system and hide traces",
+                "next_node": "energy_stable",
+                "requirements": {
+                    "energy": 50
+                }
             }
         }
     },
@@ -94,9 +158,9 @@
                     "credits": 500
                 },
                 "reward": {
-                    "credits": -500
-                },
-                "quest_id": "unlock_data_ghost"
+                    "credits": -500,
+                    "quest_id": "unlock_data_ghost"
+                }
             },
             "leave": {
                 "label": "Leave Black Market",
@@ -131,7 +195,7 @@
                 },
                 "reward": {
                     "hacking_xp": 50,
-                    "credits": 100
+                    "credits": 1000
                 }
             },
             "gather_compute": {

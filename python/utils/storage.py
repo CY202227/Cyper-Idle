@@ -17,7 +17,8 @@ def load_from_local(state):
             state.from_json(save_data)
             return True
         except Exception as e:
-            print(f"加载存档失败: {e}")
+            print(f"加载存档失败，正在清除损坏的存档: {e}")
+            localStorage.removeItem(SAVE_KEY)
     return False
 
 def export_save_string(state):

@@ -57,6 +57,70 @@
                     "credits": 500,
                     "data_scraps": 10
                 }
+            },
+            "deep_dive_abyss": {
+                "label": "深入扫描底层协议 (需要 200 算力)",
+                "next_node": "abyss_discovery",
+                "requirements": {
+                    "compute": 200
+                }
+            }
+        }
+    },
+    "abyss_discovery": {
+        "text": "在层层加密的协议之下，你发现了一个被称为“深渊”的未记录区域。这里的代码在自我复制，仿佛有生命一般。一个古老的 AI 意识片段向你发出了警告：'后来者，这里不是你该来的地方。'",
+        "actions": {
+            "communicate_ai": {
+                "label": "尝试与 AI 意识交流",
+                "next_node": "ai_revelation",
+                "requirements": {
+                    "hacking_xp": 500
+                }
+            },
+            "force_extract": {
+                "label": "强制提取深渊数据",
+                "next_node": "extraction_consequence",
+                "reward": {
+                    "data_scraps": 50,
+                    "credits": 1000
+                }
+            },
+            "retreat": {
+                "label": "撤回安全区域",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "ai_revelation": {
+        "text": "AI 意识展示了一段被抹除的历史：这个节点曾是“赛博核心”公司的秘密实验场，旨在创造一个能控制整个网络的超级智能。实验失败了，但核心代码依然在深渊中跳动。'帮我彻底删除这些代码，或者... 继承它。'",
+        "actions": {
+            "delete_code": {
+                "label": "协助 AI 删除核心代码 (获得声望)",
+                "next_node": "energy_stable",
+                "reward": {
+                    "hacking_xp": 1000,
+                    "credits": 2000
+                }
+            },
+            "absorb_code": {
+                "label": "吸收核心代码 (获得强大算力)",
+                "next_node": "energy_stable",
+                "reward": {
+                    "compute": 500,
+                    "energy": -100
+                }
+            }
+        }
+    },
+    "extraction_consequence": {
+        "text": "你强行提取了数据，但触发了自动防御机制。虽然获得了资源，但你的系统受到了轻微损伤，且引起了某些未知实体的注意。",
+        "actions": {
+            "repair_and_hide": {
+                "label": "修复系统并隐藏踪迹",
+                "next_node": "energy_stable",
+                "requirements": {
+                    "energy": 50
+                }
             }
         }
     },
@@ -94,9 +158,9 @@
                     "credits": 500
                 },
                 "reward": {
-                    "credits": -500
-                },
-                "quest_id": "unlock_data_ghost"
+                    "credits": -500,
+                    "quest_id": "unlock_data_ghost"
+                }
             },
             "leave": {
                 "label": "离开黑市",
@@ -131,7 +195,7 @@
                 },
                 "reward": {
                     "hacking_xp": 50,
-                    "credits": 100
+                    "credits": 1000
                 }
             },
             "gather_compute": {
