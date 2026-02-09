@@ -12,6 +12,14 @@ class GameState:
             "compute": 0,
             "hacking_xp": 0
         }
+        self.storage_caps = {
+            "energy": 100,
+            "data_scraps": 100,
+            "credits": 1000,
+            "compute": 50
+        }
+        self.buildings = {} # { "building_id": level }
+        self.artifacts = [] # 存储已获得的特殊道具/日志 ID
         self.daemons = [] # 存储拥有的守护程序
         self.active_daemon_index = 0 # 当前选中的守护程序索引
         self.active_quests = [] # 存储当前接受的任务
@@ -32,6 +40,9 @@ class GameState:
     def to_json(self):
         return json.dumps({
             "resources": self.resources,
+            "storage_caps": self.storage_caps,
+            "buildings": self.buildings,
+            "artifacts": self.artifacts,
             "daemons": self.daemons,
             "active_daemon_index": self.active_daemon_index,
             "active_quests": self.active_quests,
@@ -47,6 +58,9 @@ class GameState:
     def from_json(self, json_str):
         data = json.loads(json_str)
         self.resources = data.get("resources", self.resources)
+        self.storage_caps = data.get("storage_caps", self.storage_caps)
+        self.buildings = data.get("buildings", {})
+        self.artifacts = data.get("artifacts", [])
         self.daemons = data.get("daemons", [])
         self.active_daemon_index = data.get("active_daemon_index", 0)
         self.active_quests = data.get("active_quests", [])

@@ -30,8 +30,26 @@ class StoryManager:
         # 应用奖励/后果
         if "reward" in action:
             for res, amount in action["reward"].items():
-                self.state.resources[res] = self.state.resources.get(res, 0) + amount
+                if res in self.state.resources:
+                    self.state.resources[res] = self.state.resources.get(res, 0) + amount
+                elif res == "daemon_id" or res == "quest_id":
+                    # 已经在 main.py 中特殊处理，这里跳过
+                    pass
+                else:
+                    # 如果是其他未定义的资源，也尝试增加
+                    self.state.resources[res] = self.state.resources.get(res, 0) + amount
 
+        # 扣除消耗 (Requirements)
+        # 或者在 action 中增加一个 "consume" 字段。
+        if "requirements" in action:
+            # 默认情况下，requirements 只是检查。
+            # 但如果我们在 action 中定义了 "consume": true，则扣除。
+            if action.get("consume", False):
+                for res, amount in action["requirements"].items():
+                    self.state.resources[res] = max(0, self.state.resources.get(res, 0) - amount)
+
+        # 特殊处理：如果 reward 中有负数，它实际上就是消耗
+        
         # 跳转节点
         if "next_node" in action:
             self.state.current_story_node = action["next_node"]

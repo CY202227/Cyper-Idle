@@ -200,6 +200,7 @@
                 "requirements": {
                     "compute": 10
                 },
+                "consume": true,
                 "reward": {
                     "hacking_xp": 50,
                     "credits": 1000
@@ -211,6 +212,7 @@
                 "requirements": {
                     "energy": 50
                 },
+                "consume": true,
                 "reward": {
                     "compute": 5
                 }

@@ -66,11 +66,74 @@ h1 {
 
 main {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1.5fr 1fr 1fr;
+    grid-template-columns: 2fr 350px; /* 稍微加宽侧边栏 */
+    grid-template-rows: 1fr;
     gap: 20px;
     flex-grow: 1;
     overflow: hidden;
+}
+
+#story-panel {
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 右侧侧边栏容器 */
+#side-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--panel-bg);
+}
+
+#side-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    background: rgba(0, 255, 65, 0.1);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.side-tab-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 8px 5px;
+    font-size: 0.75rem;
+    border: none;
+    border-right: 1px solid rgba(0, 255, 65, 0.3);
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-family);
+}
+
+.side-tab-btn:last-child {
+    border-right: none;
+}
+
+.side-tab-btn.active {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+#side-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.side-section {
+    display: none; /* 默认隐藏 */
+    flex-direction: column;
+    gap: 15px;
+}
+
+.side-section.active {
+    display: flex; /* 激活时显示 */
 }
 
 section {
@@ -84,6 +147,21 @@ section {
     grid-row: span 3;
     display: flex;
     flex-direction: column;
+}
+
+.side-section section {
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    overflow: visible;
+}
+
+.side-section h2 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--secondary-accent);
+    padding-bottom: 5px;
 }
 
 #story-log {

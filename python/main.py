@@ -97,8 +97,21 @@ def update_ui():
         res_item.className = "resource-item"
         # 使用 i18n 获取资源名称
         display_name = i18n.get_res_name(res_id, manager.definitions["resources"])
-        res_item.innerHTML = f"<span>{display_name}:</span> <span>{int(amount)}</span>"
+        
+        # 获取上限 (如果存在)
+        cap = getattr(state, 'storage_caps', {}).get(res_id)
+        cap_str = f" / {int(cap)}" if cap is not None else ""
+        
+        res_item.innerHTML = f"<span>{display_name}:</span> <span>{int(amount)}{cap_str}</span>"
         res_list.appendChild(res_item)
+
+    # 更新基础设施显示
+    if hasattr(manager, 'definitions') and "buildings" in manager.definitions:
+        update_infrastructure_ui()
+
+    # 更新档案显示
+    if hasattr(state, 'artifacts'):
+        update_archives_ui()
 
     # 更新守护程序显示
     daemon_list_div = document.getElementById("daemons-list")
@@ -243,6 +256,9 @@ def update_ui():
 
     # 更新状态栏
     document.getElementById("tick-timer").innerText = f"TICK: {state.tick_count}"
+
+    # 更新侧边栏标签页显示
+    update_side_tabs_visibility()
 
     # 更新地牢显示
     if state.current_story_node == "dungeon_start" and not combat_eng.is_active:
@@ -393,6 +409,195 @@ async def import_save_dialog(event=None):
             update_ui()
         else:
             window.alert(msg)
+
+# --- 基础设施 UI 逻辑 ---
+
+def show_side_tab(tab_id, event=None):
+    """切换右侧侧边栏标签页"""
+    # 隐藏所有面板
+    sections = document.querySelectorAll(".side-section")
+    for section in sections:
+        section.classList.remove("active")
+    
+    # 显示目标面板
+    target_map = {
+        "assets": "resource-panel",
+        "infra": "infrastructure-panel",
+        "ops": "action-panel",
+        "quests": "quest-panel",
+        "archives": "archives-panel"
+    }
+    target_id = target_map.get(tab_id)
+    if target_id:
+        document.getElementById(target_id).classList.add("active")
+    
+    # 更新按钮样式
+    btns = document.querySelectorAll(".side-tab-btn")
+    for btn in btns:
+        # 提取 py-click 中的 tab_id 进行比较
+        click_attr = btn.getAttribute("py-click") or ""
+        if tab_id in click_attr:
+            btn.classList.add("active")
+        else:
+            btn.classList.remove("active")
+
+def update_side_tabs_visibility():
+    """根据游戏状态更新侧边栏标签页内容"""
+    pass
+
+# --- 基础设施 UI 逻辑 ---
+
+def update_infrastructure_ui():
+    """更新硬件和软件建筑列表"""
+    for category in ["hardware", "software"]:
+        list_div = document.getElementById(f"{category}-list")
+        if not list_div: continue
+        
+        list_div.innerHTML = ""
+        buildings_def = manager.definitions.get("buildings", {}).get(category, {})
+        
+        if not buildings_def:
+            empty_msg = document.createElement("div")
+            empty_msg.className = "empty-msg"
+            empty_msg.innerText = i18n.get("no_infra")
+            list_div.appendChild(empty_msg)
+        else:
+            for b_id, b_def in buildings_def.items():
+                # 检查前置条件
+                if "requires_artifact" in b_def:
+                    if b_def["requires_artifact"] not in state.artifacts:
+                        continue # 隐藏未解锁的建筑
+                
+                level = state.buildings.get(b_id, 0)
+                multiplier = b_def.get("cost_multiplier", 1.5)
+                
+                # 计算成本
+                costs = []
+                can_afford = True
+                for res, base_amount in b_def["cost"].items():
+                    actual_cost = int(base_amount * (multiplier ** level))
+                    res_name = i18n.get_res_name(res, manager.definitions["resources"])
+                    costs.append(f"{actual_cost} {res_name}")
+                    if state.resources.get(res, 0) < actual_cost:
+                        can_afford = False
+                
+                cost_str = ", ".join(costs)
+                
+                item = document.createElement("div")
+                item.className = "infra-item"
+                item.innerHTML = f"""
+                    <div class="infra-header">
+                        <span>{b_def['name']}</span>
+                        <span>Lv.{level}</span>
+                    </div>
+                    <div class="infra-desc">{b_def['desc']}</div>
+                    <div class="infra-cost">Cost: {cost_str}</div>
+                """
+                
+                btn = document.createElement("button")
+                btn.className = "infra-build-btn"
+                btn.innerText = "UPGRADE" if level > 0 else "BUILD"
+                if not can_afford:
+                    btn.disabled = True
+                    btn.style.opacity = "0.5"
+                
+                def make_build_handler(bid):
+                    def handler(event):
+                        success, msg = manager.build(bid)
+                        if success:
+                            if hasattr(window, 'npc_mgr'):
+                                window.npc_mgr.check_reaction("build_complete")
+                            update_ui()
+                        else:
+                            window.alert(msg)
+                    return handler
+                
+                btn.onclick = create_proxy(make_build_handler(b_id))
+                item.appendChild(btn)
+                list_div.appendChild(item)
+
+def show_infra_tab(category, event=None):
+    """切换基础设施标签页"""
+    document.getElementById("hardware-list").style.display = "none"
+    document.getElementById("software-list").style.display = "none"
+    document.getElementById(f"{category}-list").style.display = "flex"
+    
+    # 更新按钮状态
+    tabs = document.querySelectorAll("#infrastructure-tabs .tab-btn")
+    for tab in tabs:
+        if tab.innerText.lower() == category.lower():
+            tab.classList.add("active")
+        else:
+            tab.classList.remove("active")
+
+def update_archives_ui():
+    """更新系统档案列表"""
+    list_div = document.getElementById("artifacts-list")
+    if not list_div: return
+    
+    list_div.innerHTML = ""
+    # 动态更新标题
+    archives_title = i18n.get("archives")
+    if archives_title != "archives":
+        document.querySelector("#archives-panel h2").innerText = archives_title
+    
+    if not state.artifacts:
+        empty_msg = document.createElement("div")
+        empty_msg.className = "empty-msg"
+        empty_msg.innerText = i18n.get("no_artifacts")
+        list_div.appendChild(empty_msg)
+    else:
+        for art_id in state.artifacts:
+            art_def = manager.definitions.get("artifacts", {}).get(art_id)
+            if not art_def: continue
+            
+            item = document.createElement("div")
+            item.className = "artifact-item"
+            item.innerHTML = f"""
+                <div class="artifact-name">{art_def['name']}</div>
+                <div class="artifact-desc">{art_def['desc']}</div>
+                <div class="artifact-content">{art_def['content']}</div>
+            """
+            
+            def make_toggle_handler(target_item):
+                def handler(event):
+                    target_item.classList.toggle("expanded")
+                return handler
+            
+            item.onclick = create_proxy(make_toggle_handler(item))
+            list_div.appendChild(item)
+
+def show_side_tab(tab_id, event=None):
+    """切换右侧侧边栏标签页"""
+    # 隐藏所有面板
+    sections = document.querySelectorAll(".side-section")
+    for section in sections:
+        section.classList.remove("active")
+    
+    # 显示目标面板
+    target_map = {
+        "assets": "resource-panel",
+        "infra": "infrastructure-panel",
+        "ops": "action-panel",
+        "quests": "quest-panel",
+        "archives": "archives-panel"
+    }
+    target_id = target_map.get(tab_id)
+    if target_id:
+        document.getElementById(target_id).classList.add("active")
+    
+    # 更新按钮样式
+    btns = document.querySelectorAll(".side-tab-btn")
+    for btn in btns:
+        click_attr = btn.getAttribute("py-click") or ""
+        if tab_id in click_attr:
+            btn.classList.add("active")
+        else:
+            btn.classList.remove("active")
+
+def update_side_tabs_visibility():
+    """根据游戏状态更新侧边栏标签页内容"""
+    pass
 
 # --- 重构界面逻辑 ---
 
