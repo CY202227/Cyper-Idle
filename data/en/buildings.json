@@ -1,0 +1,63 @@
+{
+    "hardware": {
+        "server_rack": {
+            "name": "Server Rack",
+            "desc": "Expand physical storage space, increasing the storage limit for data scraps and credits.",
+            "cost": { "credits": 50, "data_scraps": 10 },
+            "cost_multiplier": 1.5,
+            "effects": {
+                "storage": { "data_scraps": 100, "credits": 500 }
+            }
+        },
+        "cooling_system": {
+            "name": "Cooling System",
+            "desc": "Improve hardware efficiency, increasing the compute limit.",
+            "cost": { "credits": 100, "data_scraps": 20 },
+            "cost_multiplier": 1.6,
+            "effects": {
+                "storage": { "compute": 50 }
+            }
+        },
+        "power_module": {
+            "name": "Power Module",
+            "desc": "Upgrade the power supply system, increasing the energy limit and base energy generation.",
+            "cost": { "credits": 30, "data_scraps": 5 },
+            "cost_multiplier": 1.4,
+            "effects": {
+                "storage": { "energy": 100 },
+                "auto_gen": { "energy": 0.2 }
+            }
+        }
+    },
+    "software": {
+        "dark_web_node": {
+            "name": "Dark Web Node",
+            "desc": "Anonymous servers occupied in the dark web, continuously generating credits.",
+            "cost": { "compute": 20, "hacking_xp": 50 },
+            "cost_multiplier": 1.8,
+            "effects": {
+                "auto_gen": { "credits": 0.5 }
+            }
+        },
+        "research_node": {
+            "name": "Research Node",
+            "desc": "Use idle compute for vulnerability research, generating hacking XP.",
+            "cost": { "compute": 30, "credits": 100 },
+            "cost_multiplier": 1.7,
+            "effects": {
+                "auto_gen": { "hacking_xp": 1 },
+                "consume": { "compute": 0.5 }
+            }
+        },
+        "virtual_miner": {
+            "name": "Virtual Miner",
+            "desc": "Run complex mining algorithms to convert energy and compute into data scraps.",
+            "cost": { "credits": 200, "compute": 50 },
+            "cost_multiplier": 2.0,
+            "effects": {
+                "auto_gen": { "data_scraps": 0.2 },
+                "consume": { "energy": 0.5, "compute": 0.3 }
+            }
+        }
+    }
+}

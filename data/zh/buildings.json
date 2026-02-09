@@ -1,0 +1,63 @@
+{
+    "hardware": {
+        "server_rack": {
+            "name": "服务器机架",
+            "desc": "扩展物理存储空间，增加数据碎片和信用点的存储上限。",
+            "cost": { "credits": 50, "data_scraps": 10 },
+            "cost_multiplier": 1.5,
+            "effects": {
+                "storage": { "data_scraps": 100, "credits": 500 }
+            }
+        },
+        "cooling_system": {
+            "name": "冷却系统",
+            "desc": "提高硬件运行效率，增加算力上限。",
+            "cost": { "credits": 100, "data_scraps": 20 },
+            "cost_multiplier": 1.6,
+            "effects": {
+                "storage": { "compute": 50 }
+            }
+        },
+        "power_module": {
+            "name": "电源模块",
+            "desc": "升级供电系统，增加电力上限和基础发电量。",
+            "cost": { "credits": 30, "data_scraps": 5 },
+            "cost_multiplier": 1.4,
+            "effects": {
+                "storage": { "energy": 100 },
+                "auto_gen": { "energy": 0.2 }
+            }
+        }
+    },
+    "software": {
+        "dark_web_node": {
+            "name": "暗网节点",
+            "desc": "在暗网中占领的匿名服务器，持续产生信用点。",
+            "cost": { "compute": 20, "hacking_xp": 50 },
+            "cost_multiplier": 1.8,
+            "effects": {
+                "auto_gen": { "credits": 0.5 }
+            }
+        },
+        "research_node": {
+            "name": "科研节点",
+            "desc": "利用闲置算力进行漏洞研究，产生黑客经验。",
+            "cost": { "compute": 30, "credits": 100 },
+            "cost_multiplier": 1.7,
+            "effects": {
+                "auto_gen": { "hacking_xp": 1 },
+                "consume": { "compute": 0.5 }
+            }
+        },
+        "virtual_miner": {
+            "name": "虚拟矿机",
+            "desc": "运行复杂的挖掘算法，将电力和算力转化为数据碎片。",
+            "cost": { "credits": 200, "compute": 50 },
+            "cost_multiplier": 2.0,
+            "effects": {
+                "auto_gen": { "data_scraps": 0.2 },
+                "consume": { "energy": 0.5, "compute": 0.3 }
+            }
+        }
+    }
+}

@@ -11,7 +11,11 @@
         "load_prompt": "请输入存档代码:",
         "switch_lang": "English",
         "ver_prefix": "版本",
-        "hacking_level": "黑客等级"
+        "hacking_level": "黑客等级",
+        "refactor": "重构",
+        "no_contracts": "[ 无活动合同 ]",
+@        "no_infra": "[ 未检测到基础设施 ]",
+        "gather_energy": "收集电力"
     },
     "en": {
         "export_save": "Export Save",
@@ -25,6 +29,10 @@
         "load_prompt": "Please enter the save code:",
         "switch_lang": "中文",
         "ver_prefix": "VER",
-        "hacking_level": "Hacking Level"
+        "hacking_level": "Hacking Level",
+        "refactor": "Refactor",
+        "no_contracts": "[ NO ACTIVE CONTRACTS ]",
+        "no_infra": "[ NO INFRASTRUCTURE DETECTED ]",
+        "gather_energy": "Gather Energy"
     }
 }
