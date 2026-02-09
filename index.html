@@ -12,6 +12,7 @@
 <body class="cyber-theme">
     <div id="loading-overlay">
         <div class="glitch-text" data-text="SYSTEM INITIALIZING...">SYSTEM INITIALIZING...</div>
+        <div id="loading-subtext" style="font-size: 0.8rem; margin-top: 20px; color: #008f11;">[ LOADING PYTHON RUNTIME ]</div>
     </div>
 
     <div id="game-container" style="display: none;">
@@ -83,42 +84,23 @@
                 </div>
             </section>
 
-            <div id="side-panels">
-                <section id="resource-panel">
-                    <h2>Core Assets</h2>
-                    <div id="resources-list"></div>
-                    
-                    <h2 style="margin-top: 20px;">Daemons</h2>
-                    <div id="daemons-list"></div>
-                </section>
+            <section id="resource-panel">
+                <h2>Core Assets</h2>
+                <div id="resources-list"></div>
+                
+                <h2 style="margin-top: 20px;">Daemons</h2>
+                <div id="daemons-list"></div>
+            </section>
 
-                <section id="infrastructure-panel">
-                    <h2>Infrastructure</h2>
-                    <div id="infrastructure-tabs">
-                        <button class="tab-btn active" py-click="lambda e: show_infra_tab('hardware')">Hardware</button>
-                        <button class="tab-btn" py-click="lambda e: show_infra_tab('software')">Software</button>
-                    </div>
-                    <div id="infra-container">
-                        <div id="hardware-list" class="infra-list"></div>
-                        <div id="software-list" class="infra-list" style="display: none;"></div>
-                    </div>
-                </section>
+            <section id="action-panel">
+                <h2>System Operations</h2>
+                <div id="actions-list"></div>
+            </section>
 
-                <section id="action-panel">
-                    <h2>System Operations</h2>
-                    <div id="actions-list"></div>
-                </section>
-
-                <section id="quest-panel">
-                    <h2>Active Contracts</h2>
-                    <div id="quests-list"></div>
-                </section>
-
-                <section id="archives-panel">
-                    <h2>System Archives</h2>
-                    <div id="artifacts-list"></div>
-                </section>
-            </div>
+            <section id="quest-panel">
+                <h2>Active Contracts</h2>
+                <div id="quests-list"></div>
+            </section>
         </main>
 
         <!-- 重构/技能树 UI -->
@@ -147,6 +129,6 @@
     </div>
 
     <!-- 按照文档推荐，将 Python 脚本放在 body 底部，并引用外部配置文件 -->
-    <script type="py" src="./python/main.py?v=2" config="./pyscript.json?v=2"></script>
+    <script type="py" src="python/main.py?v=1" config="pyscript.json?v=1"></script>
 </body>
 </html>

@@ -43,6 +43,9 @@ class GameManager:
         if self.state.tick_count % 60 == 0:
             self.check_random_events()
 
+    def set_npc_manager(self, npc_mgr):
+        self.npc_mgr = npc_mgr
+
     def check_story_triggers(self):
         """基于游戏状态触发特定的剧情节点"""
         # 仅在主循环中偶尔检查，避免性能损耗
@@ -62,21 +65,11 @@ class GameManager:
                 self.state.story_flags.append("echo_high_compute_triggered")
                 return
 
-            # 优先级 2: 基于行为的随机评价 (较低概率)
-            if self.state.tick_count % 300 == 0: # 约每 5 分钟尝试一次随机对话
-                import random
-                chance = random.random()
-                
-                # 如果刚升级过建筑 (简单通过 tick 计数模拟)
-                if self.state.tick_count % 600 == 0 and chance < 0.3:
-                    self.state.current_story_node = "echo_react_build"
-                    return
-                
-                # 闲置时的随机感叹
-                if chance < 0.05:
-                    idle_nodes = ["echo_idle_1", "echo_idle_2", "echo_idle_3"]
-                    self.state.current_story_node = random.choice(idle_nodes)
-                    return
+            # 优先级 2: 使用 NPC 管理器处理随机闲聊
+            if hasattr(self, 'npc_mgr'):
+                idle_pool = ["echo_idle_1", "echo_idle_2", "echo_idle_3"]
+                self.npc_mgr.trigger_random_chatter(idle_pool, chance=0.01)
+
 
     def apply_building_effects(self, delta_time):
         """计算所有建筑的产出、消耗和存储加成"""
