@@ -14,7 +14,7 @@
         "hacking_level": "黑客等级",
         "refactor": "重构",
         "no_contracts": "[ 无活动合同 ]",
-@        "no_infra": "[ 未检测到基础设施 ]",
+        "no_infra": "[ 未检测到基础设施 ]",
         "gather_energy": "收集电力"
     },
     "en": {
