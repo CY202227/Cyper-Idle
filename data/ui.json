@@ -15,7 +15,9 @@
         "refactor": "重构",
         "no_contracts": "[ 无活动合同 ]",
         "no_infra": "[ 未检测到基础设施 ]",
-        "gather_energy": "收集电力"
+        "gather_energy": "收集电力",
+        "archives": "系统档案",
+        "no_artifacts": "[ 未发现归档数据 ]"
     },
     "en": {
         "export_save": "Export Save",
@@ -33,6 +35,8 @@
         "refactor": "Refactor",
         "no_contracts": "[ NO ACTIVE CONTRACTS ]",
         "no_infra": "[ NO INFRASTRUCTURE DETECTED ]",
-        "gather_energy": "Gather Energy"
+        "gather_energy": "Gather Energy",
+        "archives": "System Archives",
+        "no_artifacts": "[ NO ARCHIVED DATA FOUND ]"
     }
 }

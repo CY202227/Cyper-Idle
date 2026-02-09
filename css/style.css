@@ -282,6 +282,51 @@ button:hover {
     background: rgba(0, 255, 65, 0.05);
 }
 
+/* Archives Panel Styles */
+#archives-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+#artifacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.artifact-item {
+    border: 1px solid var(--secondary-accent);
+    padding: 10px;
+    background: rgba(0, 255, 65, 0.05);
+    cursor: pointer;
+}
+
+.artifact-name {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.artifact-desc {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.artifact-content {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 2px solid var(--text-color);
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    display: none;
+}
+
+.artifact-item.expanded .artifact-content {
+    display: block;
+}
+
 #loading-overlay {
     position: fixed;
     top: 0;

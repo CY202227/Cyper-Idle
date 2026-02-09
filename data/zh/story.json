@@ -32,6 +32,13 @@
             "energy": 100
         },
         "actions": {
+            "echo_contact_1": {
+                "label": "追踪异常的通信抖动",
+                "next_node": "echo_intro",
+                "requirements": {
+                    "energy": 150
+                }
+            },
             "accept_contracts": {
                 "label": "查看可用合同",
                 "next_node": "contract_board"
@@ -255,5 +262,81 @@
                 "next_node": "energy_stable"
             }
         }
+    },
+    "echo_intro": {
+        "text": "屏幕上突然弹出一个满是噪声的对话框。 [K0_Echo]: '有人吗？... 竟然还有人在使用这种型号的接入舱... 听着，如果你能听到，说明你的信号已经引起了我的注意。这个地方不安全，但我可以帮你。'",
+        "actions": {
+            "who_are_you": {
+                "label": "你是谁？",
+                "next_node": "echo_who"
+            },
+            "ignore_echo": {
+                "label": "切断连接",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_who": {
+        "text": "[K0_Echo]: '我是谁并不重要，重要的是我是唯一能帮你活下去的人。这个接入舱曾经属于我... 或者说，属于那个还有肉体的我。现在，我只是网络中的一段回声。继续升级你的硬件，我们需要更强的带宽。'",
+        "actions": {
+            "underlined": {
+                "label": "我明白了",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_genesis_warning": {
+        "text": "[K0_Echo]: '小心！我检测到你获取了 Project_Genesis.log。你不该碰那个文件的。那是他们用来“重置”一切的开关。如果你打算解析它，最好先做好面对“它们”的准备。'",
+        "actions": {
+            "ask_about_them": {
+                "label": "“它们”是谁？",
+                "next_node": "echo_them"
+            },
+            "stay_silent": {
+                "label": "保持沉默",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_them": {
+        "text": "[K0_Echo]: '系统监视者。那些自以为是网络神灵的程序。解析 Genesis 协议会触动它们的神经。如果你一定要继续，那就变强，强到足以改写规则。'",
+        "actions": {
+            "prepare": {
+                "label": "我会准备好的",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_high_compute": {
+        "text": "[K0_Echo]: '你的算力已经达到了惊人的程度。是时候去看看那些被隐藏的“深层网关”了。我在你的坐标附近标记了一个新的入口，那里有你需要的答案。'",
+        "actions": {
+            "thanks": {
+                "label": "收到坐标",
+                "next_node": "energy_stable",
+                "reward": {
+                    "hacking_xp": 200
+                }
+            }
+        }
+    },
+    "echo_idle_1": {
+        "text": "[K0_Echo]: '你知道吗？这个接入舱的冷却液闻起来像过期的合成咖啡。虽然我现在闻不到，但那段数据一直留在我记忆区里。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_idle_2": {
+        "text": "[K0_Echo]: '外面的世界... 还在下雨吗？那种带着静电的酸雨。有时候我挺怀念那种被淋湿的感觉。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_idle_3": {
+        "text": "[K0_Echo]: '别盯着那些滚动代码太久，它们会让你产生幻觉。我曾经在那里面看到过一整座城市的倒影。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_react_build": {
+        "text": "[K0_Echo]: '不错的硬件升级。虽然比起那些大公司的服务器还差得远，但至少你现在不用担心运行一个简单的破解程序就让机架起火了。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_react_dungeon": {
+        "text": "[K0_Echo]: '又从那些废弃节点里爬回来了？命真大。下次记得检查你的防火墙补丁，我可不想看到你的意识被烧死在里面。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
     }
 }

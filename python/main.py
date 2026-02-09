@@ -67,8 +67,15 @@ async def load_game_data():
                 building_data = f.read()
         except:
             building_data = "{}"
+        
+        # 加载特定语言的档案定义
+        try:
+            with open(f"data/{lang}/artifacts.json", "r", encoding="utf-8") as f:
+                artifact_data = f.read()
+        except:
+            artifact_data = "{}"
             
-        manager.load_definitions(res_data, evt_data, building_data)
+        manager.load_definitions(res_data, evt_data, building_data, artifact_data)
         story.load_nodes(story_data)
         daemon_mgr.load_definitions(daemon_data)
         quest_mgr.load_definitions(quest_data)
@@ -115,6 +122,9 @@ def update_ui():
 
     # 更新基础设施显示
     update_infrastructure_ui()
+
+    # 更新档案显示
+    update_archives_ui()
 
     # 更新守护程序显示
     daemon_list_div = document.getElementById("daemons-list")
@@ -239,7 +249,15 @@ def update_ui():
         if not hasattr(update_ui, "last_node") or update_ui.last_node != state.current_story_node:
             entry = document.createElement("div")
             entry.className = "log-entry"
-            entry.innerText = f"> {current_node['text']}"
+            
+            # 为 K0_Echo 的对话添加特殊样式
+            text = current_node['text']
+            if "[K0_Echo]" in text:
+                entry.style.color = "#00eeff"
+                entry.style.borderLeft = "2px solid #00eeff"
+                entry.style.backgroundColor = "rgba(0, 238, 255, 0.05)"
+            
+            entry.innerText = f"> {text}"
             log_div.appendChild(entry)
             log_div.scrollTop = log_div.scrollHeight
             update_ui.last_node = state.current_story_node
@@ -404,6 +422,17 @@ def handle_move(dx, dy):
         state.resources["credits"] += 20
         state.resources["data_scraps"] += 1
         quest_mgr.update_progress("collect", "data_scraps")
+        
+        # 10% 概率掉落创世计划日志 (如果尚未获得)
+        if "project_genesis_log" not in state.artifacts and rng.rng.random() < 0.1:
+            state.artifacts.append("project_genesis_log")
+            log_div = document.getElementById("story-log")
+            entry = document.createElement("div")
+            entry.className = "log-entry"
+            entry.style.color = "var(--accent-color)"
+            entry.innerText = "> [CRITICAL] 发现加密日志: Project_Genesis.log"
+            log_div.appendChild(entry)
+            log_div.scrollTop = log_div.scrollHeight
     elif result == "ENEMY":
         # 切换到战斗模式
         combat_eng.start_combat("SECURITY_NODE", dungeon.current_level)
@@ -416,6 +445,10 @@ def handle_move(dx, dy):
     elif result == "EXIT":
         dungeon.generate_level(dungeon.current_level + 1)
         quest_mgr.update_progress("explore", amount=dungeon.current_level)
+        
+        # 离开地牢时 K0_Echo 的随机评价
+        if state.current_story_node == "energy_stable" and rng.rng.random() < 0.3:
+            state.current_story_node = "echo_react_dungeon"
     
     update_ui()
 
@@ -463,8 +496,13 @@ def update_infrastructure_ui():
             empty_msg.innerText = i18n.get("no_infra")
             list_div.appendChild(empty_msg)
         else:
-            for b_id, b_def in buildings_def.items():
-                level = state.buildings.get(b_id, 0)
+        for b_id, b_def in buildings_def.items():
+            # 检查前置条件
+            if "requires_artifact" in b_def:
+                if b_def["requires_artifact"] not in state.artifacts:
+                    continue # 隐藏未解锁的建筑
+            
+            level = state.buildings.get(b_id, 0)
                 multiplier = b_def.get("cost_multiplier", 1.5)
                 
                 # 计算成本
@@ -524,6 +562,40 @@ def show_infra_tab(category, event=None):
             tab.classList.add("active")
         else:
             tab.classList.remove("active")
+
+def update_archives_ui():
+    """更新系统档案列表"""
+    list_div = document.getElementById("artifacts-list")
+    if not list_div: return
+    
+    list_div.innerHTML = ""
+    document.querySelector("#archives-panel h2").innerText = i18n.get("archives")
+    
+    if not state.artifacts:
+        empty_msg = document.createElement("div")
+        empty_msg.className = "empty-msg"
+        empty_msg.innerText = i18n.get("no_artifacts")
+        list_div.appendChild(empty_msg)
+    else:
+        for art_id in state.artifacts:
+            art_def = manager.definitions.get("artifacts", {}).get(art_id)
+            if not art_def: continue
+            
+            item = document.createElement("div")
+            item.className = "artifact-item"
+            item.innerHTML = f"""
+                <div class="artifact-name">{art_def['name']}</div>
+                <div class="artifact-desc">{art_def['desc']}</div>
+                <div class="artifact-content">{art_def['content']}</div>
+            """
+            
+            def make_toggle_handler(target_item):
+                def handler(event):
+                    target_item.classList.toggle("expanded")
+                return handler
+            
+            item.onclick = create_proxy(make_toggle_handler(item))
+            list_div.appendChild(item)
 
 # --- 重构界面逻辑 ---
 

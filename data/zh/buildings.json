@@ -58,6 +58,16 @@
                 "auto_gen": { "data_scraps": 0.2 },
                 "consume": { "energy": 0.5, "compute": 0.3 }
             }
+        },
+        "genesis_parser": {
+            "name": "创世协议解析器",
+            "desc": "专门用于解析 Genesis 协议的超级计算机，大幅提升黑客经验产出。",
+            "cost": { "credits": 500, "compute": 150 },
+            "cost_multiplier": 2.5,
+            "requires_artifact": "project_genesis_log",
+            "effects": {
+                "auto_gen": { "hacking_xp": 5 }
+            }
         }
     }
 }
