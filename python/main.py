@@ -15,6 +15,7 @@ from engine.manager import GameManager
 from engine.story import StoryManager
 from engine.dungeon import DungeonEngine
 from engine.daemon import DaemonManager
+from engine.combat import CombatEngine
 from engine.quest import QuestManager
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
@@ -28,6 +29,11 @@ story = StoryManager(state)
 i18n = I18nManager(state)
 dungeon = DungeonEngine(state, rng)
 daemon_mgr = DaemonManager(state)
+
+def on_combat_ui_update():
+    update_ui()
+
+combat_eng = CombatEngine(state, daemon_mgr, on_combat_ui_update)
 quest_mgr = QuestManager(state)
 
 async def load_game_data():
@@ -126,6 +132,18 @@ def update_ui():
             
             d_item.onclick = create_proxy(make_switch_handler(i))
             daemon_list_div.appendChild(d_item)
+
+            # 添加“重构”按钮
+            refactor_btn = document.createElement("button")
+            refactor_btn.innerText = "重构 (SP: " + str(daemon.get('sp', 0)) + ")"
+            refactor_btn.className = "refactor-btn-mini"
+            def make_refactor_handler(idx):
+                def handler(event):
+                    event.stopPropagation()
+                    show_refactor_ui(idx)
+                return handler
+            refactor_btn.onclick = create_proxy(make_refactor_handler(i))
+            d_item.appendChild(refactor_btn)
 
     # 更新任务显示
     quest_list_div = document.getElementById("quests-list")
@@ -227,11 +245,62 @@ def update_ui():
     document.getElementById("tick-timer").innerText = f"TICK: {state.tick_count}"
 
     # 更新地牢显示
-    if state.current_story_node == "dungeon_start":
+    if state.current_story_node == "dungeon_start" and not combat_eng.is_active:
         document.getElementById("dungeon-container").style.display = "flex"
         document.getElementById("dungeon-grid").innerText = dungeon.render()
     else:
         document.getElementById("dungeon-container").style.display = "none"
+
+    # 更新战斗显示
+    combat_scene = document.getElementById("combat-scene")
+    if combat_eng.is_active:
+        combat_scene.style.display = "flex"
+        
+        # 更新敌人信息
+        document.getElementById("enemy-intent").innerText = f"NEXT: [{combat_eng.enemy_intent['name'].upper()}]"
+        document.getElementById("enemy-hp-fill").style.width = f"{(combat_eng.enemy_hp / combat_eng.enemy['max_hp']) * 100}%"
+        
+        # 更新玩家信息
+        active_daemon = daemon_mgr.get_active_daemon()
+        if active_daemon:
+            document.getElementById("active-daemon-name").innerText = active_daemon["name"].get(state.language)
+            document.getElementById("player-hp-fill").style.width = f"{(combat_eng.player_hp / combat_eng.player_max_hp) * 100}%"
+            document.getElementById("player-bw-fill").style.width = f"{combat_eng.player_bw}%"
+            
+        # 更新战斗日志
+        log_area = document.getElementById("combat-log-area")
+        log_area.innerHTML = "".join([f"<div>{l}</div>" for l in combat_eng.log])
+        log_area.scrollTop = log_area.scrollHeight
+        
+        # 更新动作按钮
+        actions_div = document.getElementById("combat-actions")
+        actions_div.innerHTML = ""
+        
+        # 基础动作
+        base_actions = [("attack", "基础攻击 (20% BW)"), ("defend", "防御 (恢复 BW)"), ("reset", "重置 (大恢复)")]
+        
+        # 技能动作 (仅显示已挂载的技能)
+        equipped_ids = active_daemon.get("equipped_skills", [])
+        defn = daemon_mgr.definitions[active_daemon["id"]]
+        all_actions = base_actions.copy()
+        
+        for sid in equipped_ids:
+            skill_defn = next((s for s in defn["skill_tree"] if s["id"] == sid), None)
+            if skill_defn:
+                all_actions.append((sid, f"{skill_defn['name']} ({skill_defn['bw_cost']}% BW)"))
+
+        for aid, label in all_actions:
+            btn = document.createElement("button")
+            btn.innerText = label
+            def make_combat_handler(action_id):
+                def handler(event):
+                    combat_eng.execute_player_action(action_id)
+                    update_ui()
+                return handler
+            btn.onclick = create_proxy(make_combat_handler(aid))
+            actions_div.appendChild(btn)
+    else:
+        combat_scene.style.display = "none"
 
 async def game_loop():
     """主游戏循环"""
@@ -284,52 +353,10 @@ def handle_move(dx, dy):
         state.resources["data_scraps"] += 1
         quest_mgr.update_progress("collect", "data_scraps")
     elif result == "ENEMY":
-        # 战斗判定逻辑
-        active_daemon = daemon_mgr.get_active_daemon()
-        if active_daemon:
-            # 简单的战斗胜率计算：(入侵 + 速度) vs (层数相关难度)
-            enemy_difficulty = dungeon.current_level * 10
-            player_power = active_daemon["stats"]["intrusion"] + active_daemon["stats"]["speed"]
-            
-            import random
-            win_chance = min(0.9, max(0.1, player_power / (player_power + enemy_difficulty)))
-            
-            if random.random() < win_chance:
-                # 胜利
-                xp_gain = 20 + dungeon.current_level * 5
-                leveled_up = daemon_mgr.add_xp(state.active_daemon_index, xp_gain)
-                
-                # 更新任务进度
-                quest_mgr.update_progress("combat")
-                
-                msg = f"战斗胜利！{active_daemon['name']} 获得了 {xp_gain} XP。"
-                if leveled_up:
-                    msg += f" 等级提升至 {active_daemon['level']}！"
-                
-                # 概率捕获 (10%)
-                if random.random() < 0.1:
-                    # 随机选择一个定义进行捕获
-                    new_id = random.choice(list(daemon_mgr.definitions.keys()))
-                    new_daemon = daemon_mgr.create_daemon(new_id, level=dungeon.current_level)
-                    state.daemons.append(new_daemon)
-                    msg += f" 成功捕获了新的守护程序：{new_daemon['name']}！"
-            else:
-                # 失败
-                damage = 20
-                state.resources["energy"] = max(0, state.resources["energy"] - damage)
-                msg = f"战斗失败。{active_daemon['name']} 被强制断开，系统能量损失 {damage}。"
-        else:
-            # 没有守护程序的情况
-            state.resources["energy"] = max(0, state.resources["energy"] - 30)
-            msg = "警告：在没有守护程序保护的情况下遭遇攻击！系统能量大幅受损。"
-        
-        # 将战斗消息显示在日志中
-        log_div = document.getElementById("story-log")
-        entry = document.createElement("div")
-        entry.className = "log-entry combat-log"
-        entry.innerText = f"> {msg}"
-        log_div.appendChild(entry)
-        log_div.scrollTop = log_div.scrollHeight
+        # 切换到战斗模式
+        combat_eng.start_combat("SECURITY_NODE", dungeon.current_level)
+        update_ui()
+        return # 战斗逻辑由 CombatEngine 接管
     elif result == "INFO":
         state.resources["hacking_xp"] += 10
     elif result == "QUEST":
@@ -367,6 +394,63 @@ async def import_save_dialog(event=None):
         else:
             window.alert(msg)
 
+# --- 重构界面逻辑 ---
+
+def show_refactor_ui(daemon_idx):
+    state.current_refactor_idx = daemon_idx
+    daemon = state.daemons[daemon_idx]
+    defn = daemon_mgr.definitions[daemon["id"]]
+    
+    document.getElementById("refactor-overlay").style.display = "flex"
+    document.getElementById("refactor-daemon-name").innerText = daemon["name"]
+    document.getElementById("ref_level").innerText = str(daemon["level"])
+    document.getElementById("ref_sp").innerText = str(daemon["sp"])
+    
+    container = document.getElementById("skill-tree-container")
+    container.innerHTML = ""
+    
+    for skill in defn["skill_tree"]:
+        node = document.createElement("div")
+        node.className = "skill-node"
+        
+        is_learned = skill["id"] in daemon["learned_skills"]
+        is_locked = skill["req"] and skill["req"] not in daemon["learned_skills"]
+        
+        if is_learned: node.className += " learned"
+        if is_locked: node.className += " locked"
+        
+        node.innerHTML = f"""
+            <div class="skill-info">
+                <h4>{skill['name']} (SP: {skill['sp_cost']})</h4>
+                <p>{skill['desc']}</p>
+            </div>
+        """
+        
+        if not is_learned and not is_locked:
+            btn = document.createElement("button")
+            btn.innerText = "学习"
+            def make_learn_handler(sid):
+                def handler(event):
+                    success, msg = daemon_mgr.learn_skill(state.current_refactor_idx, sid)
+                    if success:
+                        show_refactor_ui(state.current_refactor_idx)
+                        update_ui()
+                    else:
+                        window.alert(msg)
+                return handler
+            btn.onclick = create_proxy(make_learn_handler(skill["id"]))
+            node.appendChild(btn)
+        elif is_learned:
+            status = document.createElement("span")
+            status.innerText = "[已激活]"
+            node.appendChild(status)
+            
+        container.appendChild(node)
+
+def close_refactor_ui(event=None):
+    document.getElementById("refactor-overlay").style.display = "none"
+    state.current_refactor_idx = None
+
 # --- 初始化流程 ---
 
 async def start_game():
@@ -380,8 +464,8 @@ async def start_game():
         print("开启新游戏")
         state.seed = rng.get_seed()
         
-        # 初始赠送一个守护程序
-        initial_daemon = daemon_mgr.create_daemon("bit_wolf", level=1)
+        # 初始赠送一个守护程序 (改为新职业 ID)
+        initial_daemon = daemon_mgr.create_daemon("vanguard", level=1)
         if initial_daemon:
             state.daemons.append(initial_daemon)
 

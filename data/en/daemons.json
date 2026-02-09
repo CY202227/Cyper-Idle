@@ -1,30 +1,144 @@
 {
-    "bit_wolf": {
-        "name": "Bit Wolf",
-        "description": "A basic offensive daemon, skilled at rapidly breaching entry-level firewalls.",
-        "base_stats": {
-            "intrusion": 15,
-            "shielding": 5,
-            "speed": 20
-        },
-        "growth": {
-            "intrusion": 3,
-            "shielding": 1,
-            "speed": 4
-        }
-    },
-    "data_ghost": {
-        "name": "Data Ghost",
-        "description": "A highly stealthy program capable of extracting data without triggering alarms.",
+    "vanguard": {
+        "id": "vanguard",
+        "name": "Vanguard",
+        "description": "High stability architecture, focusing on defense and counterattacks. The system's first line of defense.",
         "base_stats": {
             "intrusion": 10,
             "shielding": 15,
-            "speed": 10
+            "speed": 10,
+            "stability": 100
         },
         "growth": {
             "intrusion": 2,
             "shielding": 3,
-            "speed": 2
-        }
+            "speed": 1,
+            "stability": 15
+        },
+        "skill_tree": [
+            {
+                "id": "hardened_shell",
+                "name": "Hardened Shell",
+                "desc": "Passive: Permanently increases Shielding by 10%.",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive",
+                "stat_boost": {"shielding": 1.1}
+            },
+            {
+                "id": "counter_ping",
+                "name": "Counter Ping",
+                "desc": "When attacked during a defense turn, automatically reflects 50% damage.",
+                "sp_cost": 2,
+                "req": "hardened_shell",
+                "type": "active",
+                "bw_cost": 10,
+                "power": 0.5
+            },
+            {
+                "id": "fortress_protocol",
+                "name": "Fortress Protocol",
+                "desc": "Greatly enhances defense effect, reducing damage by 80% this turn.",
+                "sp_cost": 3,
+                "req": "counter_ping",
+                "type": "active",
+                "bw_cost": 30,
+                "power": 0
+            }
+        ]
+    },
+    "infiltrator": {
+        "id": "infiltrator",
+        "name": "Infiltrator",
+        "description": "High speed architecture, specialized in finding system vulnerabilities for precise strikes.",
+        "base_stats": {
+            "intrusion": 15,
+            "shielding": 5,
+            "speed": 25,
+            "stability": 60
+        },
+        "growth": {
+            "intrusion": 3,
+            "shielding": 1,
+            "speed": 5,
+            "stability": 8
+        },
+        "skill_tree": [
+            {
+                "id": "optimized_path",
+                "name": "Optimized Path",
+                "desc": "Passive: Basic attack bandwidth cost reduced by 5%.",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive"
+            },
+            {
+                "id": "rapid_injection",
+                "name": "Rapid Injection",
+                "desc": "A very fast attack with low cost and moderate power.",
+                "sp_cost": 2,
+                "req": "optimized_path",
+                "type": "active",
+                "bw_cost": 12,
+                "power": 0.9
+            },
+            {
+                "id": "zero_day_exploit",
+                "name": "Zero-Day Exploit",
+                "desc": "Ignore 50% of the enemy's shielding level to deal damage.",
+                "sp_cost": 4,
+                "req": "rapid_injection",
+                "type": "active",
+                "bw_cost": 40,
+                "power": 2.5
+            }
+        ]
+    },
+    "overclocker": {
+        "id": "overclocker",
+        "name": "Overclocker",
+        "description": "High intrusion architecture, trades stability for instantaneous devastating computing power.",
+        "base_stats": {
+            "intrusion": 25,
+            "shielding": 2,
+            "speed": 15,
+            "stability": 50
+        },
+        "growth": {
+            "intrusion": 6,
+            "shielding": 0.5,
+            "speed": 2,
+            "stability": 5
+        },
+        "skill_tree": [
+            {
+                "id": "voltage_boost",
+                "name": "Voltage Boost",
+                "desc": "Passive: Intrusion increases by 15%, but consumes an extra 2% bandwidth per turn.",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive"
+            },
+            {
+                "id": "logic_bomb",
+                "name": "Logic Bomb",
+                "desc": "Deals massive area damage.",
+                "sp_cost": 2,
+                "req": "voltage_boost",
+                "type": "active",
+                "bw_cost": 50,
+                "power": 3.0
+            },
+            {
+                "id": "kernel_panic",
+                "name": "Kernel Panic",
+                "desc": "Ultimate skill: Deals extreme damage and stuns the enemy for the next turn, but resets your bandwidth to zero.",
+                "sp_cost": 5,
+                "req": "logic_bomb",
+                "type": "active",
+                "bw_cost": 80,
+                "power": 5.0
+            }
+        ]
     }
 }
