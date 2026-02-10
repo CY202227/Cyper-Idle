@@ -1,0 +1,10 @@
+{
+    "project_genesis_log": {
+        "name": "Project_Genesis.log",
+        "desc": "一份加密的系统日志，提及了底层协议的重构计划。获取后解锁高级软件定义建筑。",
+        "content": "TIMESTAMP: [REDACTED]\nSUBJECT: 底层协议重构 (Genesis)\n\n我们发现现有的网络架构存在严重的逻辑漏洞。通过注入原始代码片段，我们可以实现对赛博空间的深度重构。这不仅仅是升级，这是进化。\n\n[警告：检测到未经授权的访问...数据已加密]",
+        "unlocks": {
+            "buildings": ["genesis_parser"]
+        }
+    }
+}

@@ -32,6 +32,13 @@
             "energy": 100
         },
         "actions": {
+            "echo_contact_1": {
+                "label": "Trace abnormal communication jitter",
+                "next_node": "echo_intro",
+                "requirements": {
+                    "energy": 150
+                }
+            },
             "accept_contracts": {
                 "label": "Check Available Contracts",
                 "next_node": "contract_board"
@@ -92,7 +99,7 @@
         }
     },
     "ai_revelation": {
-        "text": "The AI consciousness shows a fragment of erased history: this node was once a secret testing ground for 'CyberCore' Corp, aiming to create a super-intelligence to control the entire network. The experiment failed, but the core code still pulses in the Abyss. 'Help me delete this code forever, or... inherit it.'",
+        "text": "[System Log: Data Recovery in Progress...]\n\nThis erased history emerges: this node was once a secret testing ground for 'CyberCore' Corp, aiming to create a super-intelligence to control the entire network. The experiment eventually spiraled out of control, physical facilities were incinerated, but the core code still pulses in the Abyss.\n\n[K0_Echo]: 'See that? It's their masterpiece, and their nightmare. Now it's whispering to you. Help it find peace, or... become its new host.'",
         "actions": {
             "delete_code": {
                 "label": "Assist AI in deleting core code (Gain Reputation)",
@@ -113,10 +120,10 @@
         }
     },
     "extraction_consequence": {
-        "text": "You forcefully extracted the data, but triggered automatic defense mechanisms. Although you gained resources, your system sustained minor damage and attracted the attention of unknown entities.",
+        "text": "[Warning: Core Firewall Counterattack]\n\nYou forcefully extracted the data, but those pulsing raw codes climbed onto your access pod like a virus along the connection. You saw countless incinerated consciousnesses screaming. Although you gained resources, your system stability is compromised, and the 'Watchers' have locked onto your coordinates.",
         "actions": {
             "repair_and_hide": {
-                "label": "Repair system and hide traces",
+                "label": "Emergency repair and cut physical connection",
                 "next_node": "energy_stable",
                 "requirements": {
                     "energy": 50
@@ -138,7 +145,7 @@
         }
     },
     "black_market": {
-        "text": "This is the Black Market. Code is worth more than credits here. You can trade data scraps for rare resources or programs.",
+        "text": "[MERCHANT]: 'Hey, newcomer. Code is worth more than life here. Want something? As long as you have enough scraps, everything is tradable.'",
         "actions": {
             "trade_scraps_compute": {
                 "label": "Trade 5 Scraps for 20 Compute",
@@ -152,14 +159,14 @@
                 }
             },
             "buy_rare_daemon": {
-                "label": "Buy Rare Daemon: 'Data Ghost' (500 Credits)",
+                "label": "Purchase rare daemon: 'Phantom' (500 Credits)",
                 "next_node": "black_market",
                 "requirements": {
                     "credits": 500
                 },
                 "reward": {
                     "credits": -500,
-                    "quest_id": "unlock_data_ghost"
+                    "daemon_id": "phantom"
                 }
             },
             "leave": {
@@ -193,6 +200,7 @@
                 "requirements": {
                     "compute": 10
                 },
+                "consume": true,
                 "reward": {
                     "hacking_xp": 50,
                     "credits": 1000
@@ -204,6 +212,7 @@
                 "requirements": {
                     "energy": 50
                 },
+                "consume": true,
                 "reward": {
                     "compute": 5
                 }
@@ -255,5 +264,81 @@
                 "next_node": "energy_stable"
             }
         }
+    },
+    "echo_intro": {
+        "text": "A noise-filled dialog box suddenly pops up on the screen. [K0_Echo]: 'Anyone there? ... Someone is still using this model of access pod... Listen, if you can hear me, it means your signal has caught my attention. This place isn't safe, but I can help you.'",
+        "actions": {
+            "who_are_you": {
+                "label": "Who are you?",
+                "next_node": "echo_who"
+            },
+            "ignore_echo": {
+                "label": "Cut Connection",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_who": {
+        "text": "[K0_Echo]: 'Who I am doesn't matter. What matters is I'm the only one who can help you survive. This pod used to belong to me... or rather, the me that still had a body. Now, I'm just an echo in the network. Keep upgrading your hardware; we need more bandwidth.'",
+        "actions": {
+            "underlined": {
+                "label": "I understand",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_genesis_warning": {
+        "text": "[K0_Echo]: 'Careful! I detected you obtained Project_Genesis.log. You shouldn't have touched that file. It's the switch they use to \"reset\" everything. If you plan to parse it, you'd better be prepared for \"them\".'",
+        "actions": {
+            "ask_about_them": {
+                "label": "Who are \"them\"?",
+                "next_node": "echo_them"
+            },
+            "stay_silent": {
+                "label": "Stay Silent",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_them": {
+        "text": "[K0_Echo]: 'System Watchers. Programs that think they're network gods. Parsing the Genesis protocol will touch their nerves. If you must continue, then get strong—strong enough to rewrite the rules.'",
+        "actions": {
+            "prepare": {
+                "label": "I'll be ready",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_high_compute": {
+        "text": "[K0_Echo]: 'Your compute power has reached an amazing level. It's time to check those hidden \"Deep Gateways\". I've marked a new entry point near your coordinates; you'll find the answers you need there.'",
+        "actions": {
+            "thanks": {
+                "label": "Coordinates Received",
+                "next_node": "energy_stable",
+                "reward": {
+                    "hacking_xp": 200
+                }
+            }
+        }
+    },
+    "echo_idle_1": {
+        "text": "[K0_Echo]: 'You know? The coolant in this pod smells like expired synthetic coffee. I can't smell it now, but that data stayed in my memory bank.'",
+        "actions": { "back": { "label": "Keep Working", "next_node": "energy_stable" } }
+    },
+    "echo_idle_2": {
+        "text": "[K0_Echo]: 'The world outside... is it still raining? That static-filled acid rain. Sometimes I miss the feeling of getting soaked.'",
+        "actions": { "back": { "label": "Keep Working", "next_node": "energy_stable" } }
+    },
+    "echo_idle_3": {
+        "text": "[K0_Echo]: 'Don't stare at those scrolling codes for too long; they'll make you hallucinate. I once saw the reflection of an entire city in there.'",
+        "actions": { "back": { "label": "Keep Working", "next_node": "energy_stable" } }
+    },
+    "echo_react_build": {
+        "text": "[K0_Echo]: 'Nice hardware upgrade. Still far from those corporate servers, but at least you don't have to worry about a simple crack script setting the rack on fire now.'",
+        "actions": { "back": { "label": "Keep Working", "next_node": "energy_stable" } }
+    },
+    "echo_react_dungeon": {
+        "text": "[K0_Echo]: 'Crawled back from those derelict nodes again? Lucky you. Remember to check your firewall patches next time; I don't want to see your consciousness fried in there.'",
+        "actions": { "back": { "label": "Keep Working", "next_node": "energy_stable" } }
     }
 }

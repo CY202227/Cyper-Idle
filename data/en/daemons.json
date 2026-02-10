@@ -140,5 +140,52 @@
                 "power": 5.0
             }
         ]
+    },
+    "phantom": {
+        "id": "phantom",
+        "name": "Phantom",
+        "description": "Phantom architecture, specialized in low-level system stealth with extremely high evasion and persistent interference.",
+        "base_stats": {
+            "intrusion": 12,
+            "shielding": 8,
+            "speed": 30,
+            "stability": 70
+        },
+        "growth": {
+            "intrusion": 2,
+            "shielding": 2,
+            "speed": 6,
+            "stability": 10
+        },
+        "skill_tree": [
+            {
+                "id": "ghost_mask",
+                "name": "Ghost Mask",
+                "desc": "Passive: Permanently increases evasion chance by 20%.",
+                "sp_cost": 1,
+                "req": null,
+                "type": "passive"
+            },
+            {
+                "id": "data_leak",
+                "name": "Data Leak",
+                "desc": "Damage over time: Target loses 5% stability per turn for 3 turns.",
+                "sp_cost": 3,
+                "req": "ghost_mask",
+                "type": "active",
+                "bw_cost": 20,
+                "power": 0.5
+            },
+            {
+                "id": "zero_trace",
+                "name": "Zero Trace",
+                "desc": "Ultimate: Absolute evasion of all attacks this turn and restores 30% bandwidth.",
+                "sp_cost": 5,
+                "req": "data_leak",
+                "type": "active",
+                "bw_cost": 40,
+                "power": 0
+            }
+        ]
     }
 }

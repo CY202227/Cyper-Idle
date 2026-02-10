@@ -8,14 +8,17 @@ class GameManager:
             "resources": {},
             "actions": {},
             "events": [],
-            "buildings": {}
+            "buildings": {},
+            "artifacts": {}
         }
 
-    def load_definitions(self, resources_json, events_json, buildings_json=None):
+    def load_definitions(self, resources_json, events_json, buildings_json=None, artifacts_json=None):
         self.definitions["resources"] = json.loads(resources_json)
         self.definitions["events"] = json.loads(events_json)
         if buildings_json:
             self.definitions["buildings"] = json.loads(buildings_json)
+        if artifacts_json:
+            self.definitions["artifacts"] = json.loads(artifacts_json)
 
     def tick(self, delta_time):
         """主循环逻辑，计算资源产出"""
@@ -33,9 +36,40 @@ class GameManager:
         # 3. 强制执行存储上限
         self.apply_storage_caps()
 
-        # 4. 随机事件检查
+        # 4. 剧情触发检查
+        self.check_story_triggers()
+
+        # 5. 随机事件检查
         if self.state.tick_count % 60 == 0:
             self.check_random_events()
+
+    def set_npc_manager(self, npc_mgr):
+        self.npc_mgr = npc_mgr
+
+    def check_story_triggers(self):
+        """基于游戏状态触发特定的剧情节点"""
+        # 仅在主循环中偶尔检查，避免性能损耗
+        if self.state.tick_count % 5 != 0: return
+
+        # 优先级 1: 关键剧情触发 (仅当当前在 energy_stable 时)
+        if self.state.current_story_node == "energy_stable":
+            # 发现创世日志后的警告
+            if "project_genesis_log" in self.state.artifacts and "echo_genesis_warned" not in self.state.story_flags:
+                self.state.current_story_node = "echo_genesis_warning"
+                self.state.story_flags.append("echo_genesis_warned")
+                return
+
+            # 算力突破 500 后的引导
+            if self.state.resources.get("compute", 0) >= 500 and "echo_high_compute_triggered" not in self.state.story_flags:
+                self.state.current_story_node = "echo_high_compute"
+                self.state.story_flags.append("echo_high_compute_triggered")
+                return
+
+            # 优先级 2: 使用 NPC 管理器处理随机闲聊
+            if hasattr(self, 'npc_mgr'):
+                idle_pool = ["echo_idle_1", "echo_idle_2", "echo_idle_3"]
+                self.npc_mgr.trigger_random_chatter(idle_pool, chance=0.01)
+
 
     def apply_building_effects(self, delta_time):
         """计算所有建筑的产出、消耗和存储加成"""
@@ -101,6 +135,11 @@ class GameManager:
                 break
         
         if not b_def: return False, "建筑不存在"
+
+        # 检查前置条件 (Artifacts)
+        if "requires_artifact" in b_def:
+            if b_def["requires_artifact"] not in self.state.artifacts:
+                return False, "缺少必要的数据档案"
         
         current_level = self.state.buildings.get(building_id, 0)
         multiplier = b_def.get("cost_multiplier", 1.5)

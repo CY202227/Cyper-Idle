@@ -60,15 +60,8 @@ async def load_game_data():
         # 加载特定语言的任务定义
         with open(f"data/{lang}/quests.json", "r", encoding="utf-8") as f:
             quest_data = f.read()
-        
-        # 加载特定语言的建筑定义
-        try:
-            with open(f"data/{lang}/buildings.json", "r", encoding="utf-8") as f:
-                building_data = f.read()
-        except:
-            building_data = "{}"
             
-        manager.load_definitions(res_data, evt_data, building_data)
+        manager.load_definitions(res_data, evt_data)
         story.load_nodes(story_data)
         daemon_mgr.load_definitions(daemon_data)
         quest_mgr.load_definitions(quest_data)
@@ -82,7 +75,6 @@ def update_ui():
     document.getElementById("btn-export").innerText = i18n.get("export_save")
     document.getElementById("btn-import").innerText = i18n.get("import_save")
     document.querySelector("#resource-panel h2").innerText = i18n.get("core_assets")
-    document.querySelector("#infrastructure-panel h2").innerText = i18n.get("infrastructure") or "Infrastructure"
     document.querySelector("#action-panel h2").innerText = i18n.get("system_ops")
     document.querySelector("#quest-panel h2").innerText = i18n.get("active_contracts")
     document.getElementById("status-text").innerText = i18n.get("status_ready")
@@ -106,15 +98,20 @@ def update_ui():
         # 使用 i18n 获取资源名称
         display_name = i18n.get_res_name(res_id, manager.definitions["resources"])
         
-        # 获取上限
-        cap = state.storage_caps.get(res_id)
+        # 获取上限 (如果存在)
+        cap = getattr(state, 'storage_caps', {}).get(res_id)
         cap_str = f" / {int(cap)}" if cap is not None else ""
         
         res_item.innerHTML = f"<span>{display_name}:</span> <span>{int(amount)}{cap_str}</span>"
         res_list.appendChild(res_item)
 
     # 更新基础设施显示
-    update_infrastructure_ui()
+    if hasattr(manager, 'definitions') and "buildings" in manager.definitions:
+        update_infrastructure_ui()
+
+    # 更新档案显示
+    if hasattr(state, 'artifacts'):
+        update_archives_ui()
 
     # 更新守护程序显示
     daemon_list_div = document.getElementById("daemons-list")
@@ -151,7 +148,7 @@ def update_ui():
 
             # 添加“重构”按钮
             refactor_btn = document.createElement("button")
-            refactor_btn.innerText = f"{i18n.get('refactor')} (SP: {daemon.get('sp', 0)})"
+            refactor_btn.innerText = "重构 (SP: " + str(daemon.get('sp', 0)) + ")"
             refactor_btn.className = "refactor-btn-mini"
             def make_refactor_handler(idx):
                 def handler(event):
@@ -165,19 +162,11 @@ def update_ui():
     quest_list_div = document.getElementById("quests-list")
     if quest_list_div:
         quest_list_div.innerHTML = ""
-        if not state.active_quests:
-            empty_msg = document.createElement("div")
-            empty_msg.className = "empty-msg"
-            empty_msg.innerText = i18n.get("no_contracts")
-            quest_list_div.appendChild(empty_msg)
-        else:
-            for quest in state.active_quests:
-                defn = quest_mgr.definitions.get(quest["id"])
-                if not defn:
-                    print(f"Warning: Quest definition not found for {quest['id']}")
-                    continue
-                
-                q_item = document.createElement("div")
+        for quest in state.active_quests:
+            defn = quest_mgr.definitions.get(quest["id"])
+            if not defn: continue
+            
+            q_item = document.createElement("div")
             q_item.className = "quest-item"
             if quest["completed"]:
                 q_item.className += " completed"
@@ -206,21 +195,12 @@ def update_ui():
                     def handler(event):
                         success, rewards = quest_mgr.claim_reward(qid)
                         if success:
-                            # 使用 i18n 获取翻译后的资源名称
-                            reward_parts = []
-                            for k, v in rewards.items():
-                                res_name = i18n.get_res_name(k, manager.definitions["resources"])
-                                reward_parts.append(f"+{v} {res_name}")
-                            
-                            reward_msg = ", ".join(reward_parts)
+                            # 显示奖励消息
+                            reward_msg = ", ".join([f"+{v} {k}" for k, v in rewards.items()])
                             log_div = document.getElementById("story-log")
                             entry = document.createElement("div")
                             entry.className = "log-entry"
-                            
-                            # 使用 i18n 获取任务完成的提示文本
-                            prefix = "任务完成！获得奖励" if state.language == "zh" else "Quest Complete! Rewards"
-                            entry.innerText = f"> {prefix}: {reward_msg}"
-                            
+                            entry.innerText = f"> 任务完成！获得奖励: {reward_msg}"
                             log_div.appendChild(entry)
                             log_div.scrollTop = log_div.scrollHeight
                             update_ui()
@@ -277,24 +257,8 @@ def update_ui():
     # 更新状态栏
     document.getElementById("tick-timer").innerText = f"TICK: {state.tick_count}"
 
-    # 更新系统操作列表 (System Operations)
-    actions_list = document.getElementById("actions-list")
-    if actions_list:
-        actions_list.innerHTML = ""
-        for action_id in state.unlocked_actions:
-            btn = document.createElement("button")
-            btn.className = "action-btn"
-            # 尝试从 i18n 获取翻译，否则显示 ID
-            btn.innerText = i18n.get(action_id) if i18n.get(action_id) != action_id else action_id
-            
-            def make_action_handler(aid):
-                def handler(event):
-                    if manager.perform_action(aid):
-                        update_ui()
-                return handler
-            
-            btn.onclick = create_proxy(make_action_handler(action_id))
-            actions_list.appendChild(btn)
+    # 更新侧边栏标签页显示
+    update_side_tabs_visibility()
 
     # 更新地牢显示
     if state.current_story_node == "dungeon_start" and not combat_eng.is_active:
@@ -448,6 +412,41 @@ async def import_save_dialog(event=None):
 
 # --- 基础设施 UI 逻辑 ---
 
+def show_side_tab(tab_id, event=None):
+    """切换右侧侧边栏标签页"""
+    # 隐藏所有面板
+    sections = document.querySelectorAll(".side-section")
+    for section in sections:
+        section.classList.remove("active")
+    
+    # 显示目标面板
+    target_map = {
+        "assets": "resource-panel",
+        "infra": "infrastructure-panel",
+        "ops": "action-panel",
+        "quests": "quest-panel",
+        "archives": "archives-panel"
+    }
+    target_id = target_map.get(tab_id)
+    if target_id:
+        document.getElementById(target_id).classList.add("active")
+    
+    # 更新按钮样式
+    btns = document.querySelectorAll(".side-tab-btn")
+    for btn in btns:
+        # 提取 py-click 中的 tab_id 进行比较
+        click_attr = btn.getAttribute("py-click") or ""
+        if tab_id in click_attr:
+            btn.classList.add("active")
+        else:
+            btn.classList.remove("active")
+
+def update_side_tabs_visibility():
+    """根据游戏状态更新侧边栏标签页内容"""
+    pass
+
+# --- 基础设施 UI 逻辑 ---
+
 def update_infrastructure_ui():
     """更新硬件和软件建筑列表"""
     for category in ["hardware", "software"]:
@@ -464,6 +463,11 @@ def update_infrastructure_ui():
             list_div.appendChild(empty_msg)
         else:
             for b_id, b_def in buildings_def.items():
+                # 检查前置条件
+                if "requires_artifact" in b_def:
+                    if b_def["requires_artifact"] not in state.artifacts:
+                        continue # 隐藏未解锁的建筑
+                
                 level = state.buildings.get(b_id, 0)
                 multiplier = b_def.get("cost_multiplier", 1.5)
                 
@@ -501,6 +505,8 @@ def update_infrastructure_ui():
                     def handler(event):
                         success, msg = manager.build(bid)
                         if success:
+                            if hasattr(window, 'npc_mgr'):
+                                window.npc_mgr.check_reaction("build_complete")
                             update_ui()
                         else:
                             window.alert(msg)
@@ -519,11 +525,79 @@ def show_infra_tab(category, event=None):
     # 更新按钮状态
     tabs = document.querySelectorAll("#infrastructure-tabs .tab-btn")
     for tab in tabs:
-        # 比较文本（不区分大小写）
         if tab.innerText.lower() == category.lower():
             tab.classList.add("active")
         else:
             tab.classList.remove("active")
+
+def update_archives_ui():
+    """更新系统档案列表"""
+    list_div = document.getElementById("artifacts-list")
+    if not list_div: return
+    
+    list_div.innerHTML = ""
+    # 动态更新标题
+    archives_title = i18n.get("archives")
+    if archives_title != "archives":
+        document.querySelector("#archives-panel h2").innerText = archives_title
+    
+    if not state.artifacts:
+        empty_msg = document.createElement("div")
+        empty_msg.className = "empty-msg"
+        empty_msg.innerText = i18n.get("no_artifacts")
+        list_div.appendChild(empty_msg)
+    else:
+        for art_id in state.artifacts:
+            art_def = manager.definitions.get("artifacts", {}).get(art_id)
+            if not art_def: continue
+            
+            item = document.createElement("div")
+            item.className = "artifact-item"
+            item.innerHTML = f"""
+                <div class="artifact-name">{art_def['name']}</div>
+                <div class="artifact-desc">{art_def['desc']}</div>
+                <div class="artifact-content">{art_def['content']}</div>
+            """
+            
+            def make_toggle_handler(target_item):
+                def handler(event):
+                    target_item.classList.toggle("expanded")
+                return handler
+            
+            item.onclick = create_proxy(make_toggle_handler(item))
+            list_div.appendChild(item)
+
+def show_side_tab(tab_id, event=None):
+    """切换右侧侧边栏标签页"""
+    # 隐藏所有面板
+    sections = document.querySelectorAll(".side-section")
+    for section in sections:
+        section.classList.remove("active")
+    
+    # 显示目标面板
+    target_map = {
+        "assets": "resource-panel",
+        "infra": "infrastructure-panel",
+        "ops": "action-panel",
+        "quests": "quest-panel",
+        "archives": "archives-panel"
+    }
+    target_id = target_map.get(tab_id)
+    if target_id:
+        document.getElementById(target_id).classList.add("active")
+    
+    # 更新按钮样式
+    btns = document.querySelectorAll(".side-tab-btn")
+    for btn in btns:
+        click_attr = btn.getAttribute("py-click") or ""
+        if tab_id in click_attr:
+            btn.classList.add("active")
+        else:
+            btn.classList.remove("active")
+
+def update_side_tabs_visibility():
+    """根据游戏状态更新侧边栏标签页内容"""
+    pass
 
 # --- 重构界面逻辑 ---
 

@@ -32,6 +32,13 @@
             "energy": 100
         },
         "actions": {
+            "echo_contact_1": {
+                "label": "追踪异常的通信抖动",
+                "next_node": "echo_intro",
+                "requirements": {
+                    "energy": 150
+                }
+            },
             "accept_contracts": {
                 "label": "查看可用合同",
                 "next_node": "contract_board"
@@ -92,10 +99,10 @@
         }
     },
     "ai_revelation": {
-        "text": "AI 意识展示了一段被抹除的历史：这个节点曾是“赛博核心”公司的秘密实验场，旨在创造一个能控制整个网络的超级智能。实验失败了，但核心代码依然在深渊中跳动。'帮我彻底删除这些代码，或者... 继承它。'",
+        "text": "[系统日志：数据恢复中...]\n\n这段被抹除的历史浮现而出：这里曾是'赛博核心'公司的秘密实验场，旨在创造一个能控制整个网络的超级智能。实验最终失控，物理设施被焚毁，但核心代码依然在深渊的脉冲中跳动。\n\n[K0_Echo]: '看到了吗？那是他们的杰作，也是他们的噩梦。现在它在向你低语。帮它解脱，或者... 成为它的新宿主。'",
         "actions": {
             "delete_code": {
-                "label": "协助 AI 删除核心代码 (获得声望)",
+                "label": "彻底删除核心代码 (获得声望)",
                 "next_node": "energy_stable",
                 "reward": {
                     "hacking_xp": 1000,
@@ -113,10 +120,10 @@
         }
     },
     "extraction_consequence": {
-        "text": "你强行提取了数据，但触发了自动防御机制。虽然获得了资源，但你的系统受到了轻微损伤，且引起了某些未知实体的注意。",
+        "text": "[警告：核心防火墙反击]\n\n你强行提取了数据，但那些跳动的原始代码像病毒一样顺着连接爬上了你的接入舱。你看到了无数被烧毁的意识在惨叫。虽然获得了资源，但你的系统稳定性受损，且'监视者'已经锁定了你的坐标。",
         "actions": {
             "repair_and_hide": {
-                "label": "修复系统并隐藏踪迹",
+                "label": "紧急修复并切断物理连接",
                 "next_node": "energy_stable",
                 "requirements": {
                     "energy": 50
@@ -138,7 +145,7 @@
         }
     },
     "black_market": {
-        "text": "这里是黑市。代码在这里比信用点更值钱。你可以用数据碎片交换一些稀有的资源或程序。",
+        "text": "[MERCHANT]: '嘿，新来的。这里的代码比命还值钱。想要点什么？只要你有足够的碎片，万物皆可交易。'",
         "actions": {
             "trade_scraps_compute": {
                 "label": "用 5 碎片换取 20 算力",
@@ -152,14 +159,14 @@
                 }
             },
             "buy_rare_daemon": {
-                "label": "购买稀有守护程序：'数据幽灵' (500 信用点)",
+                "label": "购买稀有守护程序：'幻影' (500 信用点)",
                 "next_node": "black_market",
                 "requirements": {
                     "credits": 500
                 },
                 "reward": {
                     "credits": -500,
-                    "quest_id": "unlock_data_ghost"
+                    "daemon_id": "phantom"
                 }
             },
             "leave": {
@@ -193,6 +200,7 @@
                 "requirements": {
                     "compute": 10
                 },
+                "consume": true,
                 "reward": {
                     "hacking_xp": 50,
                     "credits": 1000
@@ -204,6 +212,7 @@
                 "requirements": {
                     "energy": 50
                 },
+                "consume": true,
                 "reward": {
                     "compute": 5
                 }
@@ -255,5 +264,81 @@
                 "next_node": "energy_stable"
             }
         }
+    },
+    "echo_intro": {
+        "text": "屏幕上突然弹出一个满是噪声的对话框。 [K0_Echo]: '有人吗？... 竟然还有人在使用这种型号的接入舱... 听着，如果你能听到，说明你的信号已经引起了我的注意。这个地方不安全，但我可以帮你。'",
+        "actions": {
+            "who_are_you": {
+                "label": "你是谁？",
+                "next_node": "echo_who"
+            },
+            "ignore_echo": {
+                "label": "切断连接",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_who": {
+        "text": "[K0_Echo]: '我是谁并不重要，重要的是我是唯一能帮你活下去的人。这个接入舱曾经属于我... 或者说，属于那个还有肉体的我。现在，我只是网络中的一段回声。继续升级你的硬件，我们需要更强的带宽。'",
+        "actions": {
+            "underlined": {
+                "label": "我明白了",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_genesis_warning": {
+        "text": "[K0_Echo]: '小心！我检测到你获取了 Project_Genesis.log。你不该碰那个文件的。那是他们用来“重置”一切的开关。如果你打算解析它，最好先做好面对“它们”的准备。'",
+        "actions": {
+            "ask_about_them": {
+                "label": "“它们”是谁？",
+                "next_node": "echo_them"
+            },
+            "stay_silent": {
+                "label": "保持沉默",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_them": {
+        "text": "[K0_Echo]: '系统监视者。那些自以为是网络神灵的程序。解析 Genesis 协议会触动它们的神经。如果你一定要继续，那就变强，强到足以改写规则。'",
+        "actions": {
+            "prepare": {
+                "label": "我会准备好的",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "echo_high_compute": {
+        "text": "[K0_Echo]: '你的算力已经达到了惊人的程度。是时候去看看那些被隐藏的“深层网关”了。我在你的坐标附近标记了一个新的入口，那里有你需要的答案。'",
+        "actions": {
+            "thanks": {
+                "label": "收到坐标",
+                "next_node": "energy_stable",
+                "reward": {
+                    "hacking_xp": 200
+                }
+            }
+        }
+    },
+    "echo_idle_1": {
+        "text": "[K0_Echo]: '你知道吗？这个接入舱的冷却液闻起来像过期的合成咖啡。虽然我现在闻不到，但那段数据一直留在我记忆区里。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_idle_2": {
+        "text": "[K0_Echo]: '外面的世界... 还在下雨吗？那种带着静电的酸雨。有时候我挺怀念那种被淋湿的感觉。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_idle_3": {
+        "text": "[K0_Echo]: '别盯着那些滚动代码太久，它们会让你产生幻觉。我曾经在那里面看到过一整座城市的倒影。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_react_build": {
+        "text": "[K0_Echo]: '不错的硬件升级。虽然比起那些大公司的服务器还差得远，但至少你现在不用担心运行一个简单的破解程序就让机架起火了。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
+    },
+    "echo_react_dungeon": {
+        "text": "[K0_Echo]: '又从那些废弃节点里爬回来了？命真大。下次记得检查你的防火墙补丁，我可不想看到你的意识被烧死在里面。'",
+        "actions": { "back": { "label": "继续工作", "next_node": "energy_stable" } }
     }
 }

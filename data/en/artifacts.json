@@ -1,0 +1,10 @@
+{
+    "project_genesis_log": {
+        "name": "Project_Genesis.log",
+        "desc": "An encrypted system log mentioning plans for underlying protocol refactoring. Unlocks advanced software-defined buildings.",
+        "content": "TIMESTAMP: [REDACTED]\nSUBJECT: Underlying Protocol Refactoring (Genesis)\n\nWe have discovered serious logical vulnerabilities in the existing network architecture. By injecting raw code fragments, we can achieve deep refactoring of cyberspace. This is not just an upgrade; it is an evolution.\n\n[WARNING: Unauthorized access detected... Data encrypted]",
+        "unlocks": {
+            "buildings": ["genesis_parser"]
+        }
+    }
+}
