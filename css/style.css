@@ -78,6 +78,7 @@ main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
 
 /* 右侧侧边栏容器 */

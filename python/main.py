@@ -36,6 +36,15 @@ def on_combat_ui_update():
 combat_eng = CombatEngine(state, daemon_mgr, on_combat_ui_update)
 quest_mgr = QuestManager(state)
 
+
+def get_daemon_display_name(daemon):
+    """守护程序名称：兼容字符串或 {zh, en} 字典。"""
+    name = daemon.get("name", "Unknown")
+    if isinstance(name, dict):
+        return name.get(state.language, name.get("en", "Unknown"))
+    return str(name)
+
+
 async def load_game_data():
     """加载 JSON 配置文件"""
     lang = state.language
@@ -123,7 +132,7 @@ def update_ui():
             if i == state.active_daemon_index:
                 d_item.className += " active"
             
-            name = daemon["name"] 
+            name = get_daemon_display_name(daemon)
             d_item.innerHTML = f"""
                 <div class="daemon-header">
                     <span class="daemon-name">{name}</span>
@@ -279,7 +288,7 @@ def update_ui():
         # 更新玩家信息
         active_daemon = daemon_mgr.get_active_daemon()
         if active_daemon:
-            document.getElementById("active-daemon-name").innerText = active_daemon["name"].get(state.language)
+            document.getElementById("active-daemon-name").innerText = get_daemon_display_name(active_daemon)
             document.getElementById("player-hp-fill").style.width = f"{(combat_eng.player_hp / combat_eng.player_max_hp) * 100}%"
             document.getElementById("player-bw-fill").style.width = f"{combat_eng.player_bw}%"
             
@@ -296,14 +305,19 @@ def update_ui():
         base_actions = [("attack", "基础攻击 (20% BW)"), ("defend", "防御 (恢复 BW)"), ("reset", "重置 (大恢复)")]
         
         # 技能动作 (仅显示已挂载的技能)
-        equipped_ids = active_daemon.get("equipped_skills", [])
-        defn = daemon_mgr.definitions[active_daemon["id"]]
         all_actions = base_actions.copy()
-        
-        for sid in equipped_ids:
-            skill_defn = next((s for s in defn["skill_tree"] if s["id"] == sid), None)
-            if skill_defn:
-                all_actions.append((sid, f"{skill_defn['name']} ({skill_defn['bw_cost']}% BW)"))
+        if active_daemon and active_daemon["id"] in daemon_mgr.definitions:
+            defn = daemon_mgr.definitions[active_daemon["id"]]
+            for sid in active_daemon.get("equipped_skills", []):
+                skill_defn = next(
+                    (s for s in defn.get("skill_tree", []) if s["id"] == sid),
+                    None,
+                )
+                if skill_defn:
+                    bw = skill_defn.get("bw_cost", 0)
+                    all_actions.append(
+                        (sid, f"{skill_defn['name']} ({bw}% BW)")
+                    )
 
         for aid, label in all_actions:
             btn = document.createElement("button")
