@@ -2,71 +2,110 @@
     "hardware": {
         "server_rack": {
             "name": "Server Rack",
-            "desc": "Expand physical storage space, increasing the storage limit for data scraps and credits.",
-            "cost": { "credits": 50, "data_scraps": 10 },
-            "cost_multiplier": 1.5,
+            "desc": "Expand storage for scraps and credits.",
+            "cost": { "credits": 40, "data_scraps": 8 },
+            "cost_multiplier": 1.45,
             "effects": {
-                "storage": { "data_scraps": 100, "credits": 500 }
+                "storage": { "data_scraps": 250, "credits": 2000 },
+                "combat": { "integrity": 8 }
             }
         },
         "cooling_system": {
             "name": "Cooling System",
-            "desc": "Improve hardware efficiency, increasing the compute limit.",
-            "cost": { "credits": 100, "data_scraps": 20 },
-            "cost_multiplier": 1.6,
+            "desc": "Boost compute caps, passive compute, and firewall.",
+            "cost": { "credits": 80, "data_scraps": 15 },
+            "cost_multiplier": 1.55,
             "effects": {
-                "storage": { "compute": 50 }
+                "storage": { "compute": 100 },
+                "auto_gen": { "compute": 0.4 },
+                "combat": { "firewall": 3, "speed": 0.5 }
             }
         },
         "power_module": {
             "name": "Power Module",
-            "desc": "Upgrade the power supply system, increasing the energy limit and base energy generation.",
-            "cost": { "credits": 30, "data_scraps": 5 },
-            "cost_multiplier": 1.4,
+            "desc": "More energy cap, generation, and integrity.",
+            "cost": { "credits": 25, "data_scraps": 4 },
+            "cost_multiplier": 1.35,
             "effects": {
-                "storage": { "energy": 100 },
-                "auto_gen": { "energy": 0.2 }
+                "storage": { "energy": 250 },
+                "auto_gen": { "energy": 1.0 },
+                "combat": { "integrity": 12 }
+            }
+        },
+        "intrusion_router": {
+            "name": "Intrusion Router",
+            "desc": "Mid/late hardware: intrusion, speed, light credits.",
+            "cost": { "credits": 220, "compute": 40, "data_scraps": 25 },
+            "cost_multiplier": 1.7,
+            "effects": {
+                "auto_gen": { "credits": 1.2 },
+                "combat": { "intrusion": 5, "speed": 1.5 }
+            }
+        },
+        "mirror_array": {
+            "name": "Mirror Array",
+            "desc": "Mid/late: integrity, storage, firewall.",
+            "cost": { "credits": 350, "data_scraps": 40, "compute": 60 },
+            "cost_multiplier": 1.85,
+            "effects": {
+                "storage": { "energy": 200, "data_scraps": 200, "credits": 3000 },
+                "combat": { "integrity": 25, "firewall": 4 }
             }
         }
     },
     "software": {
         "dark_web_node": {
             "name": "Dark Web Node",
-            "desc": "Anonymous servers occupied in the dark web, continuously generating credits.",
-            "cost": { "compute": 20, "hacking_xp": 50 },
-            "cost_multiplier": 1.8,
+            "desc": "Credits and intrusion.",
+            "cost": { "compute": 15, "hacking_xp": 40 },
+            "cost_multiplier": 1.7,
             "effects": {
-                "auto_gen": { "credits": 0.5 }
+                "auto_gen": { "credits": 2.0 },
+                "combat": { "intrusion": 4 }
             }
         },
         "research_node": {
             "name": "Research Node",
-            "desc": "Use idle compute for vulnerability research, generating hacking XP.",
-            "cost": { "compute": 30, "credits": 100 },
-            "cost_multiplier": 1.7,
+            "desc": "Hacking XP with light combat buffs.",
+            "cost": { "compute": 25, "credits": 80 },
+            "cost_multiplier": 1.65,
             "effects": {
-                "auto_gen": { "hacking_xp": 1 },
-                "consume": { "compute": 0.5 }
+                "auto_gen": { "hacking_xp": 4 },
+                "consume": { "compute": 0.4 },
+                "combat": { "intrusion": 2, "speed": 1 }
             }
         },
         "virtual_miner": {
             "name": "Virtual Miner",
-            "desc": "Run complex mining algorithms to convert energy and compute into data scraps.",
-            "cost": { "credits": 200, "compute": 50 },
-            "cost_multiplier": 2.0,
+            "desc": "Scrap income; slight firewall tradeoff.",
+            "cost": { "credits": 160, "compute": 40 },
+            "cost_multiplier": 1.9,
             "effects": {
-                "auto_gen": { "data_scraps": 0.2 },
-                "consume": { "energy": 0.5, "compute": 0.3 }
+                "auto_gen": { "data_scraps": 0.8 },
+                "consume": { "energy": 0.6, "compute": 0.25 },
+                "combat": { "integrity": 5, "firewall": -0.5 }
+            }
+        },
+        "honeypot": {
+            "name": "Honeypot",
+            "desc": "Mid/late: scrap income and firewall.",
+            "cost": { "compute": 50, "credits": 200, "hacking_xp": 80 },
+            "cost_multiplier": 1.75,
+            "effects": {
+                "auto_gen": { "data_scraps": 1.2 },
+                "consume": { "energy": 0.3 },
+                "combat": { "firewall": 6, "integrity": 8 }
             }
         },
         "genesis_parser": {
-            "name": "Genesis Protocol Parser",
-            "desc": "A supercomputer dedicated to parsing the Genesis protocol, significantly increasing hacking XP production.",
+            "name": "Genesis Parser",
+            "desc": "Parse Genesis: huge XP and combat stats.",
             "cost": { "credits": 500, "compute": 150 },
             "cost_multiplier": 2.5,
             "requires_artifact": "project_genesis_log",
             "effects": {
-                "auto_gen": { "hacking_xp": 5 }
+                "auto_gen": { "hacking_xp": 15 },
+                "combat": { "intrusion": 6, "firewall": 4, "integrity": 20, "speed": 2 }
             }
         }
     }

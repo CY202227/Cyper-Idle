@@ -3,70 +3,109 @@
         "server_rack": {
             "name": "服务器机架",
             "desc": "扩展物理存储空间，增加数据碎片和信用点的存储上限。",
-            "cost": { "credits": 50, "data_scraps": 10 },
-            "cost_multiplier": 1.5,
+            "cost": { "credits": 40, "data_scraps": 8 },
+            "cost_multiplier": 1.45,
             "effects": {
-                "storage": { "data_scraps": 100, "credits": 500 }
+                "storage": { "data_scraps": 250, "credits": 2000 },
+                "combat": { "integrity": 8 }
             }
         },
         "cooling_system": {
             "name": "冷却系统",
-            "desc": "提高硬件运行效率，增加算力上限。",
-            "cost": { "credits": 100, "data_scraps": 20 },
-            "cost_multiplier": 1.6,
+            "desc": "提高硬件运行效率，增加算力上限、被动算力与防火墙强度。",
+            "cost": { "credits": 80, "data_scraps": 15 },
+            "cost_multiplier": 1.55,
             "effects": {
-                "storage": { "compute": 50 }
+                "storage": { "compute": 100 },
+                "auto_gen": { "compute": 0.4 },
+                "combat": { "firewall": 3, "speed": 0.5 }
             }
         },
         "power_module": {
             "name": "电源模块",
-            "desc": "升级供电系统，增加电力上限和基础发电量。",
-            "cost": { "credits": 30, "data_scraps": 5 },
-            "cost_multiplier": 1.4,
+            "desc": "升级供电系统，增加电力上限、发电量与节点完整性。",
+            "cost": { "credits": 25, "data_scraps": 4 },
+            "cost_multiplier": 1.35,
             "effects": {
-                "storage": { "energy": 100 },
-                "auto_gen": { "energy": 0.2 }
+                "storage": { "energy": 250 },
+                "auto_gen": { "energy": 1.0 },
+                "combat": { "integrity": 12 }
+            }
+        },
+        "intrusion_router": {
+            "name": "入侵路由",
+            "desc": "中后期硬件：强化入侵与速度，略微产信用。",
+            "cost": { "credits": 220, "compute": 40, "data_scraps": 25 },
+            "cost_multiplier": 1.7,
+            "effects": {
+                "auto_gen": { "credits": 1.2 },
+                "combat": { "intrusion": 5, "speed": 1.5 }
+            }
+        },
+        "mirror_array": {
+            "name": "镜像阵列",
+            "desc": "中后期：大幅提升完整性与存储，略增防火墙。",
+            "cost": { "credits": 350, "data_scraps": 40, "compute": 60 },
+            "cost_multiplier": 1.85,
+            "effects": {
+                "storage": { "energy": 200, "data_scraps": 200, "credits": 3000 },
+                "combat": { "integrity": 25, "firewall": 4 }
             }
         }
     },
     "software": {
         "dark_web_node": {
             "name": "暗网节点",
-            "desc": "在暗网中占领的匿名服务器，持续产生信用点。",
-            "cost": { "compute": 20, "hacking_xp": 50 },
-            "cost_multiplier": 1.8,
+            "desc": "暗网匿名服务器：产信用点并提升入侵强度。",
+            "cost": { "compute": 15, "hacking_xp": 40 },
+            "cost_multiplier": 1.7,
             "effects": {
-                "auto_gen": { "credits": 0.5 }
+                "auto_gen": { "credits": 2.0 },
+                "combat": { "intrusion": 4 }
             }
         },
         "research_node": {
             "name": "科研节点",
-            "desc": "利用闲置算力进行漏洞研究，产生黑客经验。",
-            "cost": { "compute": 30, "credits": 100 },
-            "cost_multiplier": 1.7,
+            "desc": "漏洞研究：产黑客经验并略微提升入侵与速度。",
+            "cost": { "compute": 25, "credits": 80 },
+            "cost_multiplier": 1.65,
             "effects": {
-                "auto_gen": { "hacking_xp": 1 },
-                "consume": { "compute": 0.5 }
+                "auto_gen": { "hacking_xp": 4 },
+                "consume": { "compute": 0.4 },
+                "combat": { "intrusion": 2, "speed": 1 }
             }
         },
         "virtual_miner": {
             "name": "虚拟矿机",
-            "desc": "运行复杂的挖掘算法，将电力和算力转化为数据碎片。",
-            "cost": { "credits": 200, "compute": 50 },
-            "cost_multiplier": 2.0,
+            "desc": "挖掘算法产碎片；占用带宽，略降防火墙但加完整性缓冲。",
+            "cost": { "credits": 160, "compute": 40 },
+            "cost_multiplier": 1.9,
             "effects": {
-                "auto_gen": { "data_scraps": 0.2 },
-                "consume": { "energy": 0.5, "compute": 0.3 }
+                "auto_gen": { "data_scraps": 0.8 },
+                "consume": { "energy": 0.6, "compute": 0.25 },
+                "combat": { "integrity": 5, "firewall": -0.5 }
+            }
+        },
+        "honeypot": {
+            "name": "蜜罐诱饵",
+            "desc": "中后期软件：诱捕扫描，产碎片并强化防火墙。",
+            "cost": { "compute": 50, "credits": 200, "hacking_xp": 80 },
+            "cost_multiplier": 1.75,
+            "effects": {
+                "auto_gen": { "data_scraps": 1.2 },
+                "consume": { "energy": 0.3 },
+                "combat": { "firewall": 6, "integrity": 8 }
             }
         },
         "genesis_parser": {
             "name": "创世协议解析器",
-            "desc": "专门用于解析 Genesis 协议的超级计算机，大幅提升黑客经验产出。",
+            "desc": "解析 Genesis 协议：大幅提升黑客经验与全战斗属性。",
             "cost": { "credits": 500, "compute": 150 },
             "cost_multiplier": 2.5,
             "requires_artifact": "project_genesis_log",
             "effects": {
-                "auto_gen": { "hacking_xp": 5 }
+                "auto_gen": { "hacking_xp": 15 },
+                "combat": { "intrusion": 6, "firewall": 4, "integrity": 20, "speed": 2 }
             }
         }
     }

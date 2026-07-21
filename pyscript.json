@@ -1,6 +1,44 @@
 {
     "fetch": [
-        { "files": ["python/main.py", "python/engine/state.py", "python/engine/manager.py", "python/engine/story.py", "python/engine/dungeon.py", "python/engine/daemon.py", "python/engine/combat.py", "python/engine/quest.py", "python/engine/npc.py", "python/utils/rng.py", "python/utils/storage.py", "python/utils/i18n.py"] },
-        { "files": ["data/ui.json", "data/zh/resources.json", "data/zh/story.json", "data/zh/events.json", "data/zh/daemons.json", "data/zh/quests.json", "data/zh/buildings.json", "data/zh/artifacts.json", "data/zh/artifacts.json", "data/en/resources.json", "data/en/story.json", "data/en/events.json", "data/en/daemons.json", "data/en/quests.json", "data/en/buildings.json", "data/en/artifacts.json"] }
+        { "files": [
+            "python/main.py",
+            "python/engine/state.py",
+            "python/engine/manager.py",
+            "python/engine/story.py",
+            "python/engine/dungeon.py",
+            "python/engine/combat.py",
+            "python/engine/power.py",
+            "python/engine/quest.py",
+            "python/engine/npc.py",
+            "python/engine/missions.py",
+            "python/engine/progress.py",
+            "python/engine/protocols.py",
+            "python/utils/rng.py",
+            "python/utils/storage.py",
+            "python/utils/i18n.py"
+        ] },
+        { "files": [
+            "data/ui.json",
+            "data/zh/resources.json",
+            "data/zh/story.json",
+            "data/zh/events.json",
+            "data/zh/quests.json",
+            "data/zh/buildings.json",
+            "data/zh/artifacts.json",
+            "data/zh/missions.json",
+            "data/zh/milestones.json",
+            "data/zh/enemies.json",
+            "data/zh/protocols.json",
+            "data/en/resources.json",
+            "data/en/story.json",
+            "data/en/events.json",
+            "data/en/quests.json",
+            "data/en/buildings.json",
+            "data/en/artifacts.json",
+            "data/en/missions.json",
+            "data/en/milestones.json",
+            "data/en/enemies.json",
+            "data/en/protocols.json"
+        ] }
     ]
 }

@@ -1,56 +1,63 @@
 # Cyber-Idle | 赛博放置
 
-一个基于 Python (PyScript) 实现的赛博朋克风格放置游戏 (Idle Game)。
+基于 Python 的赛博朋克放置游戏，通过 **PyScript 在浏览器中运行**（与 GitHub Pages 同一套方式）。
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 ---
 
-## 🌟 特性
+## 怎么运行（重要）
 
-- **纯前端运行**: 使用 PyScript 技术，在浏览器中直接运行 Python 逻辑，无需后端服务器。
-- **赛博风格 UI**: 极简的高对比度配色，包含 CRT 扫描线和 Glitch 故障效果。
-- **无数据库存档**: 进度自动保存至浏览器 `localStorage`，支持Base64的导出与导入。
-- **多语言支持**: 内置中英文双语切换，所有游戏内容（资源、剧情、事件）均可通过 JSON 轻松扩展。
-- **种子随机数**: 引入 Seeded RNG，确保游戏随机事件的一致性与可预测性。
-- **剧情驱动**: 包含基础的剧情引擎，支持基于资源条件的节点跳转和分支选择。
-- **地牢探索**: 基于随机漫步算法（Random Walk）生成的网络节点，探索未知的赛博空间。
-- **守护程序 (Daemon)**: 独特的程序养成系统。玩家可以捕获、升级并优化“守护程序”（战斗脚本），通过持续的迭代与重构来对抗系统安全程序。
+本项目是**静态网页游戏**，和 GitHub Pages 部署方式一致：
 
-## 🚀 快速开始
+| 正确 | 错误 |
+|------|------|
+| 用 HTTP 提供**仓库根目录**，浏览器打开 `index.html` | 执行 `python python/main.py` |
+| 使用浏览器里 PyScript 提供的 `js` / `document` | `pip install js`（那是另一个无关包） |
 
-### 在线游玩
+### 在线（GitHub Pages）
 
-1. 将本项目推送到 GitHub 仓库。
-2. 在仓库设置中开启 **GitHub Pages**。
-3. 访问生成的 URL 即可开始游戏。
+1. 推送到 GitHub。
+2. **Settings → Pages**，选分支根目录部署。
+3. 打开 `https://<用户名>.github.io/<仓库名>/`。
 
-### 本地运行
+Pages 会提供 [`index.html`](index.html)，其中用 `<script type="py" …>` 加载 [`python/main.py`](python/main.py)。
 
-1. 确保已安装 Python 环境。
-2. 在项目根目录下运行静态服务器：
-   ```bash
-   python -m http.server 8000
-   ```
-3. 在浏览器访问 `http://localhost:8000`。
+### 本地（与 Pages 相同模型）
 
-## 🛠️ 项目结构
+在**仓库根目录**执行：
+
+```bash
+python -m http.server 8000
+```
+
+浏览器打开 **http://localhost:8000**。
+
+---
+
+## 特性
+
+- **纯前端**：PyScript，无游戏后端。
+- **赛博 UI**：CRT / Glitch。
+- **存档**：`localStorage` + Base64 导入导出。
+- **双语**：中英文 JSON。
+- **剧情**：资源条件分支。
+- **地牢**：程序化子网 + **自动探索**。
+- **网络攻防**：全自动交火，血条逐 tick 下降。
+- **网络行动**：计时带宽任务（无 Daemon 抓宠）。
+- **仅在线挂机**：无离线收益补算。
+
+## 结构
 
 ```text
 /
-├── index.html          # 主入口，加载 PyScript 环境
-├── css/
-│   └── style.css       # 赛博风格样式 (CRT, 霓虹配色, 动画)
-├── data/               # 游戏配置文件
-│   ├── ui.json         # UI 翻译
-│   ├── zh/             # 中文内容 (资源, 剧情, 事件)
-│   └── en/             # 英文内容
-└── python/             # 游戏核心逻辑
-    ├── main.py         # 初始化、UI 绑定与主循环
-    ├── engine/         # 游戏引擎 (状态管理, 资源计算, 剧情系统)
-    └── utils/          # 工具类 (RNG, 存档管理, 国际化)
+├── index.html          # 入口（PyScript 加载 main.py）
+├── pyscript.json       # 浏览器运行时预取文件
+├── css/style.css
+├── data/
+└── python/             # 游戏逻辑（在浏览器跑，不是 CLI）
 ```
 
-## 📜 许可证
+## 许可证
 
-本项目采用 MIT 许可证。
+MIT

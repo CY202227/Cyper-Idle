@@ -1,0 +1,72 @@
+{
+    "order": [
+        "boot",
+        "first_purge",
+        "subnet_access",
+        "protocol_t1",
+        "depth_10",
+        "core_breach",
+        "echo_stable"
+    ],
+    "milestones": {
+        "boot": {
+            "name": "Core Online",
+            "desc": "Stabilize the system to a usable state.",
+            "hint": "Advance the story to energy stable and build a power module.",
+            "require": {
+                "story_any": ["energy_stable", "discovered_data", "dungeon_start", "contract_board", "black_market", "echo_intro"]
+            },
+            "unlock": { "story_flag": "milestone_boot" }
+        },
+        "first_purge": {
+            "name": "First Purge",
+            "desc": "Defeat 10 security programs on the link.",
+            "hint": "Enable Auto Purge and rack up wins.",
+            "require": { "combat_wins": 10 },
+            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 }
+        },
+        "subnet_access": {
+            "name": "Subnet Access",
+            "desc": "Enter the subnet and reach floor 3.",
+            "hint": "Deep scan in the story → enter the dungeon.",
+            "require": { "dungeon_level": 3 },
+            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 }
+        },
+        "protocol_t1": {
+            "name": "Protocol Awakening",
+            "desc": "Reach hacking level 5 to unlock protocols.",
+            "hint": "Farm HXP via combat and network ops.",
+            "require": { "hacking_level": 5 },
+            "unlock": {
+                "story_flag": "milestone_protocol",
+                "protocols_unlocked": true,
+                "set_threat_tier": 3
+            }
+        },
+        "depth_10": {
+            "name": "Deep Node",
+            "desc": "Reach dungeon floor 10.",
+            "hint": "Keep auto-exploring; elites appear every 5 floors.",
+            "require": { "dungeon_level": 10 },
+            "unlock": {
+                "story_flag": "milestone_depth",
+                "boss_available": true,
+                "set_threat_tier": 4
+            }
+        },
+        "core_breach": {
+            "name": "Core Breach",
+            "desc": "Defeat the sector core guardian.",
+            "hint": "Launch a core raid from Progress, or hit floor 15.",
+            "require": { "boss_kills": 1 },
+            "unlock": { "story_flag": "milestone_breach" }
+        },
+        "echo_stable": {
+            "name": "Echo Stable",
+            "desc": "After a protocol reboot, defeat the core again.",
+            "hint": "Prestige, rebuild fast, raid the core once more.",
+            "require": { "prestige": 1, "boss_kills": 2 },
+            "unlock": { "story_flag": "milestone_echo" }
+        }
+    }
+}

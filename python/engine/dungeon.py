@@ -1,5 +1,6 @@
 import random
 
+
 class DungeonEngine:
     def __init__(self, state, rng, width=20, height=10):
         self.state = state
@@ -13,42 +14,34 @@ class DungeonEngine:
 
     def generate_level(self, level_num=1):
         self.current_level = level_num
-        # 1. 初始化全为墙壁 #
         self.grid = [["#" for _ in range(self.width)] for _ in range(self.height)]
-        
-        # 2. 随机漫步生成路径 (空地用空格 " " 表示)
+
         x, y = self.width // 2, self.height // 2
         self.player_pos = [x, y]
-        
-        # 路径步数随层数略微增加
+
         steps = (self.width * self.height) // 2 + (level_num * 2)
-        
+
         walked_path = []
         for _ in range(steps):
-            self.grid[y][x] = " " # 空地是空格，可以直接走
+            self.grid[y][x] = " "
             walked_path.append((x, y))
             dx, dy = self.rng.choice([(0, 1), (0, -1), (1, 0), (-1, 0)])
-            # 留出边界墙壁
             nx, ny = x + dx, y + dy
             if 1 <= nx < self.width - 1 and 1 <= ny < self.height - 1:
                 x, y = nx, ny
 
-        # 3. 在路径上随机散布符号
-        # 过滤掉玩家初始位置
         spawn_pool = [p for p in walked_path if p != tuple(self.player_pos)]
         self.rng.rng.shuffle(spawn_pool)
 
-        # 放置出口 E
         if spawn_pool:
             ex, ey = spawn_pool.pop()
             self.grid[ey][ex] = "E"
 
-        # 放置其他符号
         symbols = {
-            "!": 2, # 信息
-            "?": 2, # 任务
-            "*": 3, # 掉落
-            "%": 3  # 敌人
+            "!": 2,
+            "?": 2,
+            "*": 3,
+            "%": 3,
         }
 
         for sym, count in symbols.items():
@@ -59,37 +52,83 @@ class DungeonEngine:
 
     def move_player(self, dx, dy):
         nx, ny = self.player_pos[0] + dx, self.player_pos[1] + dy
-        
+
         if 0 <= nx < self.width and 0 <= ny < self.height:
             target = self.grid[ny][nx]
-            
+
             if target == "#":
-                return "COLLISION", "撞到了防火墙。"
-            
-            # 更新位置
+                return "COLLISION", "dungeon_wall"
+
             self.player_pos = [nx, ny]
-            
+
             if target == " ":
                 return "MOVE", ""
-            
-            # 触发事件后清除该格子的符号
+
             self.grid[ny][nx] = " "
-            
+
             if target == "!":
-                return "INFO", "你发现了一段残留的系统日志。"
+                return "INFO", "dungeon_info"
             elif target == "?":
-                return "QUEST", "检测到未完成的任务协议。"
+                return "QUEST", "dungeon_quest"
             elif target == "*":
-                return "LOOT", "成功回收了一件丢弃的硬件碎片。"
+                return "LOOT", "dungeon_loot"
             elif target == "%":
-                return "ENEMY", "警告：遭遇安全防御程序！"
+                return "ENEMY", "dungeon_enemy"
             elif target == "E":
-                return "EXIT", "找到出口。准备进入下一层网络节点。"
-                
+                return "EXIT", "dungeon_exit"
+
+        return "IDLE", ""
+
+    def find_exit(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.grid[y][x] == "E":
+                    return (x, y)
+        return None
+
+    def find_nearest_poi(self):
+        """寻找最近的有趣格子或出口。"""
+        px, py = self.player_pos
+        best = None
+        best_dist = 10**9
+        for y in range(self.height):
+            for x in range(self.width):
+                cell = self.grid[y][x]
+                if cell in ("!", "?", "*", "%", "E"):
+                    dist = abs(x - px) + abs(y - py)
+                    if dist < best_dist and dist > 0:
+                        best_dist = dist
+                        best = (x, y)
+        return best
+
+    def auto_step(self):
+        """自动探索一步：朝 POI/出口移动，否则随机可行方向。"""
+        target = self.find_nearest_poi()
+        px, py = self.player_pos
+
+        if target:
+            tx, ty = target
+            dx = 0 if tx == px else (1 if tx > px else -1)
+            dy = 0 if ty == py else (1 if ty > py else -1)
+            # 优先横移
+            if dx != 0:
+                result, msg = self.move_player(dx, 0)
+                if result != "COLLISION":
+                    return result, msg
+            if dy != 0:
+                result, msg = self.move_player(0, dy)
+                if result != "COLLISION":
+                    return result, msg
+
+        dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        self.rng.rng.shuffle(dirs)
+        for dx, dy in dirs:
+            result, msg = self.move_player(dx, dy)
+            if result != "COLLISION":
+                return result, msg
         return "IDLE", ""
 
     def render(self):
-        """渲染成字符串供 UI 显示"""
         lines = []
         for y in range(self.height):
             line = ""

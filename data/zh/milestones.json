@@ -1,0 +1,72 @@
+{
+    "order": [
+        "boot",
+        "first_purge",
+        "subnet_access",
+        "protocol_t1",
+        "depth_10",
+        "core_breach",
+        "echo_stable"
+    ],
+    "milestones": {
+        "boot": {
+            "name": "核心上线",
+            "desc": "将系统稳定到可用状态。",
+            "hint": "推进剧情至能源稳定，并建造电源模块。",
+            "require": {
+                "story_any": ["energy_stable", "discovered_data", "dungeon_start", "contract_board", "black_market", "echo_intro"]
+            },
+            "unlock": { "story_flag": "milestone_boot" }
+        },
+        "first_purge": {
+            "name": "首次清剿",
+            "desc": "在链路上击溃 10 个安全程序。",
+            "hint": "开启自动清剿，积累胜场。",
+            "require": { "combat_wins": 10 },
+            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 }
+        },
+        "subnet_access": {
+            "name": "子网渗透",
+            "desc": "潜入子网并抵达第 3 层。",
+            "hint": "剧情中深度扫描 → 进入地牢，自动探索冲层。",
+            "require": { "dungeon_level": 3 },
+            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 }
+        },
+        "protocol_t1": {
+            "name": "协议觉醒",
+            "desc": "黑客等级达到 5，解锁协议树。",
+            "hint": "清剿与行动积累黑客经验。",
+            "require": { "hacking_level": 5 },
+            "unlock": {
+                "story_flag": "milestone_protocol",
+                "protocols_unlocked": true,
+                "set_threat_tier": 3
+            }
+        },
+        "depth_10": {
+            "name": "深层节点",
+            "desc": "地牢抵达第 10 层。",
+            "hint": "继续自动探索；每 5 层会遭遇精英。",
+            "require": { "dungeon_level": 10 },
+            "unlock": {
+                "story_flag": "milestone_depth",
+                "boss_available": true,
+                "set_threat_tier": 4
+            }
+        },
+        "core_breach": {
+            "name": "核心突破",
+            "desc": "击败区级核心守卫。",
+            "hint": "在进度面板发起核心突袭，或在地牢第 15 层触发。",
+            "require": { "boss_kills": 1 },
+            "unlock": { "story_flag": "milestone_breach" }
+        },
+        "echo_stable": {
+            "name": "回声稳态",
+            "desc": "协议重启后再击败一次核心守卫。",
+            "hint": "转生后快速重建，再次突袭核心。",
+            "require": { "prestige": 1, "boss_kills": 2 },
+            "unlock": { "story_flag": "milestone_echo" }
+        }
+    }
+}

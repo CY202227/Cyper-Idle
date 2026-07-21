@@ -1,5 +1,6 @@
 import json
 
+
 class StoryManager:
     def __init__(self, state):
         self.state = state
@@ -12,58 +13,66 @@ class StoryManager:
         node_id = self.state.current_story_node
         return self.story_nodes.get(node_id)
 
+    def can_take_action(self, action):
+        """检查选项是否可点：资源门槛、一次性标记等。"""
+        if not action:
+            return False, "missing"
+        need_flag = action.get("requires_flag")
+        if need_flag and need_flag not in self.state.story_flags:
+            return False, "flag_locked"
+        block_flag = action.get("requires_not_flag")
+        if block_flag and block_flag in self.state.story_flags:
+            return False, "already_done"
+        for res, amount in action.get("requirements", {}).items():
+            if self.state.resources.get(res, 0) < amount:
+                return False, "insufficient_resources"
+        return True, "ok"
+
     def trigger_choice(self, choice_id):
         node = self.get_current_node()
         if not node or "actions" not in node:
-            return False
-        
+            return False, "missing"
+
         action = node["actions"].get(choice_id)
         if not action:
-            return False
+            return False, "missing"
 
-        # 如果动作包含任务接受
-        if "quest_id" in action:
-            # 这里需要访问全局的 quest_mgr，或者通过某种方式传递
-            # 简单起见，我们在 main.py 中处理这个逻辑
-            pass
+        ok, reason = self.can_take_action(action)
+        if not ok:
+            return False, reason
 
-        # 应用奖励/后果
+        # 消耗：显式 consume，或 requirements 里标了 cost 语义
+        if action.get("consume"):
+            for res, amount in action.get("requirements", {}).items():
+                self.state.resources[res] = max(
+                    0, self.state.resources.get(res, 0) - amount
+                )
+
         if "reward" in action:
             for res, amount in action["reward"].items():
-                if res in self.state.resources:
-                    self.state.resources[res] = self.state.resources.get(res, 0) + amount
-                elif res == "daemon_id" or res == "quest_id":
-                    # 已经在 main.py 中特殊处理，这里跳过
-                    pass
-                else:
-                    # 如果是其他未定义的资源，也尝试增加
-                    self.state.resources[res] = self.state.resources.get(res, 0) + amount
+                if res in ("daemon_id", "quest_id"):
+                    continue
+                self.state.resources[res] = self.state.resources.get(res, 0) + amount
+                if self.state.resources[res] < 0:
+                    self.state.resources[res] = 0
 
-        # 扣除消耗 (Requirements)
-        # 或者在 action 中增加一个 "consume" 字段。
-        if "requirements" in action:
-            # 默认情况下，requirements 只是检查。
-            # 但如果我们在 action 中定义了 "consume": true，则扣除。
-            if action.get("consume", False):
-                for res, amount in action["requirements"].items():
-                    self.state.resources[res] = max(0, self.state.resources.get(res, 0) - amount)
+        set_flag = action.get("set_flag")
+        if set_flag and set_flag not in self.state.story_flags:
+            self.state.story_flags.append(set_flag)
 
-        # 特殊处理：如果 reward 中有负数，它实际上就是消耗
-        
-        # 跳转节点
         if "next_node" in action:
             self.state.current_story_node = action["next_node"]
-            
-        return True
+
+        return True, "ok"
 
     def check_availability(self, node_id):
         node = self.story_nodes.get(node_id)
         if not node:
             return False
-            
+
         if "requirements" in node:
             for res, amount in node["requirements"].items():
                 if self.state.resources.get(res, 0) < amount:
                     return False
-        
+
         return True

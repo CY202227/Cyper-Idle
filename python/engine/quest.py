@@ -45,7 +45,16 @@ class QuestManager:
                 quest["progress"] += amount
                 changed = True
             elif q_type == "explore":
-                quest["progress"] = max(quest["progress"], amount) # 比如层数
+                quest["progress"] = max(quest["progress"], amount)
+                changed = True
+            elif q_type == "special":
+                quest["progress"] += amount
+                changed = True
+            elif q_type == "protocol":
+                quest["progress"] = len(getattr(self.state, "protocols", []))
+                changed = True
+            elif q_type == "boss":
+                quest["progress"] = getattr(self.state, "boss_kills", 0)
                 changed = True
 
             if quest["progress"] >= defn["target_amount"]:

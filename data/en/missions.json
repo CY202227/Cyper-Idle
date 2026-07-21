@@ -1,0 +1,108 @@
+{
+    "edge_probe": {
+        "name": "Edge Probe",
+        "desc": "Drop probes into edge subnets for scrap.",
+        "duration": 45,
+        "req_level": 1,
+        "cost": { "compute": 2 },
+        "rewards": {
+            "data_scraps": 12,
+            "credits": 40,
+            "hacking_xp": 20
+        }
+    },
+    "dark_siphon": {
+        "name": "Dark Siphon",
+        "desc": "Siphon credits from a soft darknet lane.",
+        "duration": 90,
+        "req_level": 2,
+        "cost": { "compute": 5 },
+        "rewards": {
+            "credits": 180,
+            "hacking_xp": 40
+        }
+    },
+    "compute_hijack": {
+        "name": "Compute Hijack",
+        "desc": "Hijack idle miners for compute.",
+        "duration": 120,
+        "req_level": 3,
+        "cost": { "credits": 30 },
+        "rewards": {
+            "compute": 25,
+            "credits": 100,
+            "hacking_xp": 55
+        }
+    },
+    "packet_mirror": {
+        "name": "Packet Mirror",
+        "desc": "Mirror relay traffic for scrap and XP.",
+        "duration": 180,
+        "req_level": 3,
+        "cost": { "compute": 8 },
+        "rewards": {
+            "data_scraps": 28,
+            "hacking_xp": 80,
+            "credits": 120
+        }
+    },
+    "corp_firewall": {
+        "name": "Corp Firewall Probe",
+        "desc": "Long duel against a corp firewall.",
+        "duration": 240,
+        "req_level": 5,
+        "cost": { "compute": 15, "credits": 50 },
+        "rewards": {
+            "credits": 400,
+            "data_scraps": 30,
+            "hacking_xp": 120
+        }
+    },
+    "relay_poison": {
+        "name": "Relay Poison",
+        "desc": "Poison regional relays for credits.",
+        "duration": 300,
+        "req_level": 5,
+        "cost": { "compute": 20, "data_scraps": 10 },
+        "rewards": {
+            "credits": 650,
+            "hacking_xp": 150
+        }
+    },
+    "ghost_audit": {
+        "name": "Ghost Audit",
+        "desc": "Audit deep ledgers for compute and XP.",
+        "duration": 360,
+        "req_level": 8,
+        "cost": { "credits": 120, "compute": 30 },
+        "rewards": {
+            "compute": 60,
+            "hacking_xp": 280,
+            "data_scraps": 40
+        }
+    },
+    "blackhole_siphon": {
+        "name": "Blackhole Siphon",
+        "desc": "Idle-drain a blackhole route. Very long.",
+        "duration": 480,
+        "req_level": 8,
+        "cost": { "compute": 40, "energy": 40 },
+        "rewards": {
+            "credits": 1200,
+            "compute": 40,
+            "hacking_xp": 350
+        }
+    },
+    "protocol_harvest": {
+        "name": "Protocol Harvest",
+        "desc": "Harvest research scraps from dead protocols.",
+        "duration": 210,
+        "req_level": 5,
+        "cost": { "hacking_xp": 20 },
+        "rewards": {
+            "data_scraps": 45,
+            "credits": 300,
+            "hacking_xp": 100
+        }
+    }
+}

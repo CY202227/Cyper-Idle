@@ -1,0 +1,108 @@
+{
+    "edge_probe": {
+        "name": "边缘节点渗透",
+        "desc": "向边缘子网投放探针，回收数据碎片。",
+        "duration": 45,
+        "req_level": 1,
+        "cost": { "compute": 2 },
+        "rewards": {
+            "data_scraps": 12,
+            "credits": 40,
+            "hacking_xp": 20
+        }
+    },
+    "dark_siphon": {
+        "name": "暗网虹吸",
+        "desc": "在低防暗网通道虹吸信用点。",
+        "duration": 90,
+        "req_level": 2,
+        "cost": { "compute": 5 },
+        "rewards": {
+            "credits": 180,
+            "hacking_xp": 40
+        }
+    },
+    "compute_hijack": {
+        "name": "算力劫持",
+        "desc": "劫持闲置矿机集群，截获算力。",
+        "duration": 120,
+        "req_level": 3,
+        "cost": { "credits": 30 },
+        "rewards": {
+            "compute": 25,
+            "credits": 100,
+            "hacking_xp": 55
+        }
+    },
+    "packet_mirror": {
+        "name": "封包镜像",
+        "desc": "镜像中继流量，缓慢积累碎片与经验。",
+        "duration": 180,
+        "req_level": 3,
+        "cost": { "compute": 8 },
+        "rewards": {
+            "data_scraps": 28,
+            "hacking_xp": 80,
+            "credits": 120
+        }
+    },
+    "corp_firewall": {
+        "name": "企业防火墙探针",
+        "desc": "长时间对峙企业防火墙，高回报。",
+        "duration": 240,
+        "req_level": 5,
+        "cost": { "compute": 15, "credits": 50 },
+        "rewards": {
+            "credits": 400,
+            "data_scraps": 30,
+            "hacking_xp": 120
+        }
+    },
+    "relay_poison": {
+        "name": "中继投毒",
+        "desc": "污染区域中继表，持续抽取信用。",
+        "duration": 300,
+        "req_level": 5,
+        "cost": { "compute": 20, "data_scraps": 10 },
+        "rewards": {
+            "credits": 650,
+            "hacking_xp": 150
+        }
+    },
+    "ghost_audit": {
+        "name": "幽灵审计",
+        "desc": "审计深层账本，换算力与经验。",
+        "duration": 360,
+        "req_level": 8,
+        "cost": { "credits": 120, "compute": 30 },
+        "rewards": {
+            "compute": 60,
+            "hacking_xp": 280,
+            "data_scraps": 40
+        }
+    },
+    "blackhole_siphon": {
+        "name": "黑洞虹吸",
+        "desc": "对黑洞路由挂机抽能，超长行动。",
+        "duration": 480,
+        "req_level": 8,
+        "cost": { "compute": 40, "energy": 40 },
+        "rewards": {
+            "credits": 1200,
+            "compute": 40,
+            "hacking_xp": 350
+        }
+    },
+    "protocol_harvest": {
+        "name": "协议收割",
+        "desc": "从废弃协议堆中收割研究素材。",
+        "duration": 210,
+        "req_level": 5,
+        "cost": { "hacking_xp": 20 },
+        "rewards": {
+            "data_scraps": 45,
+            "credits": 300,
+            "hacking_xp": 100
+        }
+    }
+}

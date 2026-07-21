@@ -1,0 +1,113 @@
+{
+    "packet_sharpen": {
+        "id": "packet_sharpen",
+        "name": "封包锐化",
+        "desc": "入侵强度 +8%。",
+        "tier": 1,
+        "cost": { "credits": 80, "hacking_xp": 40 },
+        "req": null,
+        "effects": { "intrusion_pct": 0.08 }
+    },
+    "shield_weave": {
+        "id": "shield_weave",
+        "name": "盾纹编织",
+        "desc": "防火墙 +10%。",
+        "tier": 1,
+        "cost": { "credits": 80, "compute": 15 },
+        "req": null,
+        "effects": { "firewall_pct": 0.10 }
+    },
+    "coolant_loop": {
+        "id": "coolant_loop",
+        "name": "冷却回路",
+        "desc": "清剿冷却 -20%。",
+        "tier": 1,
+        "cost": { "energy": 50, "compute": 10 },
+        "req": null,
+        "effects": { "combat_cooldown_pct": -0.20 }
+    },
+    "dark_amplify": {
+        "id": "dark_amplify",
+        "name": "暗网放大",
+        "desc": "信用点被动产出 +25%。",
+        "tier": 1,
+        "cost": { "credits": 120, "hacking_xp": 60 },
+        "req": "packet_sharpen",
+        "effects": { "credits_gen_pct": 0.25 }
+    },
+    "ops_compress": {
+        "id": "ops_compress",
+        "name": "行动压缩",
+        "desc": "网络行动时长 -15%。",
+        "tier": 2,
+        "cost": { "compute": 40, "hacking_xp": 120 },
+        "req": "coolant_loop",
+        "effects": { "mission_duration_pct": -0.15 }
+    },
+    "integrity_mesh": {
+        "id": "integrity_mesh",
+        "name": "完整性格栅",
+        "desc": "节点完整性 +12%。",
+        "tier": 2,
+        "cost": { "credits": 200, "data_scraps": 30 },
+        "req": "shield_weave",
+        "effects": { "integrity_pct": 0.12 }
+    },
+    "loot_sniffer": {
+        "id": "loot_sniffer",
+        "name": "战利嗅探",
+        "desc": "战斗与地牢掉落 +20%。",
+        "tier": 2,
+        "cost": { "credits": 250, "hacking_xp": 150 },
+        "req": "dark_amplify",
+        "effects": { "loot_pct": 0.20 }
+    },
+    "speed_pipe": {
+        "id": "speed_pipe",
+        "name": "速度管道",
+        "desc": "链路速度 +15%。",
+        "tier": 2,
+        "cost": { "compute": 50, "credits": 180 },
+        "req": "packet_sharpen",
+        "effects": { "speed_pct": 0.15 }
+    },
+    "deep_cache": {
+        "id": "deep_cache",
+        "name": "深层缓存",
+        "desc": "存储上限 +30%。",
+        "tier": 3,
+        "cost": { "credits": 400, "data_scraps": 50 },
+        "req": "integrity_mesh",
+        "effects": { "storage_pct": 0.30 },
+        "persist": true
+    },
+    "raid_focus": {
+        "id": "raid_focus",
+        "name": "突袭聚焦",
+        "desc": "入侵 +12%，对 Boss 再 +10%。",
+        "tier": 3,
+        "cost": { "hacking_xp": 300, "compute": 80 },
+        "req": "speed_pipe",
+        "effects": { "intrusion_pct": 0.12, "boss_intrusion_pct": 0.10 }
+    },
+    "echo_bind": {
+        "id": "echo_bind",
+        "name": "回声绑定",
+        "desc": "转生保留：全产出 +8%。",
+        "tier": 3,
+        "cost": { "credits": 500, "hacking_xp": 400 },
+        "req": "loot_sniffer",
+        "effects": { "all_gen_pct": 0.08 },
+        "persist": true
+    },
+    "kernel_fork": {
+        "id": "kernel_fork",
+        "name": "内核分叉",
+        "desc": "永久：入侵 +5%（转生保留）。",
+        "tier": 3,
+        "cost": { "compute": 100, "hacking_xp": 500 },
+        "req": "raid_focus",
+        "effects": { "intrusion_pct": 0.05 },
+        "persist": true
+    }
+}

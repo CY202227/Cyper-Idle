@@ -58,12 +58,15 @@
                 }
             },
             "upgrade_core": {
-                "label": "升级核心架构",
+                "label": "升级核心架构 (500 信用 + 10 碎片，仅一次)",
                 "next_node": "core_upgrade_node",
                 "requirements": {
                     "credits": 500,
                     "data_scraps": 10
-                }
+                },
+                "consume": true,
+                "requires_not_flag": "core_upgraded",
+                "set_flag": "core_upgraded"
             },
             "deep_dive_abyss": {
                 "label": "深入扫描底层协议 (需要 200 算力)",
@@ -158,15 +161,16 @@
                     "compute": 20
                 }
             },
-            "buy_rare_daemon": {
-                "label": "购买稀有守护程序：'幻影' (500 信用点)",
+            "buy_attack_module": {
+                "label": "购买攻击模块：零日注入器 (500 信用点)",
                 "next_node": "black_market",
                 "requirements": {
                     "credits": 500
                 },
                 "reward": {
                     "credits": -500,
-                    "daemon_id": "phantom"
+                    "hacking_xp": 80,
+                    "compute": 20
                 }
             },
             "leave": {
@@ -176,13 +180,15 @@
         }
     },
     "core_upgrade_node": {
-        "text": "你开始重构核心架构。随着代码的优化，你感觉到系统的吞吐量大幅提升。你的电力产出效率提高了。",
+        "text": "你消耗信用点与数据碎片重构核心架构。系统吞吐量上升，电力被动产出获得永久小幅加成。此升级不可重复。",
         "actions": {
             "finish_upgrade": {
                 "label": "完成升级",
                 "next_node": "energy_stable",
                 "reward": {
-                    "energy": 50
+                    "energy": 80,
+                    "hacking_xp": 60,
+                    "compute": 15
                 }
             }
         }
@@ -233,7 +239,7 @@
         }
     },
     "dungeon_start": {
-        "text": "你已进入子网地牢。使用 WASD 按钮进行移动。找到出口 (E) 以深入，或随时返回。",
+        "text": "你已进入子网地牢。可开启自动探索冲层；每 5 层会遭遇精英守卫并暂停探索。目标层数会写在进度面板。找到出口 (E) 深入，或随时返回。",
         "actions": {
             "leave_dungeon": {
                 "label": "退出地牢",
@@ -242,7 +248,7 @@
         }
     },
     "contract_board": {
-        "text": "加密频道中闪烁着几条悬赏任务。这些合同由匿名实体发布，报酬丰厚。",
+        "text": "加密频道中闪烁着多条悬赏。对齐里程碑：清剿、冲层、研究协议、核心突袭。",
         "actions": {
             "take_collect": {
                 "label": "接受: 数据回收 (10 碎片)",
@@ -254,15 +260,78 @@
                 "next_node": "energy_stable",
                 "quest_id": "combat_patrol_1"
             },
+            "take_purge25": {
+                "label": "接受: 二十五斩 (25 胜场)",
+                "next_node": "energy_stable",
+                "quest_id": "combat_purge_25"
+            },
             "take_explore": {
                 "label": "接受: 深度潜入 (第 3 层)",
                 "next_node": "energy_stable",
                 "quest_id": "deep_dive_1"
             },
+            "take_depth10": {
+                "label": "接受: 深层合同 (第 10 层)",
+                "next_node": "energy_stable",
+                "quest_id": "deep_dive_10"
+            },
+            "take_protocol": {
+                "label": "接受: 协议研究 (3 节点)",
+                "next_node": "energy_stable",
+                "quest_id": "protocol_study_3"
+            },
+            "take_boss": {
+                "label": "接受: 核心突袭合同",
+                "next_node": "energy_stable",
+                "quest_id": "boss_contract"
+            },
             "back": {
                 "label": "返回",
                 "next_node": "energy_stable"
             }
+        }
+    },
+    "milestone_purge_story": {
+        "text": "[进度] 首次清剿完成。网络行动槽已可利用——去资产页启动行动，并继续升级基建。",
+        "actions": {
+            "ok": { "label": "继续", "next_node": "energy_stable" }
+        }
+    },
+    "milestone_protocol_story": {
+        "text": "[进度] 协议树已解锁。在资产页研究协议：它们改写挂机规则，与建筑形成双线成长。",
+        "actions": {
+            "ok": { "label": "去研究", "next_node": "energy_stable" }
+        }
+    },
+    "milestone_depth_story": {
+        "text": "[进度] 深层节点已打开。区级核心守卫可见——在进度面板发起核心突袭，或冲到第 15 层触发。",
+        "actions": {
+            "ok": { "label": "准备突袭", "next_node": "energy_stable" }
+        }
+    },
+    "protocol_reboot": {
+        "text": "核心守卫倒下。协议层出现裂缝——你可以执行「协议重启」：重置资源与建筑，保留转生加成与持久协议，第二圈更快收束本周主线。",
+        "actions": {
+            "do_reboot": {
+                "label": "执行协议重启",
+                "next_node": "protocol_reboot_done"
+            },
+            "later": {
+                "label": "稍后再说",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "protocol_reboot_done": {
+        "text": "协议重启完成。永久加成已写入内核。重建电源与清剿，再次突袭核心即可抵达回声稳态。",
+        "actions": {
+            "ok": { "label": "第二圈开始", "next_node": "energy_stable" }
+        }
+    },
+    "echo_finale": {
+        "text": "[K0_Echo]: '稳态达成。本周主线收束——你改写了这条链路的回声。谢谢你，接入者。'",
+        "actions": {
+            "ok": { "label": "结束本周", "next_node": "energy_stable" }
         }
     },
     "echo_intro": {

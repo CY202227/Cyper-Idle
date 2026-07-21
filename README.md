@@ -1,56 +1,63 @@
 # Cyber-Idle
 
-A cyberpunk-themed idle game implemented in Python (PyScript).
+A cyberpunk-themed idle game implemented in Python (**PyScript in the browser**).
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 ---
 
-## 🌟 Features
+## How to run (important)
 
-- **Pure Frontend**: Runs directly in the browser using PyScript, no backend server required.
-- **Cyberpunk UI**: Minimalist high-contrast color scheme with CRT scanlines and Glitch effects.
-- **No-DB Save System**: Progress is auto-saved to `localStorage`. Supports Base64 string export/import.
-- **Multi-language Support**: Built-in English and Chinese toggle. All content (resources, story, events) is easily extendable via JSON.
-- **Seeded RNG**: Uses a seeded random number generator for consistent and predictable random events.
-- **Story-Driven**: Includes a basic story engine supporting node jumping and branching choices based on resource requirements.
-- **Dungeon Exploration**: Procedurally generated network nodes using a Random Walk algorithm.
-- **Daemon System**: A unique nurturing system where players capture, level up, and optimize "Daemons" (combat scripts) to fight security programs through strategic growth and refactoring.
+This project is a **static web app**, same as GitHub Pages:
 
-## 🚀 Quick Start
+| Do | Don't |
+|----|--------|
+| Serve the **repo root** over HTTP and open `index.html` in a browser | Run `python python/main.py` |
+| Use PyScript’s browser `js` / `document` APIs | `pip install js` (wrong package) |
 
-### Play Online
+### Play online (GitHub Pages)
 
-1. Push this project to a GitHub repository.
-2. Enable **GitHub Pages** in the repository settings.
-3. Visit the generated URL to start playing.
+1. Push this repo to GitHub.
+2. **Settings → Pages → Deploy from branch** (usually `main` / `/` root).
+3. Open `https://<user>.github.io/<repo>/`.
 
-### Run Locally
+Pages serves [`index.html`](index.html), which loads [`python/main.py`](python/main.py) via PyScript (`<script type="py" …>`).
 
-1. Ensure you have a Python environment installed.
-2. Run a static server in the root directory:
-   ```bash
-   python -m http.server 8000
-   ```
-3. Visit `http://localhost:8000` in your browser.
+### Play locally (same model as Pages)
 
-## 🛠️ Project Structure
+From the **repository root** (not inside `python/`):
+
+```bash
+python -m http.server 8000
+```
+
+Then open **http://localhost:8000** in your browser.
+
+---
+
+## Features
+
+- **Pure Frontend**: PyScript; no game backend.
+- **Cyberpunk UI**: CRT / glitch styling.
+- **Save System**: `localStorage` + Base64 export/import.
+- **Multi-language**: English / Chinese JSON content.
+- **Story-Driven**: Branching nodes with resource gates.
+- **Dungeon Exploration**: Procedural subnets + **auto-explore**.
+- **Network Warfare**: Auto offense/defense with live stability bars.
+- **Network Ops**: Timed bandwidth actions (no daemon/pet system).
+- **Online-only idle**: No offline earnings catch-up.
+
+## Project Structure
 
 ```text
 /
-├── index.html          # Main entry, loads PyScript environment
-├── css/
-│   └── style.css       # Cyberpunk styles (CRT, neon colors, animations)
-├── data/               # Game configuration files
-│   ├── ui.json         # UI translations
-│   ├── zh/             # Chinese content (resources, story, events)
-│   └── en/             # English content
-└── python/             # Core game logic
-    ├── main.py         # Initialization, UI binding, and main loop
-    ├── engine/         # Game engine (state, resource calculation, story system)
-    └── utils/          # Utilities (RNG, storage, i18n)
+├── index.html          # Entry (PyScript loads main.py)
+├── pyscript.json       # Files fetched into the browser runtime
+├── css/style.css
+├── data/               # en / zh configs
+└── python/             # Game logic (runs in browser, not as CLI)
 ```
 
-## 📜 License
+## License
 
-This project is licensed under the MIT License.
+MIT

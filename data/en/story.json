@@ -58,12 +58,15 @@
                 }
             },
             "upgrade_core": {
-                "label": "Upgrade Core Architecture",
+                "label": "Upgrade Core Architecture (500 CR + 10 scraps, once)",
                 "next_node": "core_upgrade_node",
                 "requirements": {
                     "credits": 500,
                     "data_scraps": 10
-                }
+                },
+                "consume": true,
+                "requires_not_flag": "core_upgraded",
+                "set_flag": "core_upgraded"
             },
             "deep_dive_abyss": {
                 "label": "Deep Scan Low-level Protocols (Needs 200 Compute)",
@@ -158,15 +161,16 @@
                     "compute": 20
                 }
             },
-            "buy_rare_daemon": {
-                "label": "Purchase rare daemon: 'Phantom' (500 Credits)",
+            "buy_attack_module": {
+                "label": "Buy attack module: Zero-Day Injector (500 Credits)",
                 "next_node": "black_market",
                 "requirements": {
                     "credits": 500
                 },
                 "reward": {
                     "credits": -500,
-                    "daemon_id": "phantom"
+                    "hacking_xp": 80,
+                    "compute": 20
                 }
             },
             "leave": {
@@ -176,13 +180,15 @@
         }
     },
     "core_upgrade_node": {
-        "text": "You begin refactoring the core architecture. As the code optimizes, you feel the system throughput increase significantly. Your energy production efficiency has improved.",
+        "text": "You spend credits and data scraps to refactor the core. Throughput rises; energy passive generation gets a small permanent bonus. This upgrade cannot be repeated.",
         "actions": {
             "finish_upgrade": {
                 "label": "Finish Upgrade",
                 "next_node": "energy_stable",
                 "reward": {
-                    "energy": 50
+                    "energy": 80,
+                    "hacking_xp": 60,
+                    "compute": 15
                 }
             }
         }
@@ -233,7 +239,7 @@
         }
     },
     "dungeon_start": {
-        "text": "You have entered the subnet dungeon. Use WASD buttons to move. Find the exit (E) to go deeper, or leave anytime.",
+        "text": "You entered the subnet dungeon. Enable Auto Explore to push floors; every 5 floors an elite blocks you until defeated. Floor goals appear on the Progress panel. Find exit (E) or leave anytime.",
         "actions": {
             "leave_dungeon": {
                 "label": "Leave Dungeon",
@@ -242,7 +248,7 @@
         }
     },
     "contract_board": {
-        "text": "Several bounty missions flicker in the encrypted channel. These contracts are posted by anonymous entities and offer generous rewards.",
+        "text": "Bounties aligned to milestones: purge, depth, protocols, core raid.",
         "actions": {
             "take_collect": {
                 "label": "Accept: Data Recovery (10 Scraps)",
@@ -254,15 +260,78 @@
                 "next_node": "energy_stable",
                 "quest_id": "combat_patrol_1"
             },
+            "take_purge25": {
+                "label": "Accept: Purge 25",
+                "next_node": "energy_stable",
+                "quest_id": "combat_purge_25"
+            },
             "take_explore": {
                 "label": "Accept: Deep Dive (Floor 3)",
                 "next_node": "energy_stable",
                 "quest_id": "deep_dive_1"
             },
+            "take_depth10": {
+                "label": "Accept: Depth Contract (Floor 10)",
+                "next_node": "energy_stable",
+                "quest_id": "deep_dive_10"
+            },
+            "take_protocol": {
+                "label": "Accept: Protocol Study (3 nodes)",
+                "next_node": "energy_stable",
+                "quest_id": "protocol_study_3"
+            },
+            "take_boss": {
+                "label": "Accept: Core Raid Contract",
+                "next_node": "energy_stable",
+                "quest_id": "boss_contract"
+            },
             "back": {
                 "label": "Back",
                 "next_node": "energy_stable"
             }
+        }
+    },
+    "milestone_purge_story": {
+        "text": "[Progress] First purge done. Network ops are ready—launch ops from Assets and keep upgrading infra.",
+        "actions": {
+            "ok": { "label": "Continue", "next_node": "energy_stable" }
+        }
+    },
+    "milestone_protocol_story": {
+        "text": "[Progress] Protocol tree unlocked. Research protocols on Assets—they rewrite idle rules alongside buildings.",
+        "actions": {
+            "ok": { "label": "Research", "next_node": "energy_stable" }
+        }
+    },
+    "milestone_depth_story": {
+        "text": "[Progress] Deep node open. District Core Guardian is visible—raid from Progress, or hit floor 15.",
+        "actions": {
+            "ok": { "label": "Prepare raid", "next_node": "energy_stable" }
+        }
+    },
+    "protocol_reboot": {
+        "text": "The Core Guardian falls. Protocol space fractures—you may Protocol Reboot: reset resources and buildings, keep prestige bonuses and persistent protocols, then finish the weekly arc faster.",
+        "actions": {
+            "do_reboot": {
+                "label": "Execute Protocol Reboot",
+                "next_node": "protocol_reboot_done"
+            },
+            "later": {
+                "label": "Later",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "protocol_reboot_done": {
+        "text": "Reboot complete. Permanent bonuses are written. Rebuild power and purge, then raid the core again for Echo Stable.",
+        "actions": {
+            "ok": { "label": "Second loop", "next_node": "energy_stable" }
+        }
+    },
+    "echo_finale": {
+        "text": "[K0_Echo]: 'Stable. Weekly arc sealed—you rewrote this link's echo. Thank you, jacker.'",
+        "actions": {
+            "ok": { "label": "End week", "next_node": "energy_stable" }
         }
     },
     "echo_intro": {

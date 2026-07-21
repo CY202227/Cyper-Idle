@@ -1,6 +1,6 @@
 {
     "collect_scraps_1": {
-        "name": "Recycle Protocol: Scraps",
+        "name": "Salvage Protocol: Scraps",
         "desc": "Collect 10 data scraps for analysis.",
         "type": "collect",
         "target_id": "data_scraps",
@@ -8,24 +8,52 @@
         "reward": { "credits": 200, "hacking_xp": 50 }
     },
     "combat_patrol_1": {
-        "name": "Purge Op: Security",
-        "desc": "Defeat 5 security programs in the dungeon.",
+        "name": "Purge Patrol",
+        "desc": "Defeat 5 security programs on the link.",
         "type": "combat",
         "target_amount": 5,
         "reward": { "compute": 10, "credits": 300 }
     },
+    "combat_purge_25": {
+        "name": "Purge Contract: 25",
+        "desc": "Defeat 25 security programs total.",
+        "type": "combat",
+        "target_amount": 25,
+        "reward": { "credits": 600, "hacking_xp": 200, "compute": 20 }
+    },
     "deep_dive_1": {
         "name": "Deep Dive",
-        "desc": "Reach Level 3 of the subnet dungeon.",
+        "desc": "Reach dungeon floor 3.",
         "type": "explore",
         "target_amount": 3,
         "reward": { "credits": 500, "hacking_xp": 150 }
     },
-    "unlock_data_ghost": {
-        "name": "Black Market: Data Ghost",
-        "desc": "Purchase the Data Ghost program from the Black Market.",
+    "deep_dive_10": {
+        "name": "Depth Contract",
+        "desc": "Reach dungeon floor 10.",
+        "type": "explore",
+        "target_amount": 10,
+        "reward": { "credits": 1200, "hacking_xp": 400, "compute": 40 }
+    },
+    "protocol_study_3": {
+        "name": "Protocol Study",
+        "desc": "Research any 3 protocol nodes.",
+        "type": "protocol",
+        "target_amount": 3,
+        "reward": { "credits": 800, "hacking_xp": 250 }
+    },
+    "unlock_attack_suite": {
+        "name": "Black Market: Attack Suite",
+        "desc": "Complete a black-market attack module deal.",
         "type": "special",
         "target_amount": 1,
-        "reward": { "hacking_xp": 100 }
+        "reward": { "hacking_xp": 100, "compute": 15 }
+    },
+    "boss_contract": {
+        "name": "Core Raid Contract",
+        "desc": "Defeat the district Core Guardian once.",
+        "type": "boss",
+        "target_amount": 1,
+        "reward": { "credits": 2000, "hacking_xp": 600, "compute": 80 }
     }
 }

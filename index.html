@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyber-Idle | 赛博放置</title>
-    <!-- 使用文档推荐的最新版本链接 -->
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body class="cyber-theme">
     <div id="loading-overlay">
@@ -18,7 +17,7 @@
         <header>
             <h1 class="glitch-text" data-text="CYBER-IDLE">CYBER-IDLE</h1>
             <div id="top-bar">
-                <span id="version">VER v0.1.0-ALPHA</span>
+                <span id="version">VER v0.4.0-ALPHA</span>
                 <div id="save-controls">
                     <button id="btn-lang" py-click="switch_language">中文</button>
                     <button id="btn-export" py-click="export_save">Export Save</button>
@@ -29,63 +28,77 @@
 
         <main>
             <section id="story-panel">
-                <div id="story-log"></div>
-                <div id="story-choices"></div>
-                
-                <!-- 地牢显示区域 -->
-                <div id="dungeon-container" style="display: none; margin-top: 20px;">
-                    <div id="dungeon-grid"></div>
-                    <div id="dungeon-controls">
-                        <div class="control-row">
-                            <button id="btn-up" py-click="move_up">W</button>
+                <div id="story-active">
+                    <div id="story-current"></div>
+                    <div id="story-choices"></div>
+                </div>
+
+                <div id="story-playfield">
+                    <div id="dungeon-container" style="display: none;">
+                        <div id="dungeon-toolbar">
+                            <button id="btn-auto-explore" py-click="toggle_auto_explore">Auto Explore: OFF</button>
                         </div>
-                        <div class="control-row">
-                            <button id="btn-left" py-click="move_left">A</button>
-                            <button id="btn-down" py-click="move_down">S</button>
-                            <button id="btn-right" py-click="move_right">D</button>
+                        <div id="dungeon-grid"></div>
+                        <div id="dungeon-controls">
+                            <div class="control-row">
+                                <button id="btn-up" py-click="move_up">W</button>
+                            </div>
+                            <div class="control-row">
+                                <button id="btn-left" py-click="move_left">A</button>
+                                <button id="btn-down" py-click="move_down">S</button>
+                                <button id="btn-right" py-click="move_right">D</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="combat-scene" style="display: none;">
+                        <div id="combat-header">
+                            <div id="idle-combat-title">Network Warfare</div>
+                            <div id="combat-status-text">Status: Idle</div>
+                            <div id="combat-wins-text">Wins: 0</div>
+                        </div>
+                        
+                        <div id="combat-main">
+                            <div id="enemy-area">
+                                <div id="enemy-visual" class="glitch-text" data-text="IDLE_SCAN">IDLE_SCAN</div>
+                                <div class="combat-stats">
+                                    <div class="label" id="sec-stability-label">SEC STABILITY</div>
+                                    <div class="stat-bar"><div id="enemy-hp-fill" style="width: 0%"></div></div>
+                                    <div id="enemy-hp-text" class="hp-text">—</div>
+                                </div>
+                            </div>
+
+                            <div id="vs-divider">VS</div>
+
+                            <div id="player-combat-area">
+                                <div id="player-node-label">YOUR_NODE</div>
+                                <div class="combat-stats">
+                                    <div class="label" id="node-stability-label">NODE STABILITY</div>
+                                    <div class="stat-bar"><div id="player-hp-fill" style="width: 100%"></div></div>
+                                    <div id="player-hp-text" class="hp-text">100/100</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="combat-log-area"></div>
+                        
+                        <div id="combat-actions">
+                            <button id="btn-auto-combat" py-click="toggle_auto_combat">Auto Purge: OFF</button>
+                            <button id="btn-force-fight" py-click="force_fight">Fight Now</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 战斗场景 UI -->
-                <div id="combat-scene" style="display: none;">
-                    <div id="combat-header">
-                        <div id="enemy-intent">NEXT: [SCANNING...]</div>
-                    </div>
-                    
-                    <div id="combat-main">
-                        <div id="enemy-area">
-                            <div id="enemy-visual" class="glitch-text" data-text="UNKNOWN_PROC">UNKNOWN_PROC</div>
-                            <div class="combat-stats">
-                                <div class="label">STABILITY</div>
-                                <div class="stat-bar"><div id="enemy-hp-fill" style="width: 100%"></div></div>
-                            </div>
-                        </div>
-
-                        <div id="vs-divider">VS</div>
-
-                        <div id="player-combat-area">
-                            <div id="active-daemon-name">DAEMON_NAME</div>
-                            <div class="combat-stats">
-                                <div class="label">STABILITY</div>
-                                <div class="stat-bar"><div id="player-hp-fill" style="width: 100%"></div></div>
-                                <div class="label">BANDWIDTH</div>
-                                <div class="stat-bar bandwidth"><div id="player-bw-fill" style="width: 100%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="combat-log-area"></div>
-                    
-                    <div id="combat-actions">
-                        <!-- 按钮将由 Python 动态生成 -->
-                    </div>
+                <div id="story-log-section">
+                    <div id="story-log-label">LOG</div>
+                    <div id="story-log"></div>
                 </div>
             </section>
 
             <div id="side-panels">
                 <div id="side-tabs">
                     <button class="side-tab-btn active" py-click="lambda e: show_side_tab('assets')">Assets</button>
+                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('progress')">Progress</button>
                     <button class="side-tab-btn" py-click="lambda e: show_side_tab('infra')">Infra</button>
                     <button class="side-tab-btn" py-click="lambda e: show_side_tab('ops')">Ops</button>
                     <button class="side-tab-btn" py-click="lambda e: show_side_tab('quests')">Quests</button>
@@ -97,8 +110,20 @@
                         <h2>Core Assets</h2>
                         <div id="resources-list"></div>
                         
-                        <h2 style="margin-top: 20px;">Daemons</h2>
-                        <div id="daemons-list"></div>
+                        <h2 id="node-power-title" style="margin-top: 20px;">Node Power</h2>
+                        <div id="node-power-panel" class="node-power-panel"></div>
+
+                        <h2 id="protocols-title" style="margin-top: 20px;">Protocols</h2>
+                        <div id="protocols-list"></div>
+
+                        <h2 id="missions-title" style="margin-top: 20px;">Network Ops</h2>
+                        <div id="active-missions-list"></div>
+                        <div id="missions-list"></div>
+                    </section>
+
+                    <section id="progress-panel" class="side-section">
+                        <h2 id="progress-title">Progress</h2>
+                        <div id="progress-content"></div>
                     </section>
 
                     <section id="infrastructure-panel" class="side-section">
@@ -131,32 +156,12 @@
             </div>
         </main>
 
-        <!-- 重构/技能树 UI -->
-        <div id="refactor-overlay" style="display: none;">
-            <div id="refactor-modal">
-                <div id="refactor-header">
-                    <h2 id="refactor-daemon-name">DAEMON_NAME</h2>
-                    <button id="close-refactor" py-click="close_refactor_ui">X</button>
-                </div>
-                <div id="refactor-body">
-                    <div id="refactor-stats">
-                        <p>Level: <span id="ref_level">1</span></p>
-                        <p>Available SP: <span id="ref_sp">0</span></p>
-                    </div>
-                    <div id="skill-tree-container">
-                        <!-- 技能树将由 Python 动态生成 -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <footer id="status-bar">
             <span id="status-text">System Ready...</span>
             <span id="tick-timer">TICK: 0</span>
         </footer>
     </div>
 
-    <!-- 按照文档推荐，将 Python 脚本放在 body 底部，并引用外部配置文件 -->
-    <script type="py" src="python/main.py?v=1" config="pyscript.json?v=1"></script>
+    <script type="py" src="python/main.py?v=8" config="pyscript.json?v=8"></script>
 </body>
 </html>

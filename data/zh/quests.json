@@ -9,10 +9,17 @@
     },
     "combat_patrol_1": {
         "name": "清理行动: 安全程序",
-        "desc": "在地牢中击败 5 个安全程序。",
+        "desc": "在攻防链路中击溃 5 个安全程序。",
         "type": "combat",
         "target_amount": 5,
         "reward": { "compute": 10, "credits": 300 }
+    },
+    "combat_purge_25": {
+        "name": "清剿合同: 二十五斩",
+        "desc": "累计击溃 25 个安全程序。",
+        "type": "combat",
+        "target_amount": 25,
+        "reward": { "credits": 600, "hacking_xp": 200, "compute": 20 }
     },
     "deep_dive_1": {
         "name": "深度潜入",
@@ -21,11 +28,32 @@
         "target_amount": 3,
         "reward": { "credits": 500, "hacking_xp": 150 }
     },
-    "unlock_data_ghost": {
-        "name": "黑市交易: 数据幽灵",
-        "desc": "在黑市购买数据幽灵程序。",
+    "deep_dive_10": {
+        "name": "深层合同",
+        "desc": "地牢抵达第 10 层。",
+        "type": "explore",
+        "target_amount": 10,
+        "reward": { "credits": 1200, "hacking_xp": 400, "compute": 40 }
+    },
+    "protocol_study_3": {
+        "name": "协议研究合同",
+        "desc": "研究任意 3 个协议节点。",
+        "type": "protocol",
+        "target_amount": 3,
+        "reward": { "credits": 800, "hacking_xp": 250 }
+    },
+    "unlock_attack_suite": {
+        "name": "黑市交易: 攻击套件",
+        "desc": "完成一次黑市攻击模块采购协议。",
         "type": "special",
         "target_amount": 1,
-        "reward": { "hacking_xp": 100 }
+        "reward": { "hacking_xp": 100, "compute": 15 }
+    },
+    "boss_contract": {
+        "name": "核心突袭合同",
+        "desc": "击败 1 次区级核心守卫。",
+        "type": "boss",
+        "target_amount": 1,
+        "reward": { "credits": 2000, "hacking_xp": 600, "compute": 80 }
     }
 }

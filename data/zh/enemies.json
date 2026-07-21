@@ -1,0 +1,81 @@
+{
+    "sentry": {
+        "id": "sentry",
+        "name": "哨兵程序",
+        "name_en": "Sentry",
+        "tier_min": 0,
+        "weight": 40,
+        "hp_mult": 1.0,
+        "intrusion_mult": 1.0,
+        "firewall_mult": 1.0,
+        "speed_mult": 1.0,
+        "reflect": 0,
+        "loot": { "credits": 1.0, "data_scraps": 1.0, "compute": 1.0, "hacking_xp": 1.0 }
+    },
+    "scanner": {
+        "id": "scanner",
+        "name": "扫描器",
+        "name_en": "Scanner",
+        "tier_min": 1,
+        "weight": 25,
+        "hp_mult": 0.7,
+        "intrusion_mult": 1.35,
+        "firewall_mult": 0.6,
+        "speed_mult": 1.4,
+        "reflect": 0,
+        "loot": { "credits": 1.1, "data_scraps": 0.8, "compute": 1.2, "hacking_xp": 1.15 }
+    },
+    "firewall_wall": {
+        "id": "firewall_wall",
+        "name": "防火墙墙体",
+        "name_en": "Firewall Wall",
+        "tier_min": 1,
+        "weight": 20,
+        "hp_mult": 1.6,
+        "intrusion_mult": 0.7,
+        "firewall_mult": 1.8,
+        "speed_mult": 0.7,
+        "reflect": 0,
+        "loot": { "credits": 0.9, "data_scraps": 1.4, "compute": 0.8, "hacking_xp": 1.0 }
+    },
+    "tracker": {
+        "id": "tracker",
+        "name": "追踪程序",
+        "name_en": "Tracker",
+        "tier_min": 2,
+        "weight": 18,
+        "hp_mult": 0.9,
+        "intrusion_mult": 1.15,
+        "firewall_mult": 0.9,
+        "speed_mult": 1.6,
+        "reflect": 0.1,
+        "loot": { "credits": 1.2, "data_scraps": 1.0, "compute": 1.1, "hacking_xp": 1.2 }
+    },
+    "elite": {
+        "id": "elite",
+        "name": "精英执勤体",
+        "name_en": "Elite Daemon",
+        "tier_min": 3,
+        "weight": 10,
+        "hp_mult": 2.2,
+        "intrusion_mult": 1.4,
+        "firewall_mult": 1.3,
+        "speed_mult": 1.1,
+        "reflect": 0.15,
+        "loot": { "credits": 2.0, "data_scraps": 2.0, "compute": 1.5, "hacking_xp": 1.8 }
+    },
+    "core_guardian": {
+        "id": "core_guardian",
+        "name": "核心守卫",
+        "name_en": "Core Guardian",
+        "tier_min": 4,
+        "weight": 0,
+        "boss": true,
+        "hp_mult": 1.15,
+        "intrusion_mult": 0.5,
+        "firewall_mult": 1.1,
+        "speed_mult": 0.9,
+        "reflect": 0.05,
+        "loot": { "credits": 8.0, "data_scraps": 5.0, "compute": 4.0, "hacking_xp": 5.0 }
+    }
+}

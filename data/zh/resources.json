@@ -1,7 +1,7 @@
 {
     "energy": {
         "name": "电力",
-        "auto_gen": 0.1,
+        "auto_gen": 0.8,
         "description": "基础能源。"
     },
     "data_scraps": {
@@ -16,7 +16,7 @@
     },
     "compute": {
         "name": "算力",
-        "auto_gen": 0,
+        "auto_gen": 0.25,
         "description": "用于破解和研究的处理能力。"
     },
     "hacking_xp": {

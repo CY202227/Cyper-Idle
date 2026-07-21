@@ -1,7 +1,7 @@
 {
     "energy": {
         "name": "Power",
-        "auto_gen": 0.1,
+        "auto_gen": 0.8,
         "description": "Basic energy source."
     },
     "data_scraps": {
@@ -16,7 +16,7 @@
     },
     "compute": {
         "name": "Compute",
-        "auto_gen": 0,
+        "auto_gen": 0.25,
         "description": "Processing power for cracking and research."
     },
     "hacking_xp": {
