@@ -13,8 +13,8 @@ class StoryManager:
         node_id = self.state.current_story_node
         return self.story_nodes.get(node_id)
 
-    def can_take_action(self, action):
-        """检查选项是否可点：资源门槛、一次性标记等。"""
+    def can_take_action(self, action, quest_mgr=None):
+        """检查选项是否可点：资源门槛、一次性标记、已接合同等。"""
         if not action:
             return False, "missing"
         need_flag = action.get("requires_flag")
@@ -23,6 +23,15 @@ class StoryManager:
         block_flag = action.get("requires_not_flag")
         if block_flag and block_flag in self.state.story_flags:
             return False, "already_done"
+        quest_id = action.get("quest_id")
+        if quest_id and quest_mgr is not None and quest_mgr.has_quest(quest_id):
+            return False, "already_done"
+        if quest_id and quest_mgr is None:
+            # 无 quest_mgr 时仍按存档字段兜底
+            if quest_id in getattr(self.state, "completed_quests", []):
+                return False, "already_done"
+            if any(q.get("id") == quest_id for q in self.state.active_quests):
+                return False, "already_done"
         for res, amount in action.get("requirements", {}).items():
             if self.state.resources.get(res, 0) < amount:
                 return False, "insufficient_resources"
@@ -37,7 +46,7 @@ class StoryManager:
         if not action:
             return False, "missing"
 
-        ok, reason = self.can_take_action(action)
+        ok, reason = self.can_take_action(action, quest_mgr=None)
         if not ok:
             return False, reason
 

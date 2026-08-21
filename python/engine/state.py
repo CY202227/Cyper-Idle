@@ -22,6 +22,7 @@ class GameState:
         self.buildings = {}
         self.artifacts = []
         self.active_quests = []
+        self.completed_quests = []
         self.story_flags = []
         self.current_story_node = "start"
         self.seed = None
@@ -62,6 +63,7 @@ class GameState:
         self.buildings = {}
         self.missions = []
         self.active_quests = []
+        self.completed_quests = []
         self.auto_combat = False
         self.auto_explore = False
         self.combat_wins = 0
@@ -87,6 +89,7 @@ class GameState:
             "buildings": self.buildings,
             "artifacts": self.artifacts,
             "active_quests": self.active_quests,
+            "completed_quests": getattr(self, "completed_quests", []),
             "story_flags": self.story_flags,
             "current_story_node": self.current_story_node,
             "seed": self.seed,
@@ -117,6 +120,7 @@ class GameState:
         self.buildings = data.get("buildings", {})
         self.artifacts = data.get("artifacts", [])
         self.active_quests = data.get("active_quests", [])
+        self.completed_quests = data.get("completed_quests", [])
         self.story_flags = data.get("story_flags", self.story_flags)
         self.current_story_node = data.get(
             "current_story_node", self.current_story_node

@@ -6,12 +6,13 @@
     <title>Cyber-Idle | 赛博放置</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body class="cyber-theme">
     <div id="loading-overlay">
         <div class="glitch-text" data-text="SYSTEM INITIALIZING...">SYSTEM INITIALIZING...</div>
     </div>
+    <div id="game-notice" role="status" aria-live="polite"></div>
 
     <div id="game-container" style="display: none;">
         <header>
@@ -60,7 +61,11 @@
                         
                         <div id="combat-main">
                             <div id="enemy-area">
-                                <div id="enemy-visual" class="glitch-text" data-text="IDLE_SCAN">IDLE_SCAN</div>
+                                <div id="enemy-visual" class="glitch-text glitch-layered" data-text="扫描空闲">
+                                    <span class="glitch-layer glitch-layer-a" aria-hidden="true">扫描空闲</span>
+                                    <span class="glitch-layer glitch-layer-b" aria-hidden="true">扫描空闲</span>
+                                    <span class="glitch-main">扫描空闲</span>
+                                </div>
                                 <div class="combat-stats">
                                     <div class="label" id="sec-stability-label">SEC STABILITY</div>
                                     <div class="stat-bar"><div id="enemy-hp-fill" style="width: 0%"></div></div>
@@ -97,12 +102,12 @@
 
             <div id="side-panels">
                 <div id="side-tabs">
-                    <button class="side-tab-btn active" py-click="lambda e: show_side_tab('assets')">Assets</button>
-                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('progress')">Progress</button>
-                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('infra')">Infra</button>
-                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('ops')">Ops</button>
-                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('quests')">Quests</button>
-                    <button class="side-tab-btn" py-click="lambda e: show_side_tab('archives')">Archives</button>
+                    <button class="side-tab-btn active" data-tab="assets" py-click="lambda e: show_side_tab('assets')">Assets</button>
+                    <button class="side-tab-btn" data-tab="progress" py-click="lambda e: show_side_tab('progress')">Progress</button>
+                    <button class="side-tab-btn" data-tab="infra" py-click="lambda e: show_side_tab('infra')">Infra</button>
+                    <button class="side-tab-btn" data-tab="ops" py-click="lambda e: show_side_tab('ops')">Ops</button>
+                    <button class="side-tab-btn" data-tab="quests" py-click="lambda e: show_side_tab('quests')">Quests</button>
+                    <button class="side-tab-btn" data-tab="archives" py-click="lambda e: show_side_tab('archives')">Archives</button>
                 </div>
 
                 <div id="side-content">
@@ -162,6 +167,6 @@
         </footer>
     </div>
 
-    <script type="py" src="python/main.py?v=8" config="pyscript.json?v=8"></script>
+    <script type="py" src="python/main.py?v=15" config="pyscript.json?v=15"></script>
 </body>
 </html>
