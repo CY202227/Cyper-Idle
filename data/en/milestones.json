@@ -6,7 +6,8 @@
         "protocol_t1",
         "depth_10",
         "core_breach",
-        "echo_stable"
+        "echo_stable",
+        "abyss_watch"
     ],
     "milestones": {
         "boot": {
@@ -16,21 +17,24 @@
             "require": {
                 "story_any": ["energy_stable", "discovered_data", "dungeon_start", "contract_board", "black_market", "echo_intro"]
             },
-            "unlock": { "story_flag": "milestone_boot" }
+            "unlock": { "story_flag": "milestone_boot" },
+            "reward": { "credits": 40, "data_scraps": 5 }
         },
         "first_purge": {
             "name": "First Purge",
             "desc": "Defeat 10 security programs on the link.",
             "hint": "Enable Auto Purge and rack up wins.",
             "require": { "combat_wins": 10 },
-            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 }
+            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 },
+            "reward": { "credits": 120, "hacking_xp": 60 }
         },
         "subnet_access": {
             "name": "Subnet Access",
             "desc": "Enter the subnet and reach floor 3.",
             "hint": "Deep scan in the story → enter the dungeon.",
             "require": { "dungeon_level": 3 },
-            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 }
+            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 },
+            "reward": { "compute": 15, "data_scraps": 15 }
         },
         "protocol_t1": {
             "name": "Protocol Awakening",
@@ -41,7 +45,8 @@
                 "story_flag": "milestone_protocol",
                 "protocols_unlocked": true,
                 "set_threat_tier": 3
-            }
+            },
+            "reward": { "credits": 200, "hacking_xp": 150 }
         },
         "depth_10": {
             "name": "Deep Node",
@@ -52,21 +57,32 @@
                 "story_flag": "milestone_depth",
                 "boss_available": true,
                 "set_threat_tier": 4
-            }
+            },
+            "reward": { "credits": 400, "compute": 40 }
         },
         "core_breach": {
             "name": "Core Breach",
             "desc": "Defeat the sector core guardian.",
             "hint": "Launch a core raid from Progress, or hit floor 15.",
             "require": { "boss_kills": 1 },
-            "unlock": { "story_flag": "milestone_breach" }
+            "unlock": { "story_flag": "milestone_breach" },
+            "reward": { "credits": 800, "hacking_xp": 400, "compute": 60 }
         },
         "echo_stable": {
             "name": "Echo Stable",
             "desc": "After a protocol reboot, defeat the core again.",
             "hint": "Prestige, rebuild fast, raid the core once more.",
             "require": { "prestige": 1, "boss_kills": 2 },
-            "unlock": { "story_flag": "milestone_echo" }
+            "unlock": { "story_flag": "milestone_echo" },
+            "reward": { "credits": 1500, "hacking_xp": 800 }
+        },
+        "abyss_watch": {
+            "name": "Abyss Gaze",
+            "desc": "Achieve 3 protocol reboots and 5 core guardian kills.",
+            "hint": "Loop the cycle: each reboot is faster; threat tier climbs with dungeon depth.",
+            "require": { "prestige": 3, "boss_kills": 5 },
+            "unlock": { "story_flag": "milestone_abyss" },
+            "reward": { "credits": 3000, "hacking_xp": 1500, "compute": 120 }
         }
     }
 }

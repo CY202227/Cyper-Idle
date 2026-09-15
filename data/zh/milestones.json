@@ -6,7 +6,8 @@
         "protocol_t1",
         "depth_10",
         "core_breach",
-        "echo_stable"
+        "echo_stable",
+        "abyss_watch"
     ],
     "milestones": {
         "boot": {
@@ -16,21 +17,24 @@
             "require": {
                 "story_any": ["energy_stable", "discovered_data", "dungeon_start", "contract_board", "black_market", "echo_intro"]
             },
-            "unlock": { "story_flag": "milestone_boot" }
+            "unlock": { "story_flag": "milestone_boot" },
+            "reward": { "credits": 40, "data_scraps": 5 }
         },
         "first_purge": {
             "name": "首次清剿",
             "desc": "在链路上击溃 10 个安全程序。",
             "hint": "开启自动清剿，积累胜场。",
             "require": { "combat_wins": 10 },
-            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 }
+            "unlock": { "story_flag": "milestone_purge", "set_threat_tier": 1 },
+            "reward": { "credits": 120, "hacking_xp": 60 }
         },
         "subnet_access": {
             "name": "子网渗透",
             "desc": "潜入子网并抵达第 3 层。",
             "hint": "剧情中深度扫描 → 进入地牢，自动探索冲层。",
             "require": { "dungeon_level": 3 },
-            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 }
+            "unlock": { "story_flag": "milestone_subnet", "set_threat_tier": 2 },
+            "reward": { "compute": 15, "data_scraps": 15 }
         },
         "protocol_t1": {
             "name": "协议觉醒",
@@ -41,7 +45,8 @@
                 "story_flag": "milestone_protocol",
                 "protocols_unlocked": true,
                 "set_threat_tier": 3
-            }
+            },
+            "reward": { "credits": 200, "hacking_xp": 150 }
         },
         "depth_10": {
             "name": "深层节点",
@@ -52,21 +57,32 @@
                 "story_flag": "milestone_depth",
                 "boss_available": true,
                 "set_threat_tier": 4
-            }
+            },
+            "reward": { "credits": 400, "compute": 40 }
         },
         "core_breach": {
             "name": "核心突破",
             "desc": "击败区级核心守卫。",
             "hint": "在进度面板发起核心突袭，或在地牢第 15 层触发。",
             "require": { "boss_kills": 1 },
-            "unlock": { "story_flag": "milestone_breach" }
+            "unlock": { "story_flag": "milestone_breach" },
+            "reward": { "credits": 800, "hacking_xp": 400, "compute": 60 }
         },
         "echo_stable": {
             "name": "回声稳态",
             "desc": "协议重启后再击败一次核心守卫。",
             "hint": "转生后快速重建，再次突袭核心。",
             "require": { "prestige": 1, "boss_kills": 2 },
-            "unlock": { "story_flag": "milestone_echo" }
+            "unlock": { "story_flag": "milestone_echo" },
+            "reward": { "credits": 1500, "hacking_xp": 800 }
+        },
+        "abyss_watch": {
+            "name": "深渊回望",
+            "desc": "达成 3 次协议重启并击溃 5 次核心守卫。",
+            "hint": "多圈循环：每圈重启都更快，威胁阶随地牢深度持续爬升。",
+            "require": { "prestige": 3, "boss_kills": 5 },
+            "unlock": { "story_flag": "milestone_abyss" },
+            "reward": { "credits": 3000, "hacking_xp": 1500, "compute": 120 }
         }
     }
 }

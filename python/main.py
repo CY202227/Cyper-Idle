@@ -1002,6 +1002,29 @@ async def game_loop():
                 state.current_story_node = story_map[mid]
                 reset_story_view_state()
 
+        # 里程碑奖励弹层
+        if getattr(progress_mgr, "pending_popups", None):
+            for pmid, preward in progress_mgr.pending_popups:
+                parts = []
+                for k, v in preward.items():
+                    name = i18n.get_res_name(
+                        k, manager.definitions.get("resources", {})
+                    )
+                    parts.append(f"+{v} {name}")
+                notify(
+                    i18n.get(
+                        "milestone_reward",
+                        rewards=", ".join(parts),
+                    )
+                )
+            progress_mgr.pending_popups = []
+
+        # 随机事件反馈进历史日志
+        if getattr(manager, "event_log", None):
+            for edesc in manager.event_log:
+                append_story_log(i18n.get(f"event_{edesc}", edesc))
+            manager.event_log = []
+
         quest_mgr.update_progress("collect", "data_scraps")
         quest_mgr.update_progress("protocol")
         quest_mgr.update_progress("boss")

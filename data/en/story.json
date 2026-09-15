@@ -173,6 +173,32 @@
                     "compute": 20
                 }
             },
+            "buy_deep_intel": {
+                "label": "Buy Deep Intel package (1200 Credits, one-time)",
+                "next_node": "black_market",
+                "requirements": {
+                    "credits": 1200
+                },
+                "consume": true,
+                "requires_not_flag": "deep_intel_bought",
+                "set_flag": "deep_intel_bought",
+                "reward": {
+                    "credits": -1200,
+                    "hacking_xp": 600,
+                    "compute": 100
+                }
+            },
+            "buy_scrap_bundle": {
+                "label": "Buy scrap crate (300 Credits → 80 Scraps)",
+                "next_node": "black_market",
+                "requirements": {
+                    "credits": 300
+                },
+                "reward": {
+                    "credits": -300,
+                    "data_scraps": 80
+                }
+            },
             "leave": {
                 "label": "Leave Black Market",
                 "next_node": "energy_stable"

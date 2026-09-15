@@ -104,5 +104,31 @@
             "credits": 300,
             "hacking_xp": 100
         }
+    },
+    "quantum_tap": {
+        "name": "Quantum Tap",
+        "desc": "Tap raw key streams on a quantum relay.",
+        "duration": 600,
+        "req_level": 10,
+        "cost": { "compute": 80, "credits": 300 },
+        "rewards": {
+            "credits": 2600,
+            "hacking_xp": 700,
+            "compute": 120,
+            "data_scraps": 60
+        }
+    },
+    "abyss_census": {
+        "name": "Abyss Census",
+        "desc": "Census active consciousness at the abyss floor. Very long, high risk.",
+        "duration": 900,
+        "req_level": 12,
+        "cost": { "compute": 150, "energy": 120, "data_scraps": 100 },
+        "rewards": {
+            "credits": 5000,
+            "hacking_xp": 1600,
+            "compute": 300,
+            "data_scraps": 150
+        }
     }
 }

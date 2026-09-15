@@ -17,5 +17,73 @@
         "effect": {
             "data_scraps": 10
         }
+    },
+    {
+        "id": "orphan_process",
+        "description": "An orphan process freed cached compute cycles.",
+        "weight": 6,
+        "requirements": {
+            "compute": 20
+        },
+        "effect": {
+            "compute": 15
+        }
+    },
+    {
+        "id": "passerby_tip",
+        "description": "A passing ghost routine tipped you some credits.",
+        "weight": 4,
+        "requirements": {
+            "credits": 50
+        },
+        "effect": {
+            "credits": 80
+        }
+    },
+    {
+        "id": "trace_sweep",
+        "description": "An anti-trace sweep burned part of your scrap cache.",
+        "weight": 5,
+        "requirements": {
+            "data_scraps": 20
+        },
+        "effect": {
+            "data_scraps": -12
+        }
+    },
+    {
+        "id": "bandwidth_storm",
+        "description": "A bandwidth storm forced partial service restarts; minor credit loss.",
+        "weight": 4,
+        "requirements": {
+            "credits": 200
+        },
+        "effect": {
+            "credits": -60
+        }
+    },
+    {
+        "id": "abandoned_cache",
+        "description": "You found a whole crate of leftover data scraps in a dead node.",
+        "weight": 3,
+        "requirements": {
+            "hacking_xp": 500
+        },
+        "effect": {
+            "data_scraps": 40,
+            "hacking_xp": 30
+        }
+    },
+    {
+        "id": "deep_resonance",
+        "description": "Deep protocol pulses washed over your node; XP and credits jumped.",
+        "weight": 2,
+        "requirements": {
+            "hacking_xp": 2000
+        },
+        "effect": {
+            "credits": 400,
+            "hacking_xp": 150
+        }
     }
 ]

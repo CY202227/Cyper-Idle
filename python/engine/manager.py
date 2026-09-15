@@ -13,6 +13,8 @@ class GameManager:
         self.state = state
         self.rng = rng
         self.protocol_mgr = None
+        # 待展示的事件日志（main 消费后清空）
+        self.event_log = []
         self.definitions = {
             "resources": {},
             "actions": {},
@@ -206,8 +208,12 @@ class GameManager:
     def trigger_event(self, event):
         if "effect" in event:
             for res, amount in event["effect"].items():
-                self.state.resources[res] = self.state.resources.get(res, 0) + amount
-        return event.get("description", "发生了一个未知的网络波动。")
+                cur = self.state.resources.get(res, 0)
+                self.state.resources[res] = max(0, cur + amount)
+        # 事件文案进日志队列，让玩家感知到事件发生
+        desc = event.get("description", "发生了一个未知的网络波动。")
+        self.event_log.append(desc)
+        return desc
 
     def perform_action(self, action_id):
         if action_id == "gather_energy":

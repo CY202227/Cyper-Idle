@@ -115,6 +115,7 @@
         "vs_label": "VS",
         "tick_prefix": "TICK",
         "milestone_log": "[里程碑] {name}",
+        "milestone_reward": "[里程碑奖励] {rewards}",
         "boss_locked": "[ 抵达地牢第 10 层后解锁核心突袭 ]"
     },
     "en": {
@@ -233,6 +234,7 @@
         "vs_label": "VS",
         "tick_prefix": "TICK",
         "milestone_log": "[MILESTONE] {name}",
+        "milestone_reward": "[MILESTONE REWARD] {rewards}",
         "boss_locked": "[ Reach dungeon floor 10 to unlock Core Raid ]"
     }
 }

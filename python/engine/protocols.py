@@ -26,6 +26,8 @@ class ProtocolManager:
         if p > 0:
             effects["all_gen_pct"] = effects.get("all_gen_pct", 0) + 0.05 * p
             effects["intrusion_pct"] = effects.get("intrusion_pct", 0) + 0.03 * p
+            # 转生掉落：第二圈起战利品与经验更丰厚，加速收束
+            effects["loot_pct"] = effects.get("loot_pct", 0) + 0.10 * p
         return effects
 
     def research(self, protocol_id):

@@ -9,6 +9,8 @@ class ProgressManager:
         self.definitions = {}
         # 有序列表（完成顺序）
         self.order = []
+        # 待展示的完成弹层（main 消费后清空）
+        self.pending_popups = []
 
     def load_definitions(self, milestones_json):
         data = json.loads(milestones_json)
@@ -47,6 +49,23 @@ class ProgressManager:
                     self.state.boss_available = True
                 if unlock.get("protocols_unlocked"):
                     self.state.protocols_unlocked = True
+                # 资源奖励：让每个里程碑都有实际获得感
+                reward = defn.get("reward", {})
+                if reward:
+                    for res, amount in reward.items():
+                        cur = self.state.resources.get(res, 0)
+                        self.state.resources[res] = max(0, cur + int(amount))
+                    self.pending_popups.append((mid, dict(reward)))
+
+        # 终局爬阶：里程碑全清后，威胁阶随地牢深度持续上升（cap 9）
+        if self.state.threat_tier >= 5:
+            deepest = max(
+                getattr(self.state, "max_dungeon_level", 1),
+                getattr(self.state, "hacking_level", 1),
+            )
+            climb = min(9, 5 + (deepest - 15) // 5)
+            if climb > self.state.threat_tier:
+                self.state.threat_tier = climb
         return newly
 
     def _met(self, req, dungeon, protocol_mgr):

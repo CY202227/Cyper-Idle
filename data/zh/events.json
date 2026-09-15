@@ -17,5 +17,73 @@
         "effect": {
             "data_scraps": 10
         }
+    },
+    {
+        "id": "orphan_process",
+        "description": "一个孤儿进程意外释放了缓存中的算力。",
+        "weight": 6,
+        "requirements": {
+            "compute": 20
+        },
+        "effect": {
+            "compute": 15
+        }
+    },
+    {
+        "id": "passerby_tip",
+        "description": "路过的一段幽灵代码顺手给你留了一点信用点。",
+        "weight": 4,
+        "requirements": {
+            "credits": 50
+        },
+        "effect": {
+            "credits": 80
+        }
+    },
+    {
+        "id": "trace_sweep",
+        "description": "一次反追踪扫描烧掉了你部分缓存碎片。",
+        "weight": 5,
+        "requirements": {
+            "data_scraps": 20
+        },
+        "effect": {
+            "data_scraps": -12
+        }
+    },
+    {
+        "id": "bandwidth_storm",
+        "description": "带宽风暴迫使你重启了部分服务，损失少量信用点。",
+        "weight": 4,
+        "requirements": {
+            "credits": 200
+        },
+        "effect": {
+            "credits": -60
+        }
+    },
+    {
+        "id": "abandoned_cache",
+        "description": "你在废弃节点中发现了一整箱遗留数据碎片。",
+        "weight": 3,
+        "requirements": {
+            "hacking_xp": 500
+        },
+        "effect": {
+            "data_scraps": 40,
+            "hacking_xp": 30
+        }
+    },
+    {
+        "id": "deep_resonance",
+        "description": "深层协议脉冲掠过你的节点，经验与信用同时跃升。",
+        "weight": 2,
+        "requirements": {
+            "hacking_xp": 2000
+        },
+        "effect": {
+            "credits": 400,
+            "hacking_xp": 150
+        }
     }
 ]

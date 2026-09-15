@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 
 class DungeonEngine:
@@ -101,22 +102,44 @@ class DungeonEngine:
                         best = (x, y)
         return best
 
-    def auto_step(self):
-        """自动探索一步：朝 POI/出口移动，否则随机可行方向。"""
-        target = self.find_nearest_poi()
+    def _bfs_step_toward(self, target):
+        """BFS 求一步走向目标的最短路。返回 (dx, dy) 或 None。"""
         px, py = self.player_pos
+        tx, ty = target
+        if (px, py) == (tx, ty):
+            return None
+        start = (px, py)
+        prev = {start: None}
+        q = deque([start])
+        while q:
+            cur = q.popleft()
+            if cur == (tx, ty):
+                # 回溯到起点后的第一步
+                step = cur
+                while prev[step] is not None and prev[step] != start:
+                    step = prev[step]
+                if prev[step] is None:
+                    return None
+                return (step[0] - px, step[1] - py)
+            cx, cy = cur
+            for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                nxt = (cx + dx, cy + dy)
+                if nxt in prev:
+                    continue
+                if 0 <= nxt[0] < self.width and 0 <= nxt[1] < self.height:
+                    if self.grid[nxt[1]][nxt[0]] != "#":
+                        prev[nxt] = cur
+                        q.append(nxt)
+        return None
+
+    def auto_step(self):
+        """自动探索一步：BFS 走向最近 POI/出口，否则随机可行方向。"""
+        target = self.find_nearest_poi()
 
         if target:
-            tx, ty = target
-            dx = 0 if tx == px else (1 if tx > px else -1)
-            dy = 0 if ty == py else (1 if ty > py else -1)
-            # 优先横移
-            if dx != 0:
-                result, msg = self.move_player(dx, 0)
-                if result != "COLLISION":
-                    return result, msg
-            if dy != 0:
-                result, msg = self.move_player(0, dy)
+            step = self._bfs_step_toward(target)
+            if step:
+                result, msg = self.move_player(step[0], step[1])
                 if result != "COLLISION":
                     return result, msg
 

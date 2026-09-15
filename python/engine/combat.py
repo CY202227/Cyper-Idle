@@ -39,6 +39,7 @@ class CombatEngine:
         self._pending_floor_elite = False
         self.last_rewards = {}
         self.vs_boss = False
+        self.win_streak = 0
 
     def set_i18n(self, i18n):
         self.i18n = i18n
@@ -103,8 +104,13 @@ class CombatEngine:
         for eid, defn in self.enemy_defs.items():
             if defn.get("boss"):
                 continue
-            if defn.get("tier_min", 0) <= tier:
-                pool.append((defn, defn.get("weight", 1)))
+            tmin = defn.get("tier_min", 0)
+            if tmin > tier:
+                continue
+            # 权重衰减：威胁阶远超怪物档位时，低级怪淡出
+            weight = float(defn.get("weight", 1))
+            decay = max(0.0, 1.0 - (tier - tmin) * 0.22)
+            pool.append((defn, weight * decay))
         if not pool:
             return self.enemy_defs.get("sentry") or {
                 "id": "sentry",
@@ -117,6 +123,9 @@ class CombatEngine:
                 "loot": {},
             }
         total = sum(w for _, w in pool)
+        if total <= 0:
+            pool = [(d, 1.0) for d, _ in pool]
+            total = float(len(pool))
         roll = random.random() * total
         acc = 0
         for defn, w in pool:
@@ -314,15 +323,31 @@ class CombatEngine:
         loot_pct = 1.0 + float(effects.get("loot_pct", 0))
 
         if victory:
+            self.win_streak += 1
             self.log.append(self._t("combat_win"))
-            credits = int((18 + level * 12) * loot_m.get("credits", 1) * loot_pct)
+            # 连击奖励：快速连续胜利最多 +30% 掉落
+            streak_mult = 1.0 + min(0.30, (self.win_streak - 1) * 0.02)
+            # 高层压制：等级差加成，鼓励打高级怪
+            overkill = max(0, level - max(1, self.state.hacking_level))
+            overkill_mult = 1.0 + min(0.50, overkill * 0.05)
+            loot_m_all = loot_pct * streak_mult * overkill_mult
+            credits = int(
+                (18 + level * 12) * loot_m.get("credits", 1) * loot_m_all
+            )
             scraps = max(
-                1, int((1 + level // 2) * loot_m.get("data_scraps", 1) * loot_pct)
+                1,
+                int((1 + level // 2) * loot_m.get("data_scraps", 1) * loot_m_all),
             )
             compute = max(
-                1, int((1 + level // 3) * loot_m.get("compute", 1) * loot_pct)
+                1,
+                int((1 + level // 3) * loot_m.get("compute", 1) * loot_m_all),
             )
-            hxp = int((10 + level * 4) * loot_m.get("hacking_xp", 1) * loot_pct)
+            # 经验曲线：高等级击杀经验小幅加速
+            hxp = int(
+                (10 + level * 4 + (level * level) // 40)
+                * loot_m.get("hacking_xp", 1)
+                * loot_m_all
+            )
             if was_boss:
                 credits = int(credits * 1.5)
                 hxp = int(hxp * 1.5)
@@ -374,6 +399,7 @@ class CombatEngine:
             cd *= 1.0 + float(effects.get("combat_cooldown_pct", 0))
             self.cooldown_remaining = max(0.3, cd)
         else:
+            self.win_streak = 0
             self.log.append(self._t("combat_lose"))
             penalty = 12
             self.state.resources["energy"] = max(

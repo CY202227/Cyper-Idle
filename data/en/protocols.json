@@ -109,5 +109,25 @@
         "req": "raid_focus",
         "effects": { "intrusion_pct": 0.05 },
         "persist": true
+    },
+    "abyss_resonance": {
+        "id": "abyss_resonance",
+        "name": "Abyss Resonance",
+        "desc": "Persists: all generation +12%, loot +15%.",
+        "tier": 4,
+        "cost": { "credits": 1500, "hacking_xp": 1200, "compute": 200 },
+        "req": "echo_bind",
+        "effects": { "all_gen_pct": 0.12, "loot_pct": 0.15 },
+        "persist": true
+    },
+    "ghost_protocol": {
+        "id": "ghost_protocol",
+        "name": "Ghost Protocol",
+        "desc": "Persists: op duration -25%, ops-drain penalty halved.",
+        "tier": 4,
+        "cost": { "compute": 300, "hacking_xp": 1000, "data_scraps": 150 },
+        "req": "ops_compress",
+        "effects": { "mission_duration_pct": -0.25, "ops_penalty_reduction": 0.5 },
+        "persist": true
     }
 }

@@ -32,15 +32,20 @@ def _resource_multiplier(state):
     return mult
 
 
-def _ops_intrusion_penalty(state):
-    """每条进行中的网络行动 -5% intrusion，最多 -15%。"""
+def _ops_intrusion_penalty(state, protocol_effects=None):
+    """每条进行中的网络行动 -5% intrusion，最多 -15%；幽灵协议减半。"""
     active = 0
     for m in getattr(state, "missions", []):
         if not m.get("claimed", False) and not m.get("completed", False):
             active += 1
         elif m.get("completed") and not m.get("claimed", False):
             active += 1
-    return min(0.15, active * 0.05)
+    penalty = min(0.15, active * 0.05)
+    if penalty > 0 and protocol_effects:
+        reduction = float(protocol_effects.get("ops_penalty_reduction", 0))
+        if reduction > 0:
+            penalty *= max(0.0, 1.0 - reduction)
+    return penalty
 
 
 def calc_player_power(
@@ -56,7 +61,7 @@ def calc_player_power(
 
     bonus = _building_combat_bonus(state, buildings_def)
     mult = _resource_multiplier(state)
-    penalty = _ops_intrusion_penalty(state)
+    penalty = _ops_intrusion_penalty(state, effects)
 
     intrusion = (base_intrusion + bonus["intrusion"]) * mult * (1.0 - penalty)
     firewall = (base_firewall + bonus["firewall"]) * mult
