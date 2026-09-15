@@ -63,6 +63,7 @@
         "op_meta": "需求等级 {level} | {duration}秒 | 消耗 {cost}",
         "op_cost_none": "无",
         "op_loot": "行动收获: {rewards}",
+        "quest_accept": "已接合同: {name} — 进度见右侧「合同」",
         "quest_complete": "任务完成！{rewards}",
         "mission_not_found": "行动不存在",
         "err_building_missing": "建筑不存在",
@@ -110,7 +111,11 @@
         "story_log_label": "历史日志",
         "story_need_res": "资源不足，无法执行该选项",
         "story_already_done": "该升级已完成，不可重复",
-        "story_choice_locked": "条件未满足"
+        "story_choice_locked": "条件未满足",
+        "vs_label": "VS",
+        "tick_prefix": "TICK",
+        "milestone_log": "[里程碑] {name}",
+        "boss_locked": "[ 抵达地牢第 10 层后解锁核心突袭 ]"
     },
     "en": {
         "export_save": "Export Save",
@@ -176,6 +181,7 @@
         "op_meta": "Req Lv.{level} | {duration}s | Cost {cost}",
         "op_cost_none": "none",
         "op_loot": "Op loot: {rewards}",
+        "quest_accept": "Contract accepted: {name} — track it under Quests",
         "quest_complete": "Quest complete! {rewards}",
         "mission_not_found": "Op not found",
         "err_building_missing": "Building not found",
@@ -223,6 +229,10 @@
         "story_log_label": "History Log",
         "story_need_res": "Not enough resources for this option",
         "story_already_done": "Already upgraded; cannot repeat",
-        "story_choice_locked": "Requirements not met"
+        "story_choice_locked": "Requirements not met",
+        "vs_label": "VS",
+        "tick_prefix": "TICK",
+        "milestone_log": "[MILESTONE] {name}",
+        "boss_locked": "[ Reach dungeon floor 10 to unlock Core Raid ]"
     }
 }

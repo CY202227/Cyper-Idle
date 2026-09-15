@@ -8,23 +8,31 @@ class QuestManager:
     def load_definitions(self, quests_json):
         self.definitions = json.loads(quests_json)
 
+    def has_quest(self, quest_id):
+        """是否已在进行中，或已领过奖（合同板应隐藏）。"""
+        if not quest_id:
+            return False
+        if quest_id in getattr(self.state, "completed_quests", []):
+            return True
+        return any(q.get("id") == quest_id for q in self.state.active_quests)
+
     def accept_quest(self, quest_id):
         """接受一个任务"""
-        if quest_id in self.definitions and quest_id not in [q["id"] for q in self.state.active_quests]:
-            defn = self.definitions[quest_id]
-            new_quest = {
-                "id": quest_id,
-                "progress": 0,
-                "completed": False,
-                "claimed": False
-            }
-            # 如果是收集任务，初始化进度
-            if defn["type"] == "collect":
-                new_quest["progress"] = self.state.resources.get(defn["target_id"], 0)
-                
-            self.state.active_quests.append(new_quest)
-            return True
-        return False
+        if quest_id not in self.definitions or self.has_quest(quest_id):
+            return False
+        defn = self.definitions[quest_id]
+        new_quest = {
+            "id": quest_id,
+            "progress": 0,
+            "completed": False,
+            "claimed": False,
+        }
+        # 如果是收集任务，初始化进度
+        if defn["type"] == "collect":
+            new_quest["progress"] = self.state.resources.get(defn["target_id"], 0)
+
+        self.state.active_quests.append(new_quest)
+        return True
 
     def update_progress(self, q_type, target_id=None, amount=1):
         """更新任务进度"""
@@ -76,7 +84,12 @@ class QuestManager:
                         self.state.resources[res_id] = self.state.resources.get(res_id, 0) + amount
                 
                 quest["claimed"] = True
-                # 从活动任务中移除（或者保留标记）
                 self.state.active_quests.pop(i)
+                done = getattr(self.state, "completed_quests", None)
+                if done is None:
+                    self.state.completed_quests = []
+                    done = self.state.completed_quests
+                if quest_id not in done:
+                    done.append(quest_id)
                 return True, defn["reward"]
         return False, None

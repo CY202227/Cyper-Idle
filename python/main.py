@@ -61,6 +61,51 @@ mission_mgr.set_protocol_manager(protocol_mgr)
 combat_eng.set_protocol_manager(protocol_mgr)
 
 
+def _ensure_glitch_layers(el):
+    """保证动态 glitch 节点有前景层和两层虚影。"""
+    main = el.querySelector(".glitch-main")
+    if main:
+        return main
+    el.innerHTML = ""
+    el.classList.add("glitch-layered")
+    for class_name in ("glitch-layer glitch-layer-a", "glitch-layer glitch-layer-b"):
+        span = document.createElement("span")
+        span.className = class_name
+        span.setAttribute("aria-hidden", "true")
+        el.appendChild(span)
+    main = document.createElement("span")
+    main.className = "glitch-main"
+    el.appendChild(main)
+    return main
+
+
+def set_glitch_text(el, text):
+    """写入可见文字，并同步两层 glitch 虚影。"""
+    if not el:
+        return
+    text = "" if text is None else str(text)
+    if el.classList.contains("glitch-layered") or el.id == "enemy-visual":
+        main = _ensure_glitch_layers(el)
+        main.textContent = text
+        for layer in el.querySelectorAll(".glitch-layer"):
+            layer.textContent = text
+    else:
+        el.textContent = text
+    el.setAttribute("data-text", text)
+
+
+def sync_glitch_texts():
+    """兜底：所有 .glitch-text 的虚影与正文保持一致。"""
+    for el in document.querySelectorAll(".glitch-text"):
+        main = el.querySelector(".glitch-main")
+        if main:
+            set_glitch_text(el, main.textContent or "")
+            continue
+        text = el.textContent or ""
+        if el.getAttribute("data-text") != text:
+            el.setAttribute("data-text", text)
+
+
 def reset_story_view_state(clear_text=False):
     if hasattr(update_ui, "last_node"):
         delattr(update_ui, "last_node")
@@ -161,6 +206,67 @@ def apply_dungeon_result(result, msg):
                 combat_eng.queue_dungeon_fight(next_level, floor_elite=True)
 
 
+def set_locked(el, locked, title=None):
+    """统一灰显不可用控件。不禁用点击，以便给出游戏内提示。"""
+    if not el:
+        return
+    if locked:
+        el.classList.add("is-locked")
+        if title:
+            el.title = title
+    else:
+        el.classList.remove("is-locked")
+        el.removeAttribute("title")
+
+
+_notice_token = 0
+_notice_hide_proxy = None
+
+
+def notify(msg):
+    """游戏内提示，替代浏览器弹窗。"""
+    global _notice_token, _notice_hide_proxy
+    if not msg:
+        return
+    el = document.getElementById("game-notice")
+    if not el:
+        el = document.createElement("div")
+        el.id = "game-notice"
+        el.setAttribute("role", "status")
+        document.body.appendChild(el)
+    _notice_token += 1
+    token = _notice_token
+    el.innerText = str(msg)
+    el.classList.add("is-on")
+
+    def hide(*_args):
+        if token == _notice_token:
+            el.classList.remove("is-on")
+
+    _notice_hide_proxy = create_proxy(hide)
+    window.setTimeout(_notice_hide_proxy, 2600)
+
+
+def update_status_bar():
+    status_map = {
+        "idle": i18n.get("status_idle"),
+        "fighting": i18n.get("status_fighting"),
+        "cooldown": i18n.get("status_cooldown"),
+    }
+    bits = [
+        f"{i18n.get('combat_status')}: {status_map.get(combat_eng.status, combat_eng.status)}",
+    ]
+    if state.auto_combat:
+        bits.append(f"{i18n.get('auto_combat')}:{i18n.get('toggle_on')}")
+    if state.auto_explore and state.current_story_node == "dungeon_start":
+        bits.append(f"{i18n.get('auto_explore')}:{i18n.get('toggle_on')}")
+    if getattr(state, "protocols_unlocked", False):
+        bits.append(
+            f"{i18n.get('protocols_title')}:{len(getattr(state, 'protocols', []))}"
+        )
+    document.getElementById("status-text").innerText = " · ".join(bits)
+
+
 def update_ui():
     document.getElementById("btn-lang").innerText = i18n.get("switch_lang")
     document.getElementById("btn-export").innerText = i18n.get("export_save")
@@ -174,8 +280,11 @@ def update_ui():
     archives_h2 = document.querySelector("#archives-panel h2")
     if archives_h2:
         archives_h2.innerText = i18n.get("archives")
-    document.getElementById("status-text").innerText = i18n.get("status_ready")
     document.getElementById("version").innerText = f"{i18n.get('ver_prefix')} v0.4.0-ALPHA"
+
+    vs = document.getElementById("vs-divider")
+    if vs:
+        vs.innerText = i18n.get("vs_label")
 
     # 侧栏标签
     tab_labels = {
@@ -187,11 +296,10 @@ def update_ui():
         "archives": "tab_archives",
     }
     for btn in document.querySelectorAll(".side-tab-btn"):
-        click_attr = btn.getAttribute("py-click") or ""
-        for tid, key in tab_labels.items():
-            if f"'{tid}'" in click_attr or f'"{tid}"' in click_attr:
-                btn.innerText = i18n.get(key)
-                break
+        tid = btn.getAttribute("data-tab")
+        key = tab_labels.get(tid)
+        if key:
+            btn.innerText = i18n.get(key)
 
     tabs = document.querySelectorAll("#infrastructure-tabs .tab-btn")
     if len(tabs) >= 2:
@@ -215,9 +323,10 @@ def update_ui():
         level_span.id = "level-display"
         status_bar.insertBefore(level_span, status_bar.firstChild)
     level_span.innerText = (
-        f"{i18n.get('hacking_level')}: {state.hacking_level} | "
-        f"{i18n.get('floor_label')}: {dungeon.current_level} | "
+        f"{i18n.get('hacking_level')}: {state.hacking_level} · "
+        f"{i18n.get('floor_label')}: {dungeon.current_level}"
     )
+    update_status_bar()
 
     res_list = document.getElementById("resources-list")
     if res_list:
@@ -231,6 +340,9 @@ def update_ui():
             item.innerText = f"{name}: {int(amount)}{cap_str}"
             res_list.appendChild(item)
 
+    side = document.getElementById("side-content")
+    side_top = side.scrollTop if side else 0
+
     update_power_ui()
     update_progress_ui()
     update_protocols_ui()
@@ -242,8 +354,14 @@ def update_ui():
     update_quests_ui()
     update_story_ui()
     update_dungeon_ui()
+    sync_glitch_texts()
 
-    document.getElementById("tick-timer").innerText = f"TICK: {state.tick_count}"
+    if side:
+        side.scrollTop = side_top
+
+    document.getElementById("tick-timer").innerText = (
+        f"{i18n.get('tick_prefix')}: {state.tick_count}"
+    )
 
 
 def update_power_ui():
@@ -304,15 +422,22 @@ def update_progress_ui():
     if getattr(state, "boss_available", False):
         boss_btn = document.createElement("button")
         boss_btn.innerText = i18n.get("progress_boss_btn")
+        busy = combat_eng.status == "fighting" or combat_eng.cooldown_remaining > 0
+        set_locked(boss_btn, busy, i18n.get("status_fighting") if busy else None)
 
         def do_boss(event):
-            if combat_eng.status == "fighting":
+            if combat_eng.status == "fighting" or combat_eng.cooldown_remaining > 0:
                 return
             combat_eng.start_boss_raid()
             update_ui()
 
         boss_btn.onclick = create_proxy(do_boss)
         panel.appendChild(boss_btn)
+    else:
+        hint = document.createElement("div")
+        hint.className = "empty-msg is-locked"
+        hint.innerText = i18n.get("boss_locked")
+        panel.appendChild(hint)
 
     if getattr(state, "boss_kills", 0) >= 1 and "milestone_breach" in state.story_flags:
         reboot_btn = document.createElement("button")
@@ -338,7 +463,7 @@ def update_protocols_ui():
 
     if not getattr(state, "protocols_unlocked", False):
         empty = document.createElement("div")
-        empty.className = "empty-msg"
+        empty.className = "empty-msg is-locked"
         empty.innerText = i18n.get("protocols_locked")
         list_div.appendChild(empty)
         return
@@ -368,6 +493,21 @@ def update_protocols_ui():
         else:
             btn = document.createElement("button")
             btn.innerText = i18n.get("protocol_research")
+            can = True
+            lock_reason = ""
+            req = pdef.get("req")
+            if req and not protocol_mgr.has(req):
+                can = False
+                lock_reason = i18n.get("protocol_req")
+            else:
+                for res, amount in cost.items():
+                    if state.resources.get(res, 0) < amount:
+                        can = False
+                        lock_reason = i18n.get("protocol_no_res")
+                        break
+            set_locked(btn, not can, lock_reason)
+            if not can:
+                item.classList.add("is-locked")
 
             def make_research(protocol_id):
                 def handler(event):
@@ -379,7 +519,7 @@ def update_protocols_ui():
                             "insufficient_resources": i18n.get("protocol_no_res"),
                             "already": i18n.get("protocol_done"),
                         }
-                        window.alert(alerts.get(msg, msg))
+                        notify(alerts.get(msg, msg))
                     else:
                         quest_mgr.update_progress("protocol")
                         manager.update_storage_caps()
@@ -419,14 +559,33 @@ def update_missions_ui():
             )
         else:
             cost_str = i18n.get("op_cost_none")
+        req_level = mdef.get("req_level", 1)
         item.innerHTML = f"""
             <div class="mission-name">{mdef.get('name', mid)}</div>
             <div class="mission-desc">{mdef.get('desc', '')}</div>
-            <div class="mission-meta">{i18n.get('op_meta', level=mdef.get('req_level', 1), duration=int(mdef.get('duration', 0)), cost=cost_str)}</div>
+            <div class="mission-meta">{i18n.get('op_meta', level=req_level, duration=int(mdef.get('duration', 0)), cost=cost_str)}</div>
             <div class="mission-meta">{reward_str}</div>
         """
         btn = document.createElement("button")
         btn.innerText = i18n.get("launch_op")
+
+        locked = False
+        lock_reason = ""
+        if state.hacking_level < req_level:
+            locked = True
+            lock_reason = i18n.get("op_level_low")
+        elif mission_mgr.active_count() >= 3:
+            locked = True
+            lock_reason = i18n.get("op_slots_full")
+        else:
+            for res, amount in cost.items():
+                if state.resources.get(res, 0) < amount:
+                    locked = True
+                    lock_reason = i18n.get("op_no_res")
+                    break
+        set_locked(btn, locked, lock_reason)
+        if locked:
+            item.classList.add("is-locked")
 
         def make_dispatch(mission_id):
             def handler(event):
@@ -438,7 +597,7 @@ def update_missions_ui():
                         "insufficient_resources": i18n.get("op_no_res"),
                         "mission_not_found": i18n.get("mission_not_found"),
                     }
-                    window.alert(alerts.get(msg, msg))
+                    notify(alerts.get(msg, msg))
                 update_ui()
             return handler
 
@@ -502,6 +661,24 @@ def update_idle_combat_ui():
         return
     panel.style.display = "flex"
 
+    in_dungeon = state.current_story_node == "dungeon_start"
+    engaged = (
+        combat_eng.status in ("fighting", "cooldown")
+        or bool(combat_eng.enemy)
+        or combat_eng.pending_dungeon_fight
+    )
+    # 空闲时压缩；地牢开启且未交火时进一步压缩，避免挤占剧情
+    if not engaged:
+        panel.classList.add("combat-compact")
+    else:
+        panel.classList.remove("combat-compact")
+    story_panel = document.getElementById("story-panel")
+    if story_panel:
+        if in_dungeon:
+            story_panel.classList.add("in-dungeon")
+        else:
+            story_panel.classList.remove("in-dungeon")
+
     title = document.getElementById("idle-combat-title")
     if title:
         title.innerText = i18n.get("combat_idle_title")
@@ -536,18 +713,18 @@ def update_idle_combat_ui():
 
     if combat_eng.enemy and combat_eng.enemy.get("max_hp"):
         label = combat_eng.enemy.get("label") or i18n.get("enemy_security")
-        document.getElementById("enemy-visual").innerText = (
-            f"{label} Lv.{combat_eng.enemy.get('level', 1)}"
-        )
+        enemy_text = f"{label} Lv.{combat_eng.enemy.get('level', 1)}"
+        set_glitch_text(document.getElementById("enemy-visual"), enemy_text)
         ep = max(0, (combat_eng.enemy_hp / combat_eng.enemy["max_hp"]) * 100)
         document.getElementById("enemy-hp-fill").style.width = f"{ep}%"
         document.getElementById("enemy-hp-text").innerText = (
             f"{int(combat_eng.enemy_hp)}/{int(combat_eng.enemy['max_hp'])}"
         )
     else:
-        idle_el = document.getElementById("enemy-visual")
-        idle_el.innerText = i18n.get("idle_scan")
-        idle_el.setAttribute("data-text", i18n.get("idle_scan"))
+        set_glitch_text(
+            document.getElementById("enemy-visual"),
+            i18n.get("idle_scan"),
+        )
         document.getElementById("enemy-hp-fill").style.width = "0%"
         document.getElementById("enemy-hp-text").innerText = "—"
 
@@ -559,6 +736,11 @@ def update_idle_combat_ui():
     if auto_btn:
         on = i18n.get("toggle_on") if state.auto_combat else i18n.get("toggle_off")
         auto_btn.innerText = f"{i18n.get('auto_combat')}: {on}"
+
+    force_btn = document.getElementById("btn-force-fight")
+    if force_btn:
+        busy = combat_eng.status == "fighting" or combat_eng.cooldown_remaining > 0
+        set_locked(force_btn, busy, i18n.get("status_fighting") if busy else None)
 
 
 def update_dungeon_ui():
@@ -642,6 +824,97 @@ def update_quests_ui():
         quest_list_div.appendChild(q_item)
 
 
+def _story_choice_hidden(cdef):
+    """合同已接/已完成，或一次性 flag 用尽时隐藏选项。"""
+    block_flag = cdef.get("requires_not_flag")
+    if block_flag and block_flag in state.story_flags:
+        return True
+    quest_id = cdef.get("quest_id")
+    if quest_id and quest_mgr.has_quest(quest_id):
+        return True
+    return False
+
+
+def _story_choice_fingerprint(node):
+    if not node:
+        return ""
+    parts = []
+    for cid, cdef in node.get("actions", {}).items():
+        if _story_choice_hidden(cdef):
+            parts.append(f"{cid}:hidden")
+            continue
+        ok, reason = story.can_take_action(cdef, quest_mgr)
+        parts.append(f"{cid}:{ok}:{reason}")
+    return "|".join(parts)
+
+
+def _build_story_choices(current_node):
+    choice_div = document.getElementById("story-choices")
+    if not choice_div:
+        return
+    choice_div.innerHTML = ""
+    if "actions" not in current_node:
+        return
+    for cid, cdef in current_node["actions"].items():
+        if _story_choice_hidden(cdef):
+            continue
+
+        btn = document.createElement("button")
+        btn.innerText = cdef.get("label", cid)
+        btn.setAttribute("data-choice-id", cid)
+        ok, reason = story.can_take_action(cdef, quest_mgr)
+        reason_text = {
+            "insufficient_resources": i18n.get("story_need_res"),
+            "already_done": i18n.get("story_already_done"),
+            "flag_locked": i18n.get("story_choice_locked"),
+        }.get(reason, i18n.get("story_choice_locked"))
+        set_locked(btn, not ok, reason_text if not ok else None)
+
+        def make_handler(node_id, choice_id):
+            def handler(event):
+                current = story.story_nodes.get(node_id)
+                if current:
+                    action = current["actions"].get(choice_id)
+                    if action and "quest_id" in action:
+                        qid = action["quest_id"]
+                        accepted = quest_mgr.accept_quest(qid)
+                        if not accepted:
+                            notify(i18n.get("story_already_done"))
+                            update_ui()
+                            return
+                        qname = quest_mgr.definitions.get(qid, {}).get(
+                            "name", qid
+                        )
+                        tip = i18n.get("quest_accept", name=qname)
+                        notify(tip)
+                        append_story_log(tip)
+                        if qid in (
+                            "unlock_attack_suite",
+                            "unlock_data_ghost",
+                        ):
+                            quest_mgr.update_progress("special", amount=1)
+                    if choice_id == "do_reboot" and node_id == "protocol_reboot":
+                        persist = protocol_mgr.persistent_ids()
+                        state.prestige_reset(persist)
+                        dungeon.generate_level(1)
+                        manager.update_storage_caps()
+                        append_story_log(i18n.get("progress_reboot_btn"))
+                ok, reason = story.trigger_choice(choice_id)
+                if ok:
+                    update_ui()
+                else:
+                    alerts = {
+                        "insufficient_resources": i18n.get("story_need_res"),
+                        "already_done": i18n.get("story_already_done"),
+                        "flag_locked": i18n.get("story_choice_locked"),
+                    }
+                    notify(alerts.get(reason, reason))
+            return handler
+
+        btn.onclick = create_proxy(make_handler(state.current_story_node, cid))
+        choice_div.appendChild(btn)
+
+
 def update_story_ui():
     current_node = story.get_current_node()
     if not current_node:
@@ -652,8 +925,11 @@ def update_story_ui():
     if log_label:
         log_label.innerText = i18n.get("story_log_label")
 
-    if not hasattr(update_ui, "last_node") or update_ui.last_node != state.current_story_node:
-        # 上一幕归档进历史日志；当前幕钉在可见区，无需滚动阅读
+    node_changed = (
+        not hasattr(update_ui, "last_node")
+        or update_ui.last_node != state.current_story_node
+    )
+    if node_changed:
         prev_text = getattr(update_ui, "last_story_text", None)
         if prev_text:
             append_story_log(prev_text)
@@ -663,58 +939,15 @@ def update_story_ui():
         update_ui.last_node = state.current_story_node
         if current_el:
             current_el.innerText = text
-
-        choice_div = document.getElementById("story-choices")
-        choice_div.innerHTML = ""
-        if "actions" in current_node:
-            for cid, cdef in current_node["actions"].items():
-                # 一次性选项用完后直接隐藏
-                block_flag = cdef.get("requires_not_flag")
-                if block_flag and block_flag in state.story_flags:
-                    continue
-
-                btn = document.createElement("button")
-                btn.innerText = cdef.get("label", cid)
-                ok, _reason = story.can_take_action(cdef)
-                if not ok:
-                    btn.disabled = True
-                    btn.style.opacity = "0.45"
-                    btn.title = i18n.get("story_choice_locked")
-
-                def make_handler(node_id, choice_id):
-                    def handler(event):
-                        current = story.story_nodes.get(node_id)
-                        if current:
-                            action = current["actions"].get(choice_id)
-                            if action and "quest_id" in action:
-                                quest_mgr.accept_quest(action["quest_id"])
-                                if action["quest_id"] in (
-                                    "unlock_attack_suite",
-                                    "unlock_data_ghost",
-                                ):
-                                    quest_mgr.update_progress("special", amount=1)
-                            if choice_id == "do_reboot" and node_id == "protocol_reboot":
-                                persist = protocol_mgr.persistent_ids()
-                                state.prestige_reset(persist)
-                                dungeon.generate_level(1)
-                                manager.update_storage_caps()
-                                append_story_log(i18n.get("progress_reboot_btn"))
-                        ok, reason = story.trigger_choice(choice_id)
-                        if ok:
-                            update_ui()
-                        else:
-                            alerts = {
-                                "insufficient_resources": i18n.get("story_need_res"),
-                                "already_done": i18n.get("story_already_done"),
-                                "flag_locked": i18n.get("story_choice_locked"),
-                            }
-                            window.alert(alerts.get(reason, reason))
-                    return handler
-
-                btn.onclick = create_proxy(make_handler(state.current_story_node, cid))
-                choice_div.appendChild(btn)
-    elif current_el and not current_el.innerText:
-        current_el.innerText = current_node.get("text", "")
+        _build_story_choices(current_node)
+        update_ui.last_choice_fp = _story_choice_fingerprint(current_node)
+    else:
+        if current_el and not current_el.innerText:
+            current_el.innerText = current_node.get("text", "")
+        fp = _story_choice_fingerprint(current_node)
+        if getattr(update_ui, "last_choice_fp", None) != fp:
+            _build_story_choices(current_node)
+            update_ui.last_choice_fp = fp
 
 
 async def game_loop():
@@ -752,7 +985,12 @@ async def game_loop():
 
         newly = progress_mgr.check(dungeon=dungeon, protocol_mgr=protocol_mgr)
         for mid in newly:
-            append_story_log(f"[MILESTONE] {progress_mgr.definitions.get(mid, {}).get('name', mid)}")
+            append_story_log(
+                i18n.get(
+                    "milestone_log",
+                    name=progress_mgr.definitions.get(mid, {}).get("name", mid),
+                )
+            )
             story_map = {
                 "first_purge": "milestone_purge_story",
                 "protocol_t1": "milestone_protocol_story",
@@ -840,33 +1078,86 @@ async def import_save_dialog(event=None):
             reset_story_view_state(clear_text=True)
             update_ui()
         else:
-            window.alert(msg)
+            notify(msg)
 
 
-def show_side_tab(tab_id, event=None):
-    sections = document.querySelectorAll(".side-section")
-    for section in sections:
-        section.classList.remove("active")
+_SIDE_TAB_MAP = {
+    "assets": "resource-panel",
+    "progress": "progress-panel",
+    "infra": "infrastructure-panel",
+    "ops": "action-panel",
+    "quests": "quest-panel",
+    "archives": "archives-panel",
+}
+_side_scroll_proxy = None
+_side_jumping = False
 
-    target_map = {
-        "assets": "resource-panel",
-        "progress": "progress-panel",
-        "infra": "infrastructure-panel",
-        "ops": "action-panel",
-        "quests": "quest-panel",
-        "archives": "archives-panel",
-    }
-    target_id = target_map.get(tab_id)
-    if target_id:
-        document.getElementById(target_id).classList.add("active")
 
-    btns = document.querySelectorAll(".side-tab-btn")
-    for btn in btns:
-        click_attr = btn.getAttribute("py-click") or ""
-        if f"'{tab_id}'" in click_attr or f'"{tab_id}"' in click_attr:
+def _highlight_side_tab(tab_id):
+    for btn in document.querySelectorAll(".side-tab-btn"):
+        if btn.getAttribute("data-tab") == tab_id:
             btn.classList.add("active")
         else:
             btn.classList.remove("active")
+    target_id = _SIDE_TAB_MAP.get(tab_id)
+    for panel_id in _SIDE_TAB_MAP.values():
+        el = document.getElementById(panel_id)
+        if el:
+            if panel_id == target_id:
+                el.classList.add("active")
+            else:
+                el.classList.remove("active")
+
+
+def _side_tab_from_scroll():
+    container = document.getElementById("side-content")
+    if not container:
+        return None
+    marker = container.getBoundingClientRect().top + 16
+    current = "assets"
+    for tab_id, panel_id in _SIDE_TAB_MAP.items():
+        el = document.getElementById(panel_id)
+        if el and el.getBoundingClientRect().top <= marker:
+            current = tab_id
+    return current
+
+
+def _on_side_scroll(event=None):
+    if _side_jumping:
+        return
+    tab_id = _side_tab_from_scroll()
+    if tab_id:
+        _highlight_side_tab(tab_id)
+
+
+def bind_side_panel():
+    global _side_scroll_proxy
+    container = document.getElementById("side-content")
+    if not container or _side_scroll_proxy is not None:
+        return
+    _side_scroll_proxy = create_proxy(_on_side_scroll)
+    container.addEventListener("scroll", _side_scroll_proxy)
+
+
+def _scroll_side_to(target):
+    global _side_jumping
+    container = document.getElementById("side-content")
+    if not container or not target:
+        return
+    _side_jumping = True
+    c_rect = container.getBoundingClientRect()
+    t_rect = target.getBoundingClientRect()
+    container.scrollTop = max(
+        0, float(container.scrollTop) + float(t_rect.top) - float(c_rect.top)
+    )
+    _side_jumping = False
+
+
+def show_side_tab(tab_id, event=None):
+    target_id = _SIDE_TAB_MAP.get(tab_id)
+    target = document.getElementById(target_id) if target_id else None
+    _highlight_side_tab(tab_id)
+    _scroll_side_to(target)
 
 
 def update_infrastructure_ui():
@@ -885,9 +1176,10 @@ def update_infrastructure_ui():
             list_div.appendChild(empty_msg)
         else:
             for b_id, b_def in buildings_def.items():
+                locked_art = False
                 if "requires_artifact" in b_def:
                     if b_def["requires_artifact"] not in state.artifacts:
-                        continue
+                        locked_art = True
 
                 level = state.buildings.get(b_id, 0)
                 multiplier = b_def.get("cost_multiplier", 1.5)
@@ -913,6 +1205,10 @@ def update_infrastructure_ui():
 
                 item = document.createElement("div")
                 item.className = "infra-item"
+                lock_note = ""
+                if locked_art:
+                    item.classList.add("is-locked")
+                    lock_note = f"<div class='infra-cost'>{i18n.get('err_artifact_missing')}</div>"
                 item.innerHTML = f"""
                     <div class="infra-header">
                         <span>{b_def['name']}</span>
@@ -920,14 +1216,19 @@ def update_infrastructure_ui():
                     </div>
                     <div class="infra-desc">{b_def['desc']}{combat_str}</div>
                     <div class="infra-cost">{i18n.get('cost')}: {', '.join(costs)}</div>
+                    {lock_note}
                 """
 
                 btn = document.createElement("button")
                 btn.className = "infra-build-btn"
                 btn.innerText = i18n.get("upgrade") if level > 0 else i18n.get("build")
-                if not can_afford:
-                    btn.disabled = True
-                    btn.style.opacity = "0.5"
+                locked = locked_art or not can_afford
+                reason = (
+                    i18n.get("err_artifact_missing")
+                    if locked_art
+                    else i18n.get("op_no_res")
+                )
+                set_locked(btn, locked, reason if locked else None)
 
                 def make_build_handler(bid):
                     def handler(event):
@@ -940,11 +1241,11 @@ def update_infrastructure_ui():
                                 res_name = i18n.get_res_name(
                                     res, manager.definitions.get("resources", {})
                                 )
-                                window.alert(
+                                notify(
                                     i18n.get(key, amount=amount, res=res_name)
                                 )
                             else:
-                                window.alert(i18n.get(msg, msg))
+                                notify(i18n.get(msg, msg))
                     return handler
 
                 btn.onclick = create_proxy(make_build_handler(b_id))
@@ -1022,6 +1323,7 @@ async def start_game():
 
     document.getElementById("loading-overlay").style.display = "none"
     document.getElementById("game-container").style.display = "flex"
+    bind_side_panel()
 
     await game_loop()
 
