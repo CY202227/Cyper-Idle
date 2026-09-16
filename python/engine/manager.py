@@ -182,10 +182,16 @@ class GameManager:
 
         current_level = self.state.buildings.get(building_id, 0)
         multiplier = b_def.get("cost_multiplier", 1.5)
+        # 工程架构等提供 build_cost_pct（负值 = 更便宜）
+        cost_scale = max(
+            0.1, 1.0 + float(self._proto_effects().get("build_cost_pct", 0))
+        )
 
         actual_costs = {}
         for res, base_amount in b_def["cost"].items():
-            actual_costs[res] = base_amount * (multiplier ** current_level)
+            actual_costs[res] = (
+                base_amount * (multiplier ** current_level) * cost_scale
+            )
 
         for res, amount in actual_costs.items():
             if self.state.resources.get(res, 0) < amount:
@@ -214,11 +220,12 @@ class GameManager:
         return out
 
     def synergy_effects(self):
-        """聚合所有生效协同的效果。"""
+        """聚合所有生效协同的效果（受 synergy_boost 放大）。"""
+        boost = max(0.0, 1.0 + float(self._proto_effects().get("synergy_boost", 0)))
         effects = {}
         for sid, sdef in self.active_synergies():
             for k, v in sdef.get("effects", {}).items():
-                effects[k] = effects.get(k, 0) + v
+                effects[k] = effects.get(k, 0) + v * boost
         return effects
 
     def check_random_events(self):

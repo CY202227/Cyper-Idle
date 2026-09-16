@@ -988,3 +988,111 @@ button.is-locked:hover {
     opacity: 0.85;
     margin-bottom: 8px;
 }
+
+/* ---- 架构范式 / Trait 构筑 ---- */
+.arch-card {
+    border: 1px solid var(--secondary-accent);
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.arch-card:hover {
+    border-color: var(--text-color);
+}
+
+.arch-card.is-picked {
+    border-color: var(--text-color);
+    background: rgba(0, 255, 65, 0.12);
+    box-shadow: 0 0 6px rgba(0, 255, 65, 0.25) inset;
+}
+
+.arch-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.arch-budget {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin: 6px 0 10px;
+}
+
+.arch-budget.is-over {
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+.arch-axis-title {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.arch-trait {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    border: 1px dashed var(--secondary-accent);
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.arch-trait:hover {
+    border-color: var(--text-color);
+}
+
+.arch-trait.is-picked {
+    border-style: solid;
+    border-color: var(--text-color);
+    background: rgba(0, 255, 65, 0.12);
+}
+
+.arch-trait .trait-val {
+    color: var(--text-color);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.arch-trait .trait-val.is-refund {
+    color: var(--accent-color);
+}
+
+.arch-trait .trait-body {
+    flex: 1;
+}
+
+.arch-trait .trait-desc {
+    opacity: 0.75;
+}
+
+.arch-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.arch-actions button {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.arch-slot-note {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 6px;
+}
+
+.mission-item.is-persist-kept {
+    border-color: var(--text-color);
+    background: rgba(0, 255, 65, 0.10);
+}

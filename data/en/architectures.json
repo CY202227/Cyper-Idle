@@ -1,0 +1,210 @@
+{
+    "rules": {
+        "max_traits": 5,
+        "free_first": true,
+        "respec_credits_base": 200,
+        "respec_credits_per_prestige": 150,
+        "respec_credits_per_trait": 100,
+        "respec_compute_base": 20,
+        "respec_compute_per_prestige": 10
+    },
+    "axes": {
+        "combat": { "name": "Combat Style", "limit": 1 },
+        "tempo": { "name": "Operating Mode", "limit": 1 },
+        "economy": { "name": "Resource Mode", "limit": 1 },
+        "delve": { "name": "Delve Mode", "limit": 1 },
+        "flaw": { "name": "Kernel Flaws", "limit": 2 }
+    },
+    "paradigms": {
+        "standard": {
+            "id": "standard",
+            "name": "Standard Architecture",
+            "desc": "A general-purpose kernel with no built-in bias. No innate bonuses, but the widest Trait budget for a fully custom build.",
+            "trait_budget": 7,
+            "effects": {}
+        },
+        "intrusion": {
+            "id": "intrusion",
+            "name": "Intrusion Architecture",
+            "desc": "Routes all compute into the attack chain: intrusion strength and loot surge, at the cost of firewall and integrity.",
+            "trait_budget": 6,
+            "effects": {
+                "intrusion_pct": 0.18,
+                "boss_intrusion_pct": 0.25,
+                "loot_pct": 0.15,
+                "firewall_pct": -0.15,
+                "integrity_pct": -0.12
+            }
+        },
+        "fortress": {
+            "id": "fortress",
+            "name": "Fortress Architecture",
+            "desc": "Trades aggression for stability: very high integrity and firewall plus shorter purge cooldowns, but lower intrusion and loot.",
+            "trait_budget": 6,
+            "effects": {
+                "integrity_pct": 0.25,
+                "firewall_pct": 0.20,
+                "combat_cooldown_pct": -0.15,
+                "intrusion_pct": -0.12,
+                "loot_pct": -0.10
+            }
+        },
+        "ghost": {
+            "id": "ghost",
+            "name": "Ghost Architecture",
+            "desc": "A traceless infiltration kernel: extreme link speed and op efficiency, and heavy resistance to dungeon floor modifier penalties. Costs raw output and storage.",
+            "trait_budget": 6,
+            "effects": {
+                "speed_pct": 0.20,
+                "mission_duration_pct": -0.25,
+                "modifier_resist": 0.50,
+                "intrusion_pct": -0.10,
+                "storage_pct": -0.10
+            }
+        },
+        "engineering": {
+            "id": "engineering",
+            "name": "Engineering Architecture",
+            "desc": "Rebuilds the kernel into a factory: cheaper buildings, stronger synergies, higher passive output, but a weaker combat chain overall.",
+            "trait_budget": 6,
+            "effects": {
+                "build_cost_pct": -0.20,
+                "synergy_boost": 0.50,
+                "all_gen_pct": 0.12,
+                "intrusion_pct": -0.12,
+                "speed_pct": -0.10
+            }
+        }
+    },
+    "traits": {
+        "overdrive": {
+            "id": "overdrive",
+            "name": "Overdrive Pulse",
+            "desc": "Intrusion +20%, link speed +12%, but node integrity -20%.",
+            "axis": "combat",
+            "val": 3,
+            "effects": {
+                "intrusion_pct": 0.20,
+                "speed_pct": 0.12,
+                "integrity_pct": -0.20
+            }
+        },
+        "bulwark": {
+            "id": "bulwark",
+            "name": "Silent Bulwark",
+            "desc": "Firewall +22%, integrity +20%, but link speed -15%.",
+            "axis": "combat",
+            "val": 3,
+            "effects": {
+                "firewall_pct": 0.22,
+                "integrity_pct": 0.20,
+                "speed_pct": -0.15
+            }
+        },
+        "autopilot": {
+            "id": "autopilot",
+            "name": "Unattended",
+            "desc": "All output +15%, purge cooldown -20%, but intrusion -10%.",
+            "axis": "tempo",
+            "val": 2,
+            "effects": {
+                "all_gen_pct": 0.15,
+                "combat_cooldown_pct": -0.20,
+                "intrusion_pct": -0.10
+            }
+        },
+        "blitz": {
+            "id": "blitz",
+            "name": "Active Blitz",
+            "desc": "Intrusion +14%, loot +12%, but purge cooldown +15%.",
+            "axis": "tempo",
+            "val": 2,
+            "effects": {
+                "intrusion_pct": 0.14,
+                "loot_pct": 0.12,
+                "combat_cooldown_pct": 0.15
+            }
+        },
+        "powergrid": {
+            "id": "powergrid",
+            "name": "Power Grid Driven",
+            "desc": "All output +10%, storage cap +20%, but credit output -15%.",
+            "axis": "economy",
+            "val": 2,
+            "effects": {
+                "all_gen_pct": 0.10,
+                "storage_pct": 0.20,
+                "credits_gen_pct": -0.15
+            }
+        },
+        "datamill": {
+            "id": "datamill",
+            "name": "Compute Driven",
+            "desc": "Credit output +35%, loot +10%, but storage cap -20%.",
+            "axis": "economy",
+            "val": 2,
+            "effects": {
+                "credits_gen_pct": 0.35,
+                "loot_pct": 0.10,
+                "storage_pct": -0.20
+            }
+        },
+        "gambler": {
+            "id": "gambler",
+            "name": "Abyss Gambler",
+            "desc": "Loot +25%, boss intrusion +15%, but dungeon floor modifier penalties are 30% heavier.",
+            "axis": "delve",
+            "val": 3,
+            "effects": {
+                "loot_pct": 0.25,
+                "boss_intrusion_pct": 0.15,
+                "modifier_resist": -0.30
+            }
+        },
+        "surveyor": {
+            "id": "surveyor",
+            "name": "Steady Surveyor",
+            "desc": "Dungeon floor modifier penalties -40%, all output +8%, but loot -15%.",
+            "axis": "delve",
+            "val": 2,
+            "effects": {
+                "modifier_resist": 0.40,
+                "all_gen_pct": 0.08,
+                "loot_pct": -0.15
+            }
+        },
+        "fragile_core": {
+            "id": "fragile_core",
+            "name": "Fragile Core",
+            "desc": "Flaw: node integrity -18%, firewall -12%. Refunds 2 Trait budget.",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "integrity_pct": -0.18,
+                "firewall_pct": -0.12
+            }
+        },
+        "heat_debt": {
+            "id": "heat_debt",
+            "name": "Thermal Debt",
+            "desc": "Flaw: all output -12%, link speed -8%. Refunds 2 Trait budget.",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "all_gen_pct": -0.12,
+                "speed_pct": -0.08
+            }
+        },
+        "blacklisted": {
+            "id": "blacklisted",
+            "name": "Flagged Asset",
+            "desc": "Flaw: loot -15%, credit output -15%. Refunds 2 Trait budget.",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "loot_pct": -0.15,
+                "credits_gen_pct": -0.15
+            }
+        }
+    }
+}

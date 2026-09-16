@@ -45,6 +45,12 @@ class GameState:
         self.guide_shown = False
         self.max_dungeon_level = 1
         self.active_floor_modifier = None
+        # 架构范式 + Trait 构筑（跨转生保留）
+        self.architecture = None
+        self.architecture_chosen = False
+        self.traits = []
+        # 玩家手动锁定、转生后必定保留的持久协议（受槽位上限约束）
+        self.protocol_keep = []
 
     @property
     def hacking_level(self):
@@ -52,7 +58,7 @@ class GameState:
         return math.floor(math.sqrt(self.resources.get("hacking_xp", 0) / 100)) + 1
 
     def prestige_reset(self, persist_protocols):
-        """协议重启：清空进度，保留转生与持久协议。"""
+        """协议重启：清空进度，保留转生、架构构筑与持久协议（受槽位上限约束）。"""
         self.prestige += 1
         self.resources = {
             "energy": 120,
@@ -72,6 +78,7 @@ class GameState:
         self.boss_available = False
         self.pending_floor_boss = False
         self.max_dungeon_level = 1
+        self.active_floor_modifier = None
         self.protocols = list(persist_protocols)
         self.protocols_unlocked = True
         self.storage_caps = {
@@ -113,6 +120,10 @@ class GameState:
             "guide_shown": self.guide_shown,
             "max_dungeon_level": self.max_dungeon_level,
             "active_floor_modifier": self.active_floor_modifier,
+            "architecture": self.architecture,
+            "architecture_chosen": self.architecture_chosen,
+            "traits": self.traits,
+            "protocol_keep": self.protocol_keep,
         })
 
     def from_json(self, json_str):
@@ -162,3 +173,10 @@ class GameState:
         self.guide_shown = data.get("guide_shown", False)
         self.max_dungeon_level = data.get("max_dungeon_level", 1)
         self.active_floor_modifier = data.get("active_floor_modifier")
+        # 旧存档没有架构字段：留 None，由 ArchitectureManager.ensure_default() 迁移
+        self.architecture = data.get("architecture")
+        self.architecture_chosen = bool(data.get("architecture_chosen", False))
+        raw_traits = data.get("traits", [])
+        self.traits = list(raw_traits) if isinstance(raw_traits, list) else []
+        raw_keep = data.get("protocol_keep", [])
+        self.protocol_keep = list(raw_keep) if isinstance(raw_keep, list) else []

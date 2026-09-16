@@ -5,6 +5,11 @@ class ProtocolManager:
     def __init__(self, state):
         self.state = state
         self.definitions = {}
+        # 架构/Trait 构筑聚合器（可选注入）
+        self.arch_mgr = None
+
+    def set_architecture_manager(self, arch_mgr):
+        self.arch_mgr = arch_mgr
 
     def load_definitions(self, protocols_json):
         self.definitions = json.loads(protocols_json)
@@ -28,6 +33,10 @@ class ProtocolManager:
             effects["intrusion_pct"] = effects.get("intrusion_pct", 0) + 0.03 * p
             # 转生掉落：第二圈起战利品与经验更丰厚，加速收束
             effects["loot_pct"] = effects.get("loot_pct", 0) + 0.10 * p
+        # 架构范式 + Trait：走同一条全局修正通道
+        if self.arch_mgr is not None:
+            for k, v in self.arch_mgr.aggregate_effects().items():
+                effects[k] = effects.get(k, 0) + v
         return effects
 
     def research(self, protocol_id):
@@ -50,9 +59,55 @@ class ProtocolManager:
         self.state.protocols.append(protocol_id)
         return True, "ok"
 
-    def persistent_ids(self):
+    def persistent_pool(self):
+        """所有已研究且标记 persist 的协议 id。"""
         return [
             pid
             for pid in self.researched()
             if self.definitions.get(pid, {}).get("persist")
         ]
+
+    def next_slots(self):
+        """下一次重启可保留的槽位数（基于即将到达的转生次数）。"""
+        from engine.architecture import protocol_slots
+
+        return protocol_slots(int(getattr(self.state, "prestige", 0)) + 1)
+
+    def persist_plan(self):
+        """计算本次重启实际保留的持久协议。
+
+        规则：玩家手动锁定的协议优先，其余按 tier 从高到低补足，
+        总数不超过下一次重启解锁的槽位数。
+        """
+        pool = self.persistent_pool()
+        slots = self.next_slots()
+        if slots <= 0:
+            return []
+        keep = [
+            pid
+            for pid in list(getattr(self.state, "protocol_keep", None) or [])
+            if pid in pool
+        ]
+        rest = [pid for pid in pool if pid not in keep]
+        rest.sort(key=lambda pid: (-int(self.definitions.get(pid, {}).get("tier", 1)), pid))
+        plan = keep[:slots]
+        for pid in rest:
+            if len(plan) >= slots:
+                break
+            plan.append(pid)
+        return plan
+
+    def persistent_ids(self):
+        return self.persist_plan()
+
+    def toggle_keep(self, pid):
+        """切换某个持久协议的「锁定保留」状态。"""
+        if pid not in self.persistent_pool():
+            return False, "not_persistent"
+        keep = list(getattr(self.state, "protocol_keep", None) or [])
+        if pid in keep:
+            keep.remove(pid)
+        else:
+            keep.append(pid)
+        self.state.protocol_keep = keep
+        return True, "ok"

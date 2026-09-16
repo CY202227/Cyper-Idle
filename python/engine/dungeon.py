@@ -16,16 +16,31 @@ class DungeonEngine:
         # 地牢修饰词
         self.modifier_defs = {}
         self.active_modifier = None
+        # 修饰词抗性：>0 削弱负面效果，<0 放大负面效果（架构/Trait 提供）
+        self.modifier_resist = 0.0
 
     def load_modifiers(self, modifiers_json):
         self.modifier_defs = json.loads(modifiers_json)
 
+    def set_modifier_resist(self, value):
+        self.modifier_resist = float(value or 0.0)
+
     def modifier_effects(self):
-        """当前层修饰词效果（无修饰词返回空 dict）。"""
+        """当前层修饰词效果（无修饰词返回空 dict）。
+
+        负向效果按 modifier_resist 缩放：resist 0.5 → 负面只生效一半；
+        resist -0.3 → 负面加重 30%。正向效果不受影响。
+        """
         if not self.active_modifier:
             return {}
         defn = self.modifier_defs.get(self.active_modifier)
-        return dict(defn.get("effects", {})) if defn else {}
+        if not defn:
+            return {}
+        scale = max(0.0, 1.0 - self.modifier_resist)
+        out = {}
+        for k, v in defn.get("effects", {}).items():
+            out[k] = float(v) * scale if float(v) < 0 else v
+        return out
 
     def _roll_modifier(self, level_num):
         """按权重 roll 本层修饰词；浅层（<3）不出修饰词。"""

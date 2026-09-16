@@ -1,0 +1,210 @@
+{
+    "rules": {
+        "max_traits": 5,
+        "free_first": true,
+        "respec_credits_base": 200,
+        "respec_credits_per_prestige": 150,
+        "respec_credits_per_trait": 100,
+        "respec_compute_base": 20,
+        "respec_compute_per_prestige": 10
+    },
+    "axes": {
+        "combat": { "name": "战斗方式", "limit": 1 },
+        "tempo": { "name": "运行方式", "limit": 1 },
+        "economy": { "name": "资源方式", "limit": 1 },
+        "delve": { "name": "地牢方式", "limit": 1 },
+        "flaw": { "name": "内核缺陷", "limit": 2 }
+    },
+    "paradigms": {
+        "standard": {
+            "id": "standard",
+            "name": "标准架构",
+            "desc": "无固有偏向的通用内核。没有额外加成，但 Trait 预算最宽裕，适合自定义流派。",
+            "trait_budget": 7,
+            "effects": {}
+        },
+        "intrusion": {
+            "id": "intrusion",
+            "name": "入侵架构",
+            "desc": "把全部算力压进攻击链路：入侵强度与战利品大幅提升，但防火墙与完整性被削弱。",
+            "trait_budget": 6,
+            "effects": {
+                "intrusion_pct": 0.18,
+                "boss_intrusion_pct": 0.25,
+                "loot_pct": 0.15,
+                "firewall_pct": -0.15,
+                "integrity_pct": -0.12
+            }
+        },
+        "fortress": {
+            "id": "fortress",
+            "name": "堡垒架构",
+            "desc": "以静默防守换稳定收益：完整性与防火墙极高、清剿冷却更短，但入侵与掉落偏低。",
+            "trait_budget": 6,
+            "effects": {
+                "integrity_pct": 0.25,
+                "firewall_pct": 0.20,
+                "combat_cooldown_pct": -0.15,
+                "intrusion_pct": -0.12,
+                "loot_pct": -0.10
+            }
+        },
+        "ghost": {
+            "id": "ghost",
+            "name": "幽灵架构",
+            "desc": "不留痕迹的渗透内核：链路速度与行动效率极高，并能大幅抵抗地牢修饰词的负面效果，代价是正面输出与存储能力。",
+            "trait_budget": 6,
+            "effects": {
+                "speed_pct": 0.20,
+                "mission_duration_pct": -0.25,
+                "modifier_resist": 0.50,
+                "intrusion_pct": -0.10,
+                "storage_pct": -0.10
+            }
+        },
+        "engineering": {
+            "id": "engineering",
+            "name": "工程架构",
+            "desc": "把内核改造成工厂：建筑更便宜、协同加成更强、被动产出更高，但战斗链路整体偏弱。",
+            "trait_budget": 6,
+            "effects": {
+                "build_cost_pct": -0.20,
+                "synergy_boost": 0.50,
+                "all_gen_pct": 0.12,
+                "intrusion_pct": -0.12,
+                "speed_pct": -0.10
+            }
+        }
+    },
+    "traits": {
+        "overdrive": {
+            "id": "overdrive",
+            "name": "过载脉冲",
+            "desc": "入侵 +20%，链路速度 +12%，但节点完整性 -20%。",
+            "axis": "combat",
+            "val": 3,
+            "effects": {
+                "intrusion_pct": 0.20,
+                "speed_pct": 0.12,
+                "integrity_pct": -0.20
+            }
+        },
+        "bulwark": {
+            "id": "bulwark",
+            "name": "静默壁垒",
+            "desc": "防火墙 +22%，完整性 +20%，但链路速度 -15%。",
+            "axis": "combat",
+            "val": 3,
+            "effects": {
+                "firewall_pct": 0.22,
+                "integrity_pct": 0.20,
+                "speed_pct": -0.15
+            }
+        },
+        "autopilot": {
+            "id": "autopilot",
+            "name": "无人值守",
+            "desc": "全产出 +15%，清剿冷却 -20%，但入侵 -10%。",
+            "axis": "tempo",
+            "val": 2,
+            "effects": {
+                "all_gen_pct": 0.15,
+                "combat_cooldown_pct": -0.20,
+                "intrusion_pct": -0.10
+            }
+        },
+        "blitz": {
+            "id": "blitz",
+            "name": "主动突进",
+            "desc": "入侵 +14%，战利品 +12%，但清剿冷却 +15%。",
+            "axis": "tempo",
+            "val": 2,
+            "effects": {
+                "intrusion_pct": 0.14,
+                "loot_pct": 0.12,
+                "combat_cooldown_pct": 0.15
+            }
+        },
+        "powergrid": {
+            "id": "powergrid",
+            "name": "电力驱动",
+            "desc": "全产出 +10%，存储上限 +20%，但信用点产出 -15%。",
+            "axis": "economy",
+            "val": 2,
+            "effects": {
+                "all_gen_pct": 0.10,
+                "storage_pct": 0.20,
+                "credits_gen_pct": -0.15
+            }
+        },
+        "datamill": {
+            "id": "datamill",
+            "name": "算力驱动",
+            "desc": "信用点产出 +35%，战利品 +10%，但存储上限 -20%。",
+            "axis": "economy",
+            "val": 2,
+            "effects": {
+                "credits_gen_pct": 0.35,
+                "loot_pct": 0.10,
+                "storage_pct": -0.20
+            }
+        },
+        "gambler": {
+            "id": "gambler",
+            "name": "深渊赌徒",
+            "desc": "战利品 +25%，对 Boss 入侵 +15%，但地牢修饰词的负面效果加重 30%。",
+            "axis": "delve",
+            "val": 3,
+            "effects": {
+                "loot_pct": 0.25,
+                "boss_intrusion_pct": 0.15,
+                "modifier_resist": -0.30
+            }
+        },
+        "surveyor": {
+            "id": "surveyor",
+            "name": "稳线勘探",
+            "desc": "地牢修饰词负面效果 -40%，全产出 +8%，但战利品 -15%。",
+            "axis": "delve",
+            "val": 2,
+            "effects": {
+                "modifier_resist": 0.40,
+                "all_gen_pct": 0.08,
+                "loot_pct": -0.15
+            }
+        },
+        "fragile_core": {
+            "id": "fragile_core",
+            "name": "易碎内核",
+            "desc": "缺陷：节点完整性 -18%，防火墙 -12%。返还 2 点 Trait 预算。",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "integrity_pct": -0.18,
+                "firewall_pct": -0.12
+            }
+        },
+        "heat_debt": {
+            "id": "heat_debt",
+            "name": "散热负债",
+            "desc": "缺陷：全产出 -12%，链路速度 -8%。返还 2 点 Trait 预算。",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "all_gen_pct": -0.12,
+                "speed_pct": -0.08
+            }
+        },
+        "blacklisted": {
+            "id": "blacklisted",
+            "name": "通缉标记",
+            "desc": "缺陷：战利品 -15%，信用点产出 -15%。返还 2 点 Trait 预算。",
+            "axis": "flaw",
+            "val": -2,
+            "effects": {
+                "loot_pct": -0.15,
+                "credits_gen_pct": -0.15
+            }
+        }
+    }
+}

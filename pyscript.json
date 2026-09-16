@@ -13,6 +13,7 @@
             "python/engine/missions.py",
             "python/engine/progress.py",
             "python/engine/protocols.py",
+            "python/engine/architecture.py",
             "python/utils/rng.py",
             "python/utils/storage.py",
             "python/utils/i18n.py"
@@ -30,6 +31,7 @@
             "data/zh/enemies.json",
             "data/zh/protocols.json",
             "data/zh/modifiers.json",
+            "data/zh/architectures.json",
             "data/en/resources.json",
             "data/en/story.json",
             "data/en/events.json",
@@ -40,7 +42,8 @@
             "data/en/milestones.json",
             "data/en/enemies.json",
             "data/en/protocols.json",
-            "data/en/modifiers.json"
+            "data/en/modifiers.json",
+            "data/en/architectures.json"
         ] }
     ]
 }

@@ -39,6 +39,7 @@ from engine.quest import QuestManager
 from engine.missions import MissionManager
 from engine.progress import ProgressManager
 from engine.protocols import ProtocolManager
+from engine.architecture import ArchitectureManager, protocol_slots
 from engine.power import calc_player_power
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
@@ -52,12 +53,14 @@ i18n = I18nManager(state)
 dungeon = DungeonEngine(state, rng)
 mission_mgr = MissionManager(state)
 protocol_mgr = ProtocolManager(state)
+arch_mgr = ArchitectureManager(state)
 progress_mgr = ProgressManager(state)
 combat_eng = CombatEngine(state, manager, None, mission_mgr, i18n, protocol_mgr)
 quest_mgr = QuestManager(state)
 
 manager.set_protocol_manager(protocol_mgr)
 mission_mgr.set_protocol_manager(protocol_mgr)
+protocol_mgr.set_architecture_manager(arch_mgr)
 combat_eng.set_protocol_manager(protocol_mgr)
 
 
@@ -124,6 +127,16 @@ def append_story_log(msg):
     log_div.scrollTop = log_div.scrollHeight
 
 
+def sync_architecture_effects():
+    """把架构/Trait 的全局修正同步到需要独立缓存的子系统。
+
+    目前只有地牢修饰词抗性（DungeonEngine 需要独立持有该值，
+    因为 modifier_effects() 会被战斗与主循环分别调用）。
+    """
+    pe = protocol_mgr.aggregate_effects()
+    dungeon.set_modifier_resist(pe.get("modifier_resist", 0))
+
+
 async def load_game_data():
     lang = state.language
     try:
@@ -151,6 +164,8 @@ async def load_game_data():
             protocols_data = f.read()
         with open(f"data/{lang}/modifiers.json", "r", encoding="utf-8") as f:
             modifiers_data = f.read()
+        with open(f"data/{lang}/architectures.json", "r", encoding="utf-8") as f:
+            architectures_data = f.read()
 
         manager.load_definitions(res_data, evt_data, buildings_data, artifacts_data)
         story.load_nodes(story_data)
@@ -158,10 +173,13 @@ async def load_game_data():
         mission_mgr.load_definitions(missions_data)
         progress_mgr.load_definitions(milestones_data)
         protocol_mgr.load_definitions(protocols_data)
+        arch_mgr.load_definitions(architectures_data)
         combat_eng.load_enemies(enemies_data)
         combat_eng.set_i18n(i18n)
         dungeon.load_modifiers(modifiers_data)
         combat_eng.set_dungeon(dungeon)
+        arch_mgr.ensure_default()
+        sync_architecture_effects()
         manager.update_storage_caps()
     except Exception as e:
         print(f"配置文件加载失败 ({lang}): {e}")
@@ -373,6 +391,7 @@ def update_ui():
 
     update_power_ui()
     update_progress_ui()
+    update_architecture_ui()
     update_protocols_ui()
     update_missions_ui()
     update_idle_combat_ui()
@@ -490,6 +509,196 @@ def update_progress_ui():
         panel.appendChild(reboot_btn)
 
 
+# ---- 架构范式 / Trait 构筑 ----
+# 草稿与已生效构筑分离：玩家先自由试选，点「重构内核」才真正生效并扣费。
+_arch_draft = {"paradigm": None, "traits": []}
+
+
+def _arch_seed_draft(force=False):
+    if force or _arch_draft["paradigm"] is None:
+        _arch_draft["paradigm"] = (
+            arch_mgr.current_paradigm() or arch_mgr.default_paradigm()
+        )
+        _arch_draft["traits"] = list(arch_mgr.current_traits())
+
+
+def _arch_is_dirty():
+    if _arch_draft["paradigm"] != arch_mgr.current_paradigm():
+        return True
+    return sorted(_arch_draft["traits"]) != sorted(arch_mgr.current_traits())
+
+
+def _fmt_res_cost(cost):
+    parts = []
+    for res, amount in cost.items():
+        parts.append(
+            f"{i18n.get_res_name(res, manager.definitions.get('resources', {}))}:{int(amount)}"
+        )
+    return ", ".join(parts)
+
+
+def _make_arch_pick_handler(paradigm_id):
+    def handler(event):
+        _arch_draft["paradigm"] = paradigm_id
+        update_ui()
+
+    return handler
+
+
+def _make_trait_toggle_handler(trait_id):
+    def handler(event):
+        tids = _arch_draft["traits"]
+        if trait_id in tids:
+            tids.remove(trait_id)
+        else:
+            tids.append(trait_id)
+        update_ui()
+
+    return handler
+
+
+def _reset_arch_draft_handler(event):
+    _arch_seed_draft(force=True)
+    update_ui()
+
+
+def _apply_arch_handler(event):
+    ok, reason = arch_mgr.select(_arch_draft["paradigm"], _arch_draft["traits"])
+    if not ok:
+        notify(i18n.get("arch_err_" + reason, i18n.get("arch_no_res")))
+        update_ui()
+        return
+    sync_architecture_effects()
+    manager.update_storage_caps()
+    _arch_seed_draft(force=True)
+    notify(i18n.get("arch_applied"))
+    append_story_log(i18n.get("arch_applied"))
+    update_ui()
+
+
+def update_architecture_ui():
+    title = document.getElementById("architectures-title")
+    if title:
+        title.innerText = i18n.get("arch_title")
+    list_div = document.getElementById("architectures-list")
+    if not list_div:
+        return
+    list_div.innerHTML = ""
+    _arch_seed_draft()
+
+    pid = _arch_draft["paradigm"]
+    tids = list(_arch_draft["traits"])
+    total = arch_mgr.budget_total(pid)
+    used = arch_mgr.budget_used(tids)
+    ok, reason = arch_mgr.validate(pid, tids)
+    dirty = _arch_is_dirty()
+    cost = arch_mgr.respec_cost()
+
+    cur_pid = arch_mgr.current_paradigm()
+    cur_name = (
+        arch_mgr.paradigms.get(cur_pid, {}).get("name", cur_pid) if cur_pid else "-"
+    )
+    summary = document.createElement("div")
+    summary.className = "mission-meta"
+    summary.innerText = i18n.get(
+        "arch_current", name=cur_name, n=len(arch_mgr.current_traits())
+    )
+    list_div.appendChild(summary)
+
+    budget = document.createElement("div")
+    budget.className = "arch-budget" + (" is-over" if used > total else "")
+    budget.innerText = i18n.get("arch_budget", used=used, total=total)
+    list_div.appendChild(budget)
+
+    # 范式卡片
+    for apid, adef in arch_mgr.paradigms.items():
+        card = document.createElement("div")
+        card.className = "arch-card" + (" is-picked" if apid == pid else "")
+        card.innerHTML = (
+            f'<div class="arch-card-head"><span>{adef.get("name", apid)}</span>'
+            f'<span>{i18n.get("arch_budget_short", n=adef.get("trait_budget", 0))}</span></div>'
+            f'<div class="mission-desc">{adef.get("desc", "")}</div>'
+        )
+        card.onclick = create_proxy(_make_arch_pick_handler(apid))
+        list_div.appendChild(card)
+
+    # Trait 分组（按互斥轴）
+    for axis_id, axis_def in arch_mgr.axes.items():
+        axis_traits = [
+            tid
+            for tid, tdef in arch_mgr.traits.items()
+            if tdef.get("axis") == axis_id
+        ]
+        if not axis_traits:
+            continue
+        head = document.createElement("div")
+        head.className = "arch-axis-title"
+        head.innerText = (
+            f"{axis_def.get('name', axis_id)} · "
+            f"{i18n.get('arch_axis_limit', limit=axis_def.get('limit', 1))}"
+        )
+        list_div.appendChild(head)
+
+        for tid in axis_traits:
+            tdef = arch_mgr.traits[tid]
+            val = int(tdef.get("val", 0))
+            val_str = f"+{val}" if val > 0 else str(val)
+            row = document.createElement("div")
+            row.className = "arch-trait" + (" is-picked" if tid in tids else "")
+            refund_cls = " is-refund" if val < 0 else ""
+            row.innerHTML = (
+                f'<span class="trait-val{refund_cls}">{val_str}</span>'
+                f'<span class="trait-body"><b>{tdef.get("name", tid)}</b><br>'
+                f'<span class="trait-desc">{tdef.get("desc", "")}</span></span>'
+            )
+            row.onclick = create_proxy(_make_trait_toggle_handler(tid))
+            list_div.appendChild(row)
+
+    actions = document.createElement("div")
+    actions.className = "arch-actions"
+
+    apply_btn = document.createElement("button")
+    apply_btn.innerText = i18n.get("arch_confirm")
+    block_reason = None
+    if not dirty:
+        block_reason = i18n.get("arch_no_change")
+    elif not ok:
+        block_reason = i18n.get("arch_err_" + reason, i18n.get("arch_no_res"))
+    elif cost and not arch_mgr.can_afford():
+        block_reason = i18n.get("arch_no_res")
+    set_locked(apply_btn, block_reason is not None, block_reason)
+    apply_btn.onclick = create_proxy(_apply_arch_handler)
+    actions.appendChild(apply_btn)
+
+    reset_btn = document.createElement("button")
+    reset_btn.innerText = i18n.get("arch_reset")
+    set_locked(reset_btn, not dirty, i18n.get("arch_no_change"))
+    reset_btn.onclick = create_proxy(_reset_arch_draft_handler)
+    actions.appendChild(reset_btn)
+    list_div.appendChild(actions)
+
+    if dirty and not ok:
+        err = document.createElement("div")
+        err.className = "arch-budget is-over"
+        err.innerText = i18n.get("arch_err_" + reason, i18n.get("arch_no_res"))
+        list_div.appendChild(err)
+
+    note = document.createElement("div")
+    note.className = "arch-slot-note"
+    note.innerText = (
+        i18n.get("arch_free") if not cost else i18n.get("arch_cost", cost=_fmt_res_cost(cost))
+    )
+    list_div.appendChild(note)
+
+
+def _make_keep_toggle(protocol_id):
+    def handler(event):
+        protocol_mgr.toggle_keep(protocol_id)
+        update_ui()
+
+    return handler
+
+
 def update_protocols_ui():
     title = document.getElementById("protocols-title")
     if title:
@@ -505,6 +714,20 @@ def update_protocols_ui():
         empty.innerText = i18n.get("protocols_locked")
         list_div.appendChild(empty)
         return
+
+    # 持久槽位提示
+    pool = protocol_mgr.persistent_pool()
+    slots = protocol_mgr.next_slots()
+    plan = protocol_mgr.persist_plan()
+    if pool:
+        slot_note = document.createElement("div")
+        slot_note.className = "arch-slot-note"
+        slot_note.innerText = (
+            i18n.get("protocol_slots_label", used=len(plan), slots=slots)
+            + " · "
+            + i18n.get("protocol_keep_hint")
+        )
+        list_div.appendChild(slot_note)
 
     items = sorted(
         protocol_mgr.definitions.items(),
@@ -528,6 +751,18 @@ def update_protocols_ui():
             done.className = "mission-meta"
             done.innerText = i18n.get("protocol_done")
             item.appendChild(done)
+            # 持久协议可手动锁定，优先占用转生槽位
+            if pdef.get("persist"):
+                keep = pid in list(getattr(state, "protocol_keep", None) or [])
+                keep_btn = document.createElement("button")
+                keep_btn.className = "refactor-btn-mini"
+                keep_btn.innerText = i18n.get(
+                    "protocol_keep_on" if keep else "protocol_keep_off"
+                )
+                if keep:
+                    item.classList.add("is-persist-kept")
+                keep_btn.onclick = create_proxy(_make_keep_toggle(pid))
+                item.appendChild(keep_btn)
         else:
             btn = document.createElement("button")
             btn.innerText = i18n.get("protocol_research")
@@ -937,6 +1172,7 @@ def _build_story_choices(current_node):
                         state.prestige_reset(persist)
                         dungeon.generate_level(1)
                         manager.update_storage_caps()
+                        sync_architecture_effects()
                         append_story_log(i18n.get("progress_reboot_btn"))
                 ok, reason = story.trigger_choice(choice_id)
                 if ok:
@@ -998,6 +1234,9 @@ async def game_loop():
 
         manager.tick(delta_time)
         mission_mgr.tick(delta_time)
+        # 架构/Trait 的全局修正同步到地牢修饰词抗性（低频即可）
+        if state.tick_count % 20 == 0:
+            sync_architecture_effects()
 
         farm_level = max(
             state.hacking_level,
@@ -1409,6 +1648,11 @@ async def start_game():
     else:
         print("开启新游戏")
         state.seed = rng.get_seed()
+
+    # 旧存档迁移：没有架构字段时落到默认范式，并同步修饰词抗性
+    arch_mgr.ensure_default()
+    sync_architecture_effects()
+    manager.update_storage_caps()
 
     start_floor = max(1, getattr(state, "max_dungeon_level", 1))
     dungeon.generate_level(start_floor)
