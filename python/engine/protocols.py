@@ -7,9 +7,14 @@ class ProtocolManager:
         self.definitions = {}
         # 架构/Trait 构筑聚合器（可选注入）
         self.arch_mgr = None
+        # 内核跃迁永久升级聚合器（可选注入）
+        self.asc_mgr = None
 
     def set_architecture_manager(self, arch_mgr):
         self.arch_mgr = arch_mgr
+
+    def set_ascension_manager(self, asc_mgr):
+        self.asc_mgr = asc_mgr
 
     def load_definitions(self, protocols_json):
         self.definitions = json.loads(protocols_json)
@@ -36,6 +41,10 @@ class ProtocolManager:
         # 架构范式 + Trait：走同一条全局修正通道
         if self.arch_mgr is not None:
             for k, v in self.arch_mgr.aggregate_effects().items():
+                effects[k] = effects.get(k, 0) + v
+        # 内核跃迁永久升级：同一条通道
+        if self.asc_mgr is not None:
+            for k, v in self.asc_mgr.aggregate_effects().items():
                 effects[k] = effects.get(k, 0) + v
         return effects
 
@@ -71,7 +80,10 @@ class ProtocolManager:
         """下一次重启可保留的槽位数（基于即将到达的转生次数）。"""
         from engine.architecture import protocol_slots
 
-        return protocol_slots(int(getattr(self.state, "prestige", 0)) + 1)
+        bonus = 0
+        if self.asc_mgr is not None:
+            bonus = int(self.asc_mgr.protocol_slot_bonus())
+        return protocol_slots(int(getattr(self.state, "prestige", 0)) + 1, bonus)
 
     def persist_plan(self):
         """计算本次重启实际保留的持久协议。

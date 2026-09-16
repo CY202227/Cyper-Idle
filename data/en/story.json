@@ -354,6 +354,25 @@
             "ok": { "label": "Second loop", "next_node": "energy_stable" }
         }
     },
+    "ascension_gate": {
+        "text": "The protocol stack is saturated - tier 4 no longer opens anything new. But there is one interface in the kernel nobody has touched. [K0_Echo]: 'A reboot just runs the same loop again. To actually move forward you burn the whole stack and trade it for one Architecture Point written into the hardware. Expensive, but permanent.'",
+        "actions": {
+            "do_ascend": {
+                "label": "Perform Kernel Ascension",
+                "next_node": "ascension_done"
+            },
+            "later": {
+                "label": "Accumulate more",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "ascension_done": {
+        "text": "Kernel Ascension complete. Every protocol you researched has been fed to the furnace and your reboot count is back to zero - but the Architecture Points are burned into hardware, and no reset can take them. You start from nothing, this time with memory.",
+        "actions": {
+            "ok": { "label": "Reconnect", "next_node": "energy_stable" }
+        }
+    },
     "echo_finale": {
         "text": "[K0_Echo]: 'Stable. Weekly arc sealed—you rewrote this link's echo. Thank you, jacker.'",
         "actions": {

@@ -51,6 +51,10 @@ class GameState:
         self.traits = []
         # 玩家手动锁定、转生后必定保留的持久协议（受槽位上限约束）
         self.protocol_keep = []
+        # 内核跃迁（第 2 层转生）：永久货币与永久升级等级
+        self.arch_points = 0
+        self.ascension_upgrades = {}
+        self.ascension_count = 0
 
     @property
     def hacking_level(self):
@@ -75,7 +79,8 @@ class GameState:
         self.auto_explore = False
         self.combat_wins = 0
         self.threat_tier = min(2, self.prestige)
-        self.boss_available = False
+        # boss_available 由 depth_10 里程碑授予；里程碑不会重复触发，
+        # 因此这里不能清掉，否则第一次重启后核心突袭将永久失效。
         self.pending_floor_boss = False
         self.max_dungeon_level = 1
         self.active_floor_modifier = None
@@ -89,6 +94,49 @@ class GameState:
         }
         if "protocol_reboot_done" not in self.story_flags:
             self.story_flags.append("protocol_reboot_done")
+
+    def ascension_reset(self, gain=0, threat_floor=0):
+        """内核跃迁：比协议重启更深一层。
+
+        代价：**清空全部协议研究**（包括持久槽位）并把转生计数归零——
+        放弃这一轮积累的协议栈。
+        保留：架构构筑、Trait、已购永久升级、里程碑与剧情标记
+        （里程碑不会重复触发，清掉会造成解锁死锁）。
+        """
+        self.ascension_count = int(getattr(self, "ascension_count", 0)) + 1
+        self.arch_points = int(getattr(self, "arch_points", 0)) + max(0, int(gain))
+        self.prestige = 0
+        # 跃迁代价：协议全清
+        self.protocols = []
+        self.protocol_keep = []
+        self.resources = {
+            "energy": 150,
+            "data_scraps": 0,
+            "credits": 0,
+            "compute": 0,
+            "hacking_xp": 0,
+        }
+        self.buildings = {}
+        self.missions = []
+        self.active_quests = []
+        self.completed_quests = []
+        self.auto_combat = False
+        self.auto_explore = False
+        self.combat_wins = 0
+        self.boss_kills = 0
+        self.pending_floor_boss = False
+        self.max_dungeon_level = 1
+        self.active_floor_modifier = None
+        # 跃迁次数抬升起始威胁阶：越跃迁越硬，但掉落更好
+        self.threat_tier = max(0, int(threat_floor))
+        self.storage_caps = {
+            "energy": 500,
+            "data_scraps": 500,
+            "credits": 5000,
+            "compute": 200,
+        }
+        if "kernel_ascended" not in self.story_flags:
+            self.story_flags.append("kernel_ascended")
 
     def to_json(self):
         return json.dumps({
@@ -124,6 +172,9 @@ class GameState:
             "architecture_chosen": self.architecture_chosen,
             "traits": self.traits,
             "protocol_keep": self.protocol_keep,
+            "arch_points": self.arch_points,
+            "ascension_upgrades": self.ascension_upgrades,
+            "ascension_count": self.ascension_count,
         })
 
     def from_json(self, json_str):
@@ -180,3 +231,7 @@ class GameState:
         self.traits = list(raw_traits) if isinstance(raw_traits, list) else []
         raw_keep = data.get("protocol_keep", [])
         self.protocol_keep = list(raw_keep) if isinstance(raw_keep, list) else []
+        self.arch_points = int(data.get("arch_points", 0) or 0)
+        raw_ups = data.get("ascension_upgrades", {})
+        self.ascension_upgrades = dict(raw_ups) if isinstance(raw_ups, dict) else {}
+        self.ascension_count = int(data.get("ascension_count", 0) or 0)

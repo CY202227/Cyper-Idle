@@ -7,7 +7,8 @@
         "depth_10",
         "core_breach",
         "echo_stable",
-        "abyss_watch"
+        "abyss_watch",
+        "ascension_ready"
     ],
     "milestones": {
         "boot": {
@@ -83,6 +84,14 @@
             "require": { "prestige": 3, "boss_kills": 5 },
             "unlock": { "story_flag": "milestone_abyss" },
             "reward": { "credits": 3000, "hacking_xp": 1500, "compute": 120 }
+        },
+        "ascension_ready": {
+            "name": "Kernel Ascension",
+            "desc": "Achieve 3 protocol reboots, 3 core guardian kills, and reach dungeon floor 20.",
+            "hint": "You may now perform a Kernel Ascension: wipe all protocol research (including persist slots) for permanent Architecture Points.",
+            "require": { "prestige": 3, "boss_kills": 3, "dungeon_level": 20 },
+            "unlock": { "story_flag": "milestone_ascension" },
+            "reward": { "credits": 5000, "hacking_xp": 2500, "compute": 200 }
         }
     }
 }

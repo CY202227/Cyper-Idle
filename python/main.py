@@ -40,6 +40,7 @@ from engine.missions import MissionManager
 from engine.progress import ProgressManager
 from engine.protocols import ProtocolManager
 from engine.architecture import ArchitectureManager, protocol_slots
+from engine.ascension import AscensionManager
 from engine.power import calc_player_power
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
@@ -54,6 +55,7 @@ dungeon = DungeonEngine(state, rng)
 mission_mgr = MissionManager(state)
 protocol_mgr = ProtocolManager(state)
 arch_mgr = ArchitectureManager(state)
+asc_mgr = AscensionManager(state)
 progress_mgr = ProgressManager(state)
 combat_eng = CombatEngine(state, manager, None, mission_mgr, i18n, protocol_mgr)
 quest_mgr = QuestManager(state)
@@ -61,6 +63,8 @@ quest_mgr = QuestManager(state)
 manager.set_protocol_manager(protocol_mgr)
 mission_mgr.set_protocol_manager(protocol_mgr)
 protocol_mgr.set_architecture_manager(arch_mgr)
+protocol_mgr.set_ascension_manager(asc_mgr)
+arch_mgr.set_ascension_manager(asc_mgr)
 combat_eng.set_protocol_manager(protocol_mgr)
 
 
@@ -166,6 +170,8 @@ async def load_game_data():
             modifiers_data = f.read()
         with open(f"data/{lang}/architectures.json", "r", encoding="utf-8") as f:
             architectures_data = f.read()
+        with open(f"data/{lang}/ascension.json", "r", encoding="utf-8") as f:
+            ascension_data = f.read()
 
         manager.load_definitions(res_data, evt_data, buildings_data, artifacts_data)
         story.load_nodes(story_data)
@@ -174,6 +180,7 @@ async def load_game_data():
         progress_mgr.load_definitions(milestones_data)
         protocol_mgr.load_definitions(protocols_data)
         arch_mgr.load_definitions(architectures_data)
+        asc_mgr.load_definitions(ascension_data)
         combat_eng.load_enemies(enemies_data)
         combat_eng.set_i18n(i18n)
         dungeon.load_modifiers(modifiers_data)
@@ -302,6 +309,10 @@ def update_status_bar():
         bits.append(
             f"{i18n.get('protocols_title')}:{len(getattr(state, 'protocols', []))}"
         )
+    if getattr(state, "ascension_count", 0) > 0:
+        bits.append(
+            f"{i18n.get('asc_title')}:{int(getattr(state, 'arch_points', 0))}"
+        )
     document.getElementById("status-text").innerText = " · ".join(bits)
 
 
@@ -391,6 +402,7 @@ def update_ui():
 
     update_power_ui()
     update_progress_ui()
+    update_ascension_ui()
     update_architecture_ui()
     update_protocols_ui()
     update_missions_ui()
@@ -507,6 +519,144 @@ def update_progress_ui():
 
         reboot_btn.onclick = create_proxy(do_reboot_ui)
         panel.appendChild(reboot_btn)
+
+
+# ---- 内核跃迁（第二层转生）----
+def _fmt_points(n):
+    return i18n.get("asc_cost", n=int(n))
+
+
+def _make_asc_buy_handler(uid):
+    def handler(event):
+        ok, reason = asc_mgr.purchase(uid)
+        if not ok:
+            alerts = {
+                "asc_maxed": i18n.get("asc_maxed"),
+                "asc_no_points": i18n.get("asc_no_points"),
+                "asc_unknown": i18n.get("asc_unknown"),
+            }
+            notify(alerts.get(reason, reason))
+        else:
+            name = asc_mgr.upgrades.get(uid, {}).get("name", uid)
+            tip = i18n.get("asc_bought", name=name, lv=asc_mgr.level(uid))
+            notify(tip)
+            append_story_log(tip)
+            sync_architecture_effects()
+            manager.update_storage_caps()
+        update_ui()
+
+    return handler
+
+
+def _do_ascend():
+    """执行内核跃迁，返回获得的架构点；条件不足时返回 0。"""
+    ok, _missing = asc_mgr.can_ascend()
+    if not ok:
+        return 0
+    gain = asc_mgr.gain_for()
+    state.ascension_reset(gain=gain, threat_floor=asc_mgr.threat_floor())
+    dungeon.generate_level(1)
+    manager.update_storage_caps()
+    sync_architecture_effects()
+    return gain
+
+
+def _ascend_handler(event):
+    ok, _missing = asc_mgr.can_ascend()
+    if not ok:
+        notify(i18n.get("asc_locked"))
+        update_ui()
+        return
+    gain = _do_ascend()
+    tip = i18n.get("asc_done", n=gain)
+    notify(tip)
+    append_story_log(tip)
+    update_ui()
+
+
+def update_ascension_ui():
+    title = document.getElementById("ascension-title")
+    if title:
+        title.innerText = i18n.get("asc_title")
+    list_div = document.getElementById("ascension-list")
+    if not list_div:
+        return
+    list_div.innerHTML = ""
+
+    head = document.createElement("div")
+    head.className = "mission-meta"
+    head.innerText = (
+        i18n.get("asc_points", n=int(getattr(state, "arch_points", 0)))
+        + " · "
+        + i18n.get("asc_count", n=int(getattr(state, "ascension_count", 0)))
+    )
+    list_div.appendChild(head)
+
+    req_title = document.createElement("div")
+    req_title.className = "arch-axis-title"
+    req_title.innerText = i18n.get("asc_req_title")
+    list_div.appendChild(req_title)
+
+    label_map = {
+        "prestige": "asc_req_prestige",
+        "boss_kills": "asc_req_boss_kills",
+        "dungeon_level": "asc_req_dungeon_level",
+    }
+    for key, info in asc_mgr.unlock_status().items():
+        row = document.createElement("div")
+        row.className = "asc-req " + ("is-met" if info["met"] else "is-missing")
+        row.innerText = i18n.get(
+            label_map.get(key, key), need=info["need"], have=info["have"]
+        )
+        list_div.appendChild(row)
+
+    can, _missing = asc_mgr.can_ascend()
+    gain_div = document.createElement("div")
+    gain_div.className = "arch-budget"
+    gain_div.innerText = i18n.get("asc_gain", n=asc_mgr.gain_for())
+    list_div.appendChild(gain_div)
+
+    warn = document.createElement("div")
+    warn.className = "asc-warn"
+    warn.innerText = i18n.get("asc_warn")
+    list_div.appendChild(warn)
+
+    asc_btn = document.createElement("button")
+    asc_btn.innerText = i18n.get("asc_do")
+    set_locked(asc_btn, not can, None if can else i18n.get("asc_locked"))
+    asc_btn.onclick = create_proxy(_ascend_handler)
+    list_div.appendChild(asc_btn)
+
+    up_title = document.createElement("div")
+    up_title.className = "arch-axis-title"
+    up_title.innerText = i18n.get("asc_upgrades_title")
+    list_div.appendChild(up_title)
+
+    for uid, udef in asc_mgr.upgrades.items():
+        lvl = asc_mgr.level(uid)
+        max_lv = asc_mgr.max_level(uid)
+        cost = asc_mgr.next_cost(uid)
+        item = document.createElement("div")
+        item.className = "asc-upgrade" + (" is-maxed" if cost is None else "")
+        cost_str = i18n.get("asc_maxed") if cost is None else _fmt_points(cost)
+        item.innerHTML = (
+            f'<div class="asc-head"><span>{udef.get("name", uid)}</span>'
+            f'<span>{i18n.get("asc_lv", lv=lvl, max=max_lv)}</span></div>'
+            f'<div class="mission-desc">{udef.get("desc", "")}</div>'
+            f'<div class="mission-meta">{cost_str}</div>'
+        )
+        if cost is not None:
+            btn = document.createElement("button")
+            btn.innerText = i18n.get("asc_buy")
+            ok, reason = asc_mgr.can_purchase(uid)
+            set_locked(
+                btn,
+                not ok,
+                i18n.get("asc_no_points") if reason == "asc_no_points" else None,
+            )
+            btn.onclick = create_proxy(_make_asc_buy_handler(uid))
+            item.appendChild(btn)
+        list_div.appendChild(item)
 
 
 # ---- 架构范式 / Trait 构筑 ----
@@ -1174,6 +1324,10 @@ def _build_story_choices(current_node):
                         manager.update_storage_caps()
                         sync_architecture_effects()
                         append_story_log(i18n.get("progress_reboot_btn"))
+                    if choice_id == "do_ascend" and node_id == "ascension_gate":
+                        gain = _do_ascend()
+                        if gain:
+                            append_story_log(i18n.get("asc_done", n=gain))
                 ok, reason = story.trigger_choice(choice_id)
                 if ok:
                     update_ui()
@@ -1275,6 +1429,7 @@ async def game_loop():
                 "depth_10": "milestone_depth_story",
                 "core_breach": "protocol_reboot",
                 "echo_stable": "echo_finale",
+                "ascension_ready": "ascension_gate",
             }
             if mid in story_map:
                 state.current_story_node = story_map[mid]

@@ -354,6 +354,25 @@
             "ok": { "label": "第二圈开始", "next_node": "energy_stable" }
         }
     },
+    "ascension_gate": {
+        "text": "协议栈已经饱和——第 4 层协议不再带来新的可能。但内核深处还有一层没被触碰的接口。 [K0_Echo]: '协议重启只是换一圈跑。真正往前走，得把这一整摞协议烧掉，换成一枚写进硬件的架构点。贵，但永久。'",
+        "actions": {
+            "do_ascend": {
+                "label": "执行内核跃迁",
+                "next_node": "ascension_done"
+            },
+            "later": {
+                "label": "再攒一攒",
+                "next_node": "energy_stable"
+            }
+        }
+    },
+    "ascension_done": {
+        "text": "内核跃迁完成。全部协议研究被烧进熔炉，转生计数归零，但架构点已写入硬件——它不会再被任何一层重置带走。从零开始，但这一次你带着记忆。",
+        "actions": {
+            "ok": { "label": "重新接入", "next_node": "energy_stable" }
+        }
+    },
     "echo_finale": {
         "text": "[K0_Echo]: '稳态达成。本周主线收束——你改写了这条链路的回声。谢谢你，接入者。'",
         "actions": {

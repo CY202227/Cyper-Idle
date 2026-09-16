@@ -7,7 +7,8 @@
         "depth_10",
         "core_breach",
         "echo_stable",
-        "abyss_watch"
+        "abyss_watch",
+        "ascension_ready"
     ],
     "milestones": {
         "boot": {
@@ -83,6 +84,14 @@
             "require": { "prestige": 3, "boss_kills": 5 },
             "unlock": { "story_flag": "milestone_abyss" },
             "reward": { "credits": 3000, "hacking_xp": 1500, "compute": 120 }
+        },
+        "ascension_ready": {
+            "name": "内核跃迁",
+            "desc": "达成 3 次协议重启、3 次核心守卫击杀，并抵达地牢第 20 层。",
+            "hint": "满足条件后可执行「内核跃迁」：清空全部协议研究（含持久槽位），换取永久架构点。",
+            "require": { "prestige": 3, "boss_kills": 3, "dungeon_level": 20 },
+            "unlock": { "story_flag": "milestone_ascension" },
+            "reward": { "credits": 5000, "hacking_xp": 2500, "compute": 200 }
         }
     }
 }
