@@ -122,7 +122,8 @@
         "enemy_special_shield_regen": "> [词条] 护盾再生：敌方每回合回复少量生命",
         "enemy_leech": "> 敌方汲取回复 {heal}",
         "floor_mod_prefix": "本层修饰",
-        "floor_mod_active": "[{name}] {desc}"
+        "floor_mod_active": "[{name}] {desc}",
+        "streak_label": "连胜"
     },
     "en": {
         "export_save": "Export Save",
@@ -247,6 +248,7 @@
         "enemy_special_shield_regen": "> [TRAIT] Shield Regen: enemy heals each turn",
         "enemy_leech": "> Enemy leeches {heal} HP",
         "floor_mod_prefix": "Floor Mod",
-        "floor_mod_active": "[{name}] {desc}"
+        "floor_mod_active": "[{name}] {desc}",
+        "streak_label": "STREAK"
     }
 }

@@ -44,6 +44,7 @@ class GameState:
         self.pending_floor_boss = False
         self.guide_shown = False
         self.max_dungeon_level = 1
+        self.active_floor_modifier = None
 
     @property
     def hacking_level(self):
@@ -111,6 +112,7 @@ class GameState:
             "pending_floor_boss": self.pending_floor_boss,
             "guide_shown": self.guide_shown,
             "max_dungeon_level": self.max_dungeon_level,
+            "active_floor_modifier": self.active_floor_modifier,
         })
 
     def from_json(self, json_str):
@@ -159,3 +161,4 @@ class GameState:
         self.pending_floor_boss = data.get("pending_floor_boss", False)
         self.guide_shown = data.get("guide_shown", False)
         self.max_dungeon_level = data.get("max_dungeon_level", 1)
+        self.active_floor_modifier = data.get("active_floor_modifier")
