@@ -342,10 +342,18 @@ def update_ui():
         level_span = document.createElement("span")
         level_span.id = "level-display"
         status_bar.insertBefore(level_span, status_bar.firstChild)
-    level_span.innerText = (
+    level_text = (
         f"{i18n.get('hacking_level')}: {state.hacking_level} · "
         f"{i18n.get('floor_label')}: {dungeon.current_level}"
     )
+    # 当前层修饰词常驻显示
+    if dungeon.active_modifier:
+        mdef = dungeon.modifier_defs.get(dungeon.active_modifier, {})
+        level_text += (
+            f" · {i18n.get('floor_mod_prefix')}: "
+            f"{mdef.get('name', dungeon.active_modifier)}"
+        )
+    level_span.innerText = level_text
     update_status_bar()
 
     res_list = document.getElementById("resources-list")
@@ -397,6 +405,14 @@ def update_power_ui():
         protocol_effects=protocol_mgr.aggregate_effects(),
         synergy_effects=manager.synergy_effects(),
     )
+    streak_html = ""
+    wins = getattr(combat_eng, "win_streak", 0)
+    if wins >= 2:
+        bonus = min(30, (wins - 1) * 2)
+        streak_html = (
+            f"<div class='power-meta'>{i18n.get('streak_label')}: "
+            f"{wins} (+{bonus}%)</div>"
+        )
     panel.innerHTML = f"""
         <div class="power-stat">{i18n.get('stat_intrusion')}: {int(power['intrusion'])}</div>
         <div class="power-stat">{i18n.get('stat_firewall')}: {int(power['firewall'])}</div>
@@ -404,6 +420,7 @@ def update_power_ui():
         <div class="power-stat">{i18n.get('stat_speed')}: {int(power['speed'])}</div>
         <div class="power-meta">{i18n.get('power_mult')}: x{power['mult']:.2f}</div>
         <div class="power-meta">{i18n.get('ops_penalty')}: -{int(power['ops_penalty']*100)}%</div>
+        {streak_html}
     """
 
 
@@ -1041,15 +1058,17 @@ async def game_loop():
                 )
             progress_mgr.pending_popups = []
 
-        # 随机事件反馈进历史日志
+        # 随机事件反馈进历史日志（描述已按语言加载）
         if getattr(manager, "event_log", None):
             for edesc in manager.event_log:
-                append_story_log(i18n.get(f"event_{edesc}", edesc))
+                append_story_log(edesc)
             manager.event_log = []
 
         quest_mgr.update_progress("collect", "data_scraps")
         quest_mgr.update_progress("protocol")
         quest_mgr.update_progress("boss")
+        # 同步当前层修饰词进 state，随存档持久化
+        state.active_floor_modifier = dungeon.active_modifier
         update_ui()
 
         if state.tick_count % 10 == 0:
@@ -1393,6 +1412,10 @@ async def start_game():
 
     start_floor = max(1, getattr(state, "max_dungeon_level", 1))
     dungeon.generate_level(start_floor)
+    # 恢复存档时的本层修饰词（存档里带则还原，否则用新 roll 的）
+    saved_mod = getattr(state, "active_floor_modifier", None)
+    if saved_mod and saved_mod in dungeon.modifier_defs:
+        dungeon.active_modifier = saved_mod
 
     if not getattr(state, "guide_shown", False):
         append_story_log(i18n.get("guide_step"))
