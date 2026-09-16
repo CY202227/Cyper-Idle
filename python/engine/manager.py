@@ -121,11 +121,20 @@ class GameManager:
 
                 if "auto_gen" in effects:
                     pe = self._proto_effects()
-                    gen_mult = 1.0 + float(pe.get("all_gen_pct", 0))
+                    syn = self.synergy_effects()
+                    gen_mult = (
+                        1.0
+                        + float(pe.get("all_gen_pct", 0))
+                        + float(syn.get("all_gen_pct", 0))
+                    )
                     for res, rate in effects["auto_gen"].items():
                         rmult = gen_mult
                         if res == "credits":
-                            rmult *= 1.0 + float(pe.get("credits_gen_pct", 0))
+                            rmult *= (
+                                1.0
+                                + float(pe.get("credits_gen_pct", 0))
+                                + float(syn.get("credits_gen_pct", 0))
+                            )
                         self.state.resources[res] = (
                             self.state.resources.get(res, 0)
                             + (rate * level * delta_time * rmult)
@@ -188,6 +197,29 @@ class GameManager:
         self.state.buildings[building_id] = current_level + 1
         self.update_storage_caps()
         return True, "build_ok"
+
+    # ---- 建筑协同 ----
+    def active_synergies(self):
+        """返回当前生效的协同列表 [(sid, defn), ...]。"""
+        syn_defs = self.definitions.get("buildings", {}).get("synergies", {})
+        out = []
+        for sid, sdef in syn_defs.items():
+            met = True
+            for bid, lvl in sdef.get("require", {}).items():
+                if self.state.buildings.get(bid, 0) < lvl:
+                    met = False
+                    break
+            if met:
+                out.append((sid, sdef))
+        return out
+
+    def synergy_effects(self):
+        """聚合所有生效协同的效果。"""
+        effects = {}
+        for sid, sdef in self.active_synergies():
+            for k, v in sdef.get("effects", {}).items():
+                effects[k] = effects.get(k, 0) + v
+        return effects
 
     def check_random_events(self):
         available_events = []

@@ -1,3 +1,4 @@
+import json
 import random
 from collections import deque
 
@@ -12,9 +13,40 @@ class DungeonEngine:
         self.player_pos = [0, 0]
         self.current_level = 1
         self.log = []
+        # 地牢修饰词
+        self.modifier_defs = {}
+        self.active_modifier = None
+
+    def load_modifiers(self, modifiers_json):
+        self.modifier_defs = json.loads(modifiers_json)
+
+    def modifier_effects(self):
+        """当前层修饰词效果（无修饰词返回空 dict）。"""
+        if not self.active_modifier:
+            return {}
+        defn = self.modifier_defs.get(self.active_modifier)
+        return dict(defn.get("effects", {})) if defn else {}
+
+    def _roll_modifier(self, level_num):
+        """按权重 roll 本层修饰词；浅层（<3）不出修饰词。"""
+        if level_num < 3 or not self.modifier_defs:
+            return None
+        pool = [
+            (mid, float(defn.get("weight", 1)))
+            for mid, defn in self.modifier_defs.items()
+        ]
+        total = sum(w for _, w in pool)
+        roll = self.rng.rng.random() * total
+        acc = 0.0
+        for mid, w in pool:
+            acc += w
+            if roll <= acc:
+                return mid
+        return pool[-1][0]
 
     def generate_level(self, level_num=1):
         self.current_level = level_num
+        self.active_modifier = self._roll_modifier(level_num)
         self.grid = [["#" for _ in range(self.width)] for _ in range(self.height)]
 
         x, y = self.width // 2, self.height // 2
@@ -38,11 +70,16 @@ class DungeonEngine:
             ex, ey = spawn_pool.pop()
             self.grid[ey][ex] = "E"
 
+        # 修饰词影响 POI 分布：静默区砍敌人格，其他保持
+        eff = self.modifier_effects()
+        enemy_scale = 1.0 + float(eff.get("enemy_spawn_pct", 0))
+        enemy_count = max(1, int(round(3 * max(0.0, enemy_scale))))
+
         symbols = {
             "!": 2,
             "?": 2,
             "*": 3,
-            "%": 3,
+            "%": enemy_count,
         }
 
         for sym, count in symbols.items():

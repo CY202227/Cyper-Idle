@@ -40,6 +40,10 @@ class CombatEngine:
         self.last_rewards = {}
         self.vs_boss = False
         self.win_streak = 0
+        self.dungeon = None
+
+    def set_dungeon(self, dungeon):
+        self.dungeon = dungeon
 
     def set_i18n(self, i18n):
         self.i18n = i18n
@@ -73,11 +77,15 @@ class CombatEngine:
     def get_power(self, vs_boss=None):
         if vs_boss is None:
             vs_boss = self.vs_boss
+        syn = {}
+        if self.manager is not None and hasattr(self.manager, "synergy_effects"):
+            syn = self.manager.synergy_effects()
         return calc_player_power(
             self.state,
             self._buildings(),
             protocol_effects=self._effects(),
             vs_boss=vs_boss,
+            synergy_effects=syn,
         )
 
     def can_farm(self):
@@ -167,6 +175,11 @@ class CombatEngine:
         self.status = "fighting"
         self.turn = 0
 
+        # 地牢修饰词（若有）
+        meff = {}
+        if self.dungeon is not None:
+            meff = self.dungeon.modifier_effects()
+
         # 拉长场次：常规约 8–20 tick，Boss 约 45–90 tick
         scale = 1.0 + tier * 0.15 + max(0, level - 1) * 0.06
         if self.vs_boss:
@@ -178,6 +191,13 @@ class CombatEngine:
         if self.vs_boss:
             base_intrusion *= 0.85
             base_hp *= 1.25
+
+        # 修饰词：敌方三维调整
+        base_hp *= 1.0 + float(meff.get("enemy_hp_pct", 0))
+        base_intrusion *= 1.0 + float(meff.get("enemy_intrusion_pct", 0))
+        base_speed *= 1.0 + float(meff.get("all_speed_pct", 0)) + float(
+            meff.get("enemy_speed_pct", 0)
+        )
 
         label = self._enemy_label(defn)
         self.enemy = {
@@ -192,6 +212,7 @@ class CombatEngine:
             "firewall": base_firewall * float(defn.get("firewall_mult", 1)),
             "speed": base_speed * float(defn.get("speed_mult", 1)),
             "reflect": float(defn.get("reflect", 0)),
+            "special": list(defn.get("special", [])),
             "loot_mult": dict(defn.get("loot", {})),
         }
         self.enemy_hp = float(self.enemy["max_hp"])
@@ -200,6 +221,10 @@ class CombatEngine:
         self.last_rewards = {}
         link_key = "combat_link_boss" if self.vs_boss else "combat_link"
         self.log = [self._t(link_key, enemy=label, level=level)]
+        if defn.get("special"):
+            # 词条预告：让玩家知道这怪有什么机制
+            for sp in defn["special"]:
+                self.log.append(self._t(f"enemy_special_{sp}"))
         return True
 
     def start_boss_raid(self):
@@ -247,8 +272,19 @@ class CombatEngine:
         self.player_power = power
         self.turn += 1
 
-        p_spd = power["speed"]
+        # 词条：护盾再生——每回合回 1.2% 最大生命
+        if "shield_regen" in self.enemy.get("special", []):
+            if self.enemy_hp > 0 and self.enemy_hp < self.enemy["max_hp"]:
+                heal = self.enemy["max_hp"] * 0.012
+                self.enemy_hp = min(self.enemy["max_hp"], self.enemy_hp + heal)
+
+        # 词条：超频——血量低于 30% 时速度视为 +60%
         e_spd = self.enemy["speed"]
+        if "overclock" in self.enemy.get("special", []):
+            if self.enemy_hp < self.enemy["max_hp"] * 0.30:
+                e_spd *= 1.6
+
+        p_spd = power["speed"]
         player_actions = 2 if p_spd > e_spd * 1.25 else 1
         enemy_actions = 2 if e_spd > p_spd * 1.25 else 1
         order = ["player", "enemy"] if p_spd >= e_spd else ["enemy", "player"]
@@ -314,6 +350,11 @@ class CombatEngine:
                 hp=int(self.player_hp),
             )
         )
+        # 词条：汲取——造成伤害的 30% 转为自身治疗
+        if "leech" in self.enemy.get("special", []) and damage > 0:
+            heal = damage * 0.30
+            self.enemy_hp = min(self.enemy["max_hp"], self.enemy_hp + heal)
+            self.log.append(self._t("enemy_leech", heal=int(heal)))
 
     def end_combat(self, victory):
         level = self.enemy["level"] if self.enemy else 1
@@ -330,7 +371,16 @@ class CombatEngine:
             # 高层压制：等级差加成，鼓励打高级怪
             overkill = max(0, level - max(1, self.state.hacking_level))
             overkill_mult = 1.0 + min(0.50, overkill * 0.05)
-            loot_m_all = loot_pct * streak_mult * overkill_mult
+            # 地牢修饰词：本层掉落/经验加成
+            meff = {}
+            if self.dungeon is not None:
+                meff = self.dungeon.modifier_effects()
+            loot_m_all = (
+                loot_pct
+                * streak_mult
+                * overkill_mult
+                * (1.0 + float(meff.get("loot_pct", 0)))
+            )
             credits = int(
                 (18 + level * 12) * loot_m.get("credits", 1) * loot_m_all
             )
@@ -342,11 +392,12 @@ class CombatEngine:
                 1,
                 int((1 + level // 3) * loot_m.get("compute", 1) * loot_m_all),
             )
-            # 经验曲线：高等级击杀经验小幅加速
+            # 经验曲线：高等级击杀经验小幅加速 + 修饰词经验加成
             hxp = int(
                 (10 + level * 4 + (level * level) // 40)
                 * loot_m.get("hacking_xp", 1)
                 * loot_m_all
+                * (1.0 + float(meff.get("xp_bonus_pct", 0)))
             )
             if was_boss:
                 credits = int(credits * 1.5)

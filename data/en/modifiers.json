@@ -1,0 +1,58 @@
+{
+    "magnetic_storm": {
+        "name": "Magnetic Storm",
+        "desc": "Overloaded links: enemy speed +30%, but loot +50%.",
+        "weight": 20,
+        "effects": {
+            "enemy_speed_pct": 0.30,
+            "loot_pct": 0.50
+        }
+    },
+    "silent_zone": {
+        "name": "Silent Zone",
+        "desc": "Monitoring silent: far fewer defense programs, but POI rewards doubled.",
+        "weight": 15,
+        "effects": {
+            "enemy_spawn_pct": -0.60,
+            "poi_reward_pct": 1.00
+        }
+    },
+    "data_tide": {
+        "name": "Data Tide",
+        "desc": "Residual data flood: scrap +60%, node intrusion -10%.",
+        "weight": 20,
+        "effects": {
+            "loot_pct": 0.20,
+            "scrap_bonus_pct": 0.60,
+            "player_intrusion_pct": -0.10
+        }
+    },
+    "frost_lock": {
+        "name": "Frost Lock",
+        "desc": "Subnet frozen: all unit speed -20%, XP and scrap +25%.",
+        "weight": 15,
+        "effects": {
+            "all_speed_pct": -0.20,
+            "loot_pct": 0.25,
+            "scrap_bonus_pct": 0.25
+        }
+    },
+    "mirror_static": {
+        "name": "Mirror Static",
+        "desc": "Signal reflection chaos: enemy intrusion +20%, our firewall +25%.",
+        "weight": 15,
+        "effects": {
+            "enemy_intrusion_pct": 0.20,
+            "player_firewall_pct": 0.25
+        }
+    },
+    "ghost_traffic": {
+        "name": "Ghost Traffic",
+        "desc": "Ghost streams cover ops: hacking XP +40%, enemy HP -15%.",
+        "weight": 15,
+        "effects": {
+            "xp_bonus_pct": 0.40,
+            "enemy_hp_pct": -0.15
+        }
+    }
+}

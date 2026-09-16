@@ -29,6 +29,7 @@
             "data/zh/milestones.json",
             "data/zh/enemies.json",
             "data/zh/protocols.json",
+            "data/zh/modifiers.json",
             "data/en/resources.json",
             "data/en/story.json",
             "data/en/events.json",
@@ -38,7 +39,8 @@
             "data/en/missions.json",
             "data/en/milestones.json",
             "data/en/enemies.json",
-            "data/en/protocols.json"
+            "data/en/protocols.json",
+            "data/en/modifiers.json"
         ] }
     ]
 }

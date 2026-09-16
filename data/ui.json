@@ -116,7 +116,13 @@
         "tick_prefix": "TICK",
         "milestone_log": "[里程碑] {name}",
         "milestone_reward": "[里程碑奖励] {rewards}",
-        "boss_locked": "[ 抵达地牢第 10 层后解锁核心突袭 ]"
+        "boss_locked": "[ 抵达地牢第 10 层后解锁核心突袭 ]",
+        "enemy_special_leech": "> [词条] 汲取：敌方命中将回复自身生命",
+        "enemy_special_overclock": "> [词条] 超频：敌方低血量时速度大幅提升",
+        "enemy_special_shield_regen": "> [词条] 护盾再生：敌方每回合回复少量生命",
+        "enemy_leech": "> 敌方汲取回复 {heal}",
+        "floor_mod_prefix": "本层修饰",
+        "floor_mod_active": "[{name}] {desc}"
     },
     "en": {
         "export_save": "Export Save",
@@ -235,6 +241,12 @@
         "tick_prefix": "TICK",
         "milestone_log": "[MILESTONE] {name}",
         "milestone_reward": "[MILESTONE REWARD] {rewards}",
-        "boss_locked": "[ Reach dungeon floor 10 to unlock Core Raid ]"
+        "boss_locked": "[ Reach dungeon floor 10 to unlock Core Raid ]",
+        "enemy_special_leech": "> [TRAIT] Leech: enemy hits heal themselves",
+        "enemy_special_overclock": "> [TRAIT] Overclock: enemy speeds up at low HP",
+        "enemy_special_shield_regen": "> [TRAIT] Shield Regen: enemy heals each turn",
+        "enemy_leech": "> Enemy leeches {heal} HP",
+        "floor_mod_prefix": "Floor Mod",
+        "floor_mod_active": "[{name}] {desc}"
     }
 }

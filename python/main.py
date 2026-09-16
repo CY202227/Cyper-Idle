@@ -149,6 +149,8 @@ async def load_game_data():
             enemies_data = f.read()
         with open(f"data/{lang}/protocols.json", "r", encoding="utf-8") as f:
             protocols_data = f.read()
+        with open(f"data/{lang}/modifiers.json", "r", encoding="utf-8") as f:
+            modifiers_data = f.read()
 
         manager.load_definitions(res_data, evt_data, buildings_data, artifacts_data)
         story.load_nodes(story_data)
@@ -158,6 +160,8 @@ async def load_game_data():
         protocol_mgr.load_definitions(protocols_data)
         combat_eng.load_enemies(enemies_data)
         combat_eng.set_i18n(i18n)
+        dungeon.load_modifiers(modifiers_data)
+        combat_eng.set_dungeon(dungeon)
         manager.update_storage_caps()
     except Exception as e:
         print(f"配置文件加载失败 ({lang}): {e}")
@@ -170,10 +174,14 @@ def apply_dungeon_result(result, msg):
     pe = protocol_mgr.aggregate_effects()
     loot_pct = 1.0 + float(pe.get("loot_pct", 0))
     floor = dungeon.current_level
+    meff = dungeon.modifier_effects()
+    poi_mult = 1.0 + float(meff.get("poi_reward_pct", 0))
+    scrap_mult = 1.0 + float(meff.get("scrap_bonus_pct", 0))
+    xp_mult = 1.0 + float(meff.get("xp_bonus_pct", 0))
 
     if result == "LOOT":
-        credits = int((40 + floor * 8) * loot_pct)
-        scraps = max(1, int((2 + floor // 2) * loot_pct))
+        credits = int((40 + floor * 8) * loot_pct * poi_mult)
+        scraps = max(1, int((2 + floor // 2) * loot_pct * scrap_mult * poi_mult))
         state.resources["credits"] = state.resources.get("credits", 0) + credits
         state.resources["data_scraps"] = (
             state.resources.get("data_scraps", 0) + scraps
@@ -183,10 +191,12 @@ def apply_dungeon_result(result, msg):
         combat_eng.queue_dungeon_fight(dungeon.current_level)
     elif result == "INFO":
         state.resources["hacking_xp"] = (
-            state.resources.get("hacking_xp", 0) + 20 + floor * 2
+            state.resources.get("hacking_xp", 0) + int((20 + floor * 2) * xp_mult)
         )
     elif result == "QUEST":
-        state.resources["compute"] = state.resources.get("compute", 0) + 6 + floor // 2
+        state.resources["compute"] = (
+            state.resources.get("compute", 0) + int((6 + floor // 2) * poi_mult)
+        )
     elif result == "EXIT":
         next_level = dungeon.current_level + 1
         dungeon.generate_level(next_level)
@@ -194,6 +204,16 @@ def apply_dungeon_result(result, msg):
             getattr(state, "max_dungeon_level", 1), next_level
         )
         quest_mgr.update_progress("explore", amount=next_level)
+        # 新层修饰词播报
+        if dungeon.active_modifier:
+            mdef = dungeon.modifier_defs.get(dungeon.active_modifier, {})
+            append_story_log(
+                i18n.get(
+                    "floor_mod_active",
+                    name=mdef.get("name", dungeon.active_modifier),
+                    desc=mdef.get("desc", ""),
+                )
+            )
         # 每 5 层精英 / 15 层核心
         if next_level % 5 == 0:
             state.pending_floor_boss = True
@@ -375,6 +395,7 @@ def update_power_ui():
         state,
         manager.definitions.get("buildings", {}),
         protocol_effects=protocol_mgr.aggregate_effects(),
+        synergy_effects=manager.synergy_effects(),
     )
     panel.innerHTML = f"""
         <div class="power-stat">{i18n.get('stat_intrusion')}: {int(power['intrusion'])}</div>
@@ -707,6 +728,7 @@ def update_idle_combat_ui():
             state,
             manager.definitions.get("buildings", {}),
             protocol_effects=protocol_mgr.aggregate_effects(),
+            synergy_effects=manager.synergy_effects(),
         )
         document.getElementById("player-hp-fill").style.width = "100%"
         document.getElementById("player-hp-text").innerText = f"{int(power['integrity'])}"
@@ -1226,6 +1248,37 @@ def update_infrastructure_ui():
                         )
                     combat_str = " | " + ", ".join(bits)
 
+                # 建筑协同标记：该建筑参与的协同是否已激活
+                syn_str = ""
+                syn_defs = manager.definitions.get("buildings", {}).get(
+                    "synergies", {}
+                )
+                b_synergies = [
+                    s
+                    for s, sdef in syn_defs.items()
+                    if b_id in sdef.get("require", {})
+                ]
+                if b_synergies:
+                    active_names = []
+                    for s in b_synergies:
+                        sdef = syn_defs[s]
+                        met = all(
+                            state.buildings.get(rb, 0) >= rl
+                            for rb, rl in sdef["require"].items()
+                        )
+                        if met:
+                            active_names.append(sdef.get("name", s))
+                    if active_names:
+                        syn_str = (
+                            f"<div class='infra-cost'>[SYNERGY ON] "
+                            f"{', '.join(active_names)}</div>"
+                        )
+                    else:
+                        syn_str = (
+                            f"<div class='infra-cost'>[SYNERGY] "
+                            f"{len(b_synergies)}</div>"
+                        )
+
                 item = document.createElement("div")
                 item.className = "infra-item"
                 lock_note = ""
@@ -1239,6 +1292,7 @@ def update_infrastructure_ui():
                     </div>
                     <div class="infra-desc">{b_def['desc']}{combat_str}</div>
                     <div class="infra-cost">{i18n.get('cost')}: {', '.join(costs)}</div>
+                    {syn_str}
                     {lock_note}
                 """
 

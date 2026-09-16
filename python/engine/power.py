@@ -49,10 +49,12 @@ def _ops_intrusion_penalty(state, protocol_effects=None):
 
 
 def calc_player_power(
-    state, buildings_def=None, protocol_effects=None, vs_boss=False
+    state, buildings_def=None, protocol_effects=None, vs_boss=False,
+    synergy_effects=None,
 ):
     """返回 intrusion / firewall / integrity / speed。"""
     effects = protocol_effects or {}
+    syn = synergy_effects or {}
     level = max(1, state.hacking_level)
     base_intrusion = 8 + level * 3
     base_firewall = 5 + level * 2
@@ -74,6 +76,12 @@ def calc_player_power(
     speed *= 1.0 + float(effects.get("speed_pct", 0))
     if vs_boss:
         intrusion *= 1.0 + float(effects.get("boss_intrusion_pct", 0))
+
+    # 建筑协同战斗加成
+    intrusion *= 1.0 + float(syn.get("intrusion_pct", 0))
+    firewall *= 1.0 + float(syn.get("firewall_pct", 0))
+    integrity *= 1.0 + float(syn.get("integrity_pct", 0))
+    speed *= 1.0 + float(syn.get("speed_pct", 0))
 
     return {
         "intrusion": intrusion,

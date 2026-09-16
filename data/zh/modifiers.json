@@ -1,0 +1,58 @@
+{
+    "magnetic_storm": {
+        "name": "磁暴层",
+        "desc": "敌方链路过载：敌人速度 +30%，但战利品 +50%。",
+        "weight": 20,
+        "effects": {
+            "enemy_speed_pct": 0.30,
+            "loot_pct": 0.50
+        }
+    },
+    "silent_zone": {
+        "name": "静默区",
+        "desc": "监控静默：本层防御程序极少现身，但每个 POI 的收益翻倍。",
+        "weight": 15,
+        "effects": {
+            "enemy_spawn_pct": -0.60,
+            "poi_reward_pct": 1.00
+        }
+    },
+    "data_tide": {
+        "name": "数据潮",
+        "desc": "残留数据泛滥：碎片收益 +60%，节点入侵强度 -10%。",
+        "weight": 20,
+        "effects": {
+            "loot_pct": 0.20,
+            "scrap_bonus_pct": 0.60,
+            "player_intrusion_pct": -0.10
+        }
+    },
+    "frost_lock": {
+        "name": "冻结锁",
+        "desc": "子网被低温封存：所有单位速度 -20%，经验和碎片 +25%。",
+        "weight": 15,
+        "effects": {
+            "all_speed_pct": -0.20,
+            "loot_pct": 0.25,
+            "scrap_bonus_pct": 0.25
+        }
+    },
+    "mirror_static": {
+        "name": "镜像静电",
+        "desc": "信号反射紊乱：敌方入侵 +20%，但我方防火墙 +25%。",
+        "weight": 15,
+        "effects": {
+            "enemy_intrusion_pct": 0.20,
+            "player_firewall_pct": 0.25
+        }
+    },
+    "ghost_traffic": {
+        "name": "幽灵流量",
+        "desc": "幽灵数据流掩护行动：黑客经验 +40%，敌人血量 -15%。",
+        "weight": 15,
+        "effects": {
+            "xp_bonus_pct": 0.40,
+            "enemy_hp_pct": -0.15
+        }
+    }
+}

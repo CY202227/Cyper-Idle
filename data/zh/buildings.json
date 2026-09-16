@@ -108,5 +108,31 @@
                 "combat": { "intrusion": 6, "firewall": 4, "integrity": 20, "speed": 2 }
             }
         }
+    },
+    "synergies": {
+        "darkweb_highway": {
+            "name": "暗网高速",
+            "desc": "入侵路由 Lv.5 + 暗网节点 Lv.5：信用产出 +20%。",
+            "require": { "intrusion_router": 5, "dark_web_node": 5 },
+            "effects": { "credits_gen_pct": 0.20 }
+        },
+        "cool_matrix": {
+            "name": "冷算矩阵",
+            "desc": "冷却系统 Lv.5 + 虚拟矿机 Lv.5：碎片产出 +25%。",
+            "require": { "cooling_system": 5, "virtual_miner": 5 },
+            "effects": { "all_gen_pct": 0.10, "loot_pct": 0.10 }
+        },
+        "fortress_logic": {
+            "name": "堡垒逻辑",
+            "desc": "蜜罐 Lv.5 + 镜像阵列 Lv.3：防火墙 +15%，完整性 +10%。",
+            "require": { "honeypot": 5, "mirror_array": 3 },
+            "effects": { "firewall_pct": 0.15, "integrity_pct": 0.10 }
+        },
+        "neural_overclock": {
+            "name": "神经超频",
+            "desc": "科研节点 Lv.5 + 入侵路由 Lv.3：入侵 +12%，速度 +8%。",
+            "require": { "research_node": 5, "intrusion_router": 3 },
+            "effects": { "intrusion_pct": 0.12, "speed_pct": 0.08 }
+        }
     }
 }

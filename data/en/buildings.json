@@ -108,5 +108,31 @@
                 "combat": { "intrusion": 6, "firewall": 4, "integrity": 20, "speed": 2 }
             }
         }
+    },
+    "synergies": {
+        "darkweb_highway": {
+            "name": "Darkweb Highway",
+            "desc": "Router Lv.5 + Dark Web Node Lv.5: credit output +20%.",
+            "require": { "intrusion_router": 5, "dark_web_node": 5 },
+            "effects": { "credits_gen_pct": 0.20 }
+        },
+        "cool_matrix": {
+            "name": "Cool Matrix",
+            "desc": "Cooling Lv.5 + Virtual Miner Lv.5: scrap output +25%.",
+            "require": { "cooling_system": 5, "virtual_miner": 5 },
+            "effects": { "all_gen_pct": 0.10, "loot_pct": 0.10 }
+        },
+        "fortress_logic": {
+            "name": "Fortress Logic",
+            "desc": "Honeypot Lv.5 + Mirror Array Lv.3: firewall +15%, integrity +10%.",
+            "require": { "honeypot": 5, "mirror_array": 3 },
+            "effects": { "firewall_pct": 0.15, "integrity_pct": 0.10 }
+        },
+        "neural_overclock": {
+            "name": "Neural Overclock",
+            "desc": "Research Lv.5 + Router Lv.3: intrusion +12%, speed +8%.",
+            "require": { "research_node": 5, "intrusion_router": 3 },
+            "effects": { "intrusion_pct": 0.12, "speed_pct": 0.08 }
+        }
     }
 }
