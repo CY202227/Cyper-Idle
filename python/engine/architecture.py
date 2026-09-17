@@ -17,15 +17,22 @@ import json
 _SLOT_TABLE = ((1, 2), (3, 3), (5, 4))
 
 
-def protocol_slots(prestige):
-    """返回给定转生次数下可保留的持久协议数量（上限 5）。"""
+def protocol_slots(prestige, bonus=0):
+    """返回给定转生次数下可保留的持久协议数量。
+
+    基础表上限 5；`bonus` 来自内核跃迁的「深层槽位」永久升级，
+    因此总上限可超过 5。
+    """
     p = int(prestige or 0)
-    if p <= 0:
-        return 0
-    for cap, slots in _SLOT_TABLE:
-        if p <= cap:
-            return slots
-    return 5
+    bonus = max(0, int(bonus or 0))
+    base = 0
+    if p > 0:
+        base = 5
+        for cap, slots in _SLOT_TABLE:
+            if p <= cap:
+                base = slots
+                break
+    return base + bonus
 
 
 class ArchitectureManager:
@@ -36,6 +43,19 @@ class ArchitectureManager:
         self.axes = {}
         self.paradigms = {}
         self.traits = {}
+        # 内核跃迁管理器（可选）：提供额外的 Trait 预算
+        self.asc_mgr = None
+
+    def set_ascension_manager(self, asc_mgr):
+        self.asc_mgr = asc_mgr
+
+    def trait_budget_bonus(self):
+        if self.asc_mgr is None:
+            return 0
+        try:
+            return int(self.asc_mgr.trait_budget_bonus())
+        except Exception:
+            return 0
 
     # ---------- 加载 ----------
     def load_definitions(self, architectures_json):
@@ -89,7 +109,8 @@ class ArchitectureManager:
         pid = paradigm_id or self.current_paradigm()
         if not pid:
             return 0
-        return int(self.paradigms.get(pid, {}).get("trait_budget", 0))
+        base = int(self.paradigms.get(pid, {}).get("trait_budget", 0))
+        return base + self.trait_budget_bonus()
 
     def budget_used(self, traits=None):
         tids = self.current_traits() if traits is None else list(traits or [])

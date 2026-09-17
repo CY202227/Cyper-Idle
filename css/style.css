@@ -1096,3 +1096,109 @@ button.is-locked:hover {
     border-color: var(--text-color);
     background: rgba(0, 255, 65, 0.10);
 }
+
+/* ---- 内核跃迁（永久升级）---- */
+.asc-upgrade {
+    border: 1px solid var(--secondary-accent);
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.asc-upgrade.is-maxed {
+    border-color: var(--text-color);
+    background: rgba(0, 255, 65, 0.10);
+}
+
+.asc-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.asc-req {
+    font-size: 0.82rem;
+    opacity: 0.85;
+    margin: 2px 0;
+}
+
+.asc-req.is-met {
+    color: var(--text-color);
+    opacity: 1;
+}
+
+.asc-req.is-missing {
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+.asc-warn {
+    font-size: 0.82rem;
+    color: var(--accent-color);
+    opacity: 0.95;
+    margin: 6px 0;
+    line-height: 1.35;
+}
+
+/* ---- 网络区域 / 网络跃迁 ---- */
+.region-card {
+    border: 1px solid var(--secondary-accent);
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.region-card.is-current {
+    border-color: var(--text-color);
+    background: rgba(0, 255, 65, 0.12);
+    box-shadow: 0 0 6px rgba(0, 255, 65, 0.25) inset;
+}
+
+.region-card.is-cleared {
+    border-style: solid;
+    background: rgba(0, 255, 65, 0.06);
+}
+
+.region-card.is-locked {
+    opacity: 0.6;
+    border-style: dashed;
+}
+
+.region-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.region-effects {
+    font-size: 0.78rem;
+    opacity: 0.85;
+    margin-top: 4px;
+    line-height: 1.35;
+}
+
+.region-effects.is-bonus {
+    color: var(--text-color);
+    opacity: 0.95;
+}
+
+.region-req {
+    font-size: 0.78rem;
+    margin-top: 4px;
+    line-height: 1.35;
+}
+
+.region-req.is-missing {
+    color: var(--accent-color);
+}
+
+.region-note {
+    font-size: 0.78rem;
+    opacity: 0.8;
+    margin-top: 5px;
+    line-height: 1.35;
+}

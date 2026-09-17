@@ -118,6 +118,13 @@ class ProgressManager:
         if "prestige" in req:
             if getattr(self.state, "prestige", 0) < req["prestige"]:
                 return False
+        if "migrations" in req:
+            if int(getattr(self.state, "migrations", 0) or 0) < req["migrations"]:
+                return False
+        if "regions_cleared" in req:
+            cleared = getattr(self.state, "regions_cleared", None) or []
+            if len(cleared) < req["regions_cleared"]:
+                return False
         if "milestone" in req:
             if not self.is_done(req["milestone"]):
                 return False

@@ -172,5 +172,244 @@
             "shield_regen",
             "overclock"
         ]
+    },
+    "mesh_daemon": {
+        "id": "mesh_daemon",
+        "name": "Mesh Daemon",
+        "tier_min": 2,
+        "weight": 16,
+        "hp_mult": 1.35,
+        "intrusion_mult": 0.9,
+        "firewall_mult": 1.9,
+        "speed_mult": 0.8,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.9,
+            "data_scraps": 1.1,
+            "compute": 1.2,
+            "hacking_xp": 1.1
+        }
+    },
+    "audit_drone": {
+        "id": "audit_drone",
+        "name": "Audit Drone",
+        "tier_min": 2,
+        "weight": 18,
+        "hp_mult": 0.85,
+        "intrusion_mult": 1.25,
+        "firewall_mult": 1.1,
+        "speed_mult": 1.5,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.5,
+            "data_scraps": 0.9,
+            "compute": 1.3,
+            "hacking_xp": 1.35
+        },
+        "special": [
+            "overclock"
+        ]
+    },
+    "bounty_hunter": {
+        "id": "bounty_hunter",
+        "name": "Bounty Hunter",
+        "tier_min": 3,
+        "weight": 18,
+        "hp_mult": 1.1,
+        "intrusion_mult": 1.3,
+        "firewall_mult": 0.95,
+        "speed_mult": 1.3,
+        "reflect": 0.2,
+        "loot": {
+            "credits": 1.7,
+            "data_scraps": 1.2,
+            "compute": 1.1,
+            "hacking_xp": 1.25
+        },
+        "special": [
+            "leech"
+        ]
+    },
+    "data_fence": {
+        "id": "data_fence",
+        "name": "Data Fence",
+        "tier_min": 3,
+        "weight": 16,
+        "hp_mult": 1.45,
+        "intrusion_mult": 0.85,
+        "firewall_mult": 1.35,
+        "speed_mult": 0.75,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.4,
+            "data_scraps": 2.1,
+            "compute": 1.0,
+            "hacking_xp": 1.1
+        }
+    },
+    "relay_sentinel": {
+        "id": "relay_sentinel",
+        "name": "Relay Sentinel",
+        "tier_min": 4,
+        "weight": 18,
+        "hp_mult": 0.8,
+        "intrusion_mult": 1.4,
+        "firewall_mult": 0.85,
+        "speed_mult": 1.95,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.3,
+            "data_scraps": 1.2,
+            "compute": 1.5,
+            "hacking_xp": 1.5
+        },
+        "special": [
+            "overclock"
+        ]
+    },
+    "gravity_well": {
+        "id": "gravity_well",
+        "name": "Gravity Well",
+        "tier_min": 4,
+        "weight": 14,
+        "hp_mult": 2.0,
+        "intrusion_mult": 1.0,
+        "firewall_mult": 1.4,
+        "speed_mult": 0.6,
+        "reflect": 0.25,
+        "loot": {
+            "credits": 1.5,
+            "data_scraps": 1.3,
+            "compute": 1.4,
+            "hacking_xp": 1.3
+        }
+    },
+    "kernel_warden": {
+        "id": "kernel_warden",
+        "name": "Kernel Warden",
+        "tier_min": 5,
+        "weight": 16,
+        "hp_mult": 1.6,
+        "intrusion_mult": 1.1,
+        "firewall_mult": 1.6,
+        "speed_mult": 0.9,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.6,
+            "data_scraps": 1.4,
+            "compute": 1.5,
+            "hacking_xp": 1.5
+        },
+        "special": [
+            "shield_regen"
+        ]
+    },
+    "null_shard": {
+        "id": "null_shard",
+        "name": "Null Shard",
+        "tier_min": 5,
+        "weight": 14,
+        "hp_mult": 0.9,
+        "intrusion_mult": 1.85,
+        "firewall_mult": 0.7,
+        "speed_mult": 1.5,
+        "reflect": 0,
+        "loot": {
+            "credits": 1.7,
+            "data_scraps": 1.3,
+            "compute": 1.6,
+            "hacking_xp": 1.6
+        },
+        "special": [
+            "leech",
+            "overclock"
+        ]
+    },
+    "mesh_overseer": {
+        "id": "mesh_overseer",
+        "name": "Mesh Overseer",
+        "tier_min": 4,
+        "weight": 0,
+        "boss": true,
+        "hp_mult": 1.2,
+        "intrusion_mult": 0.55,
+        "firewall_mult": 1.5,
+        "speed_mult": 0.9,
+        "reflect": 0.05,
+        "loot": {
+            "credits": 9.0,
+            "data_scraps": 5.5,
+            "compute": 5.0,
+            "hacking_xp": 5.5
+        },
+        "special": [
+            "shield_regen"
+        ]
+    },
+    "black_market_broker": {
+        "id": "black_market_broker",
+        "name": "Black Market Broker",
+        "tier_min": 4,
+        "weight": 0,
+        "boss": true,
+        "hp_mult": 1.15,
+        "intrusion_mult": 0.6,
+        "firewall_mult": 1.1,
+        "speed_mult": 1.15,
+        "reflect": 0.1,
+        "loot": {
+            "credits": 10.0,
+            "data_scraps": 8.0,
+            "compute": 5.0,
+            "hacking_xp": 6.0
+        },
+        "special": [
+            "leech",
+            "overclock"
+        ]
+    },
+    "relay_tyrant": {
+        "id": "relay_tyrant",
+        "name": "Relay Tyrant",
+        "tier_min": 5,
+        "weight": 0,
+        "boss": true,
+        "hp_mult": 1.25,
+        "intrusion_mult": 0.6,
+        "firewall_mult": 1.3,
+        "speed_mult": 1.4,
+        "reflect": 0.08,
+        "loot": {
+            "credits": 9.0,
+            "data_scraps": 6.0,
+            "compute": 8.0,
+            "hacking_xp": 7.0
+        },
+        "special": [
+            "overclock"
+        ]
+    },
+    "kernel_sovereign": {
+        "id": "kernel_sovereign",
+        "name": "Kernel Sovereign",
+        "tier_min": 5,
+        "weight": 0,
+        "boss": true,
+        "hp_mult": 1.45,
+        "intrusion_mult": 0.62,
+        "firewall_mult": 1.55,
+        "speed_mult": 1.1,
+        "reflect": 0.12,
+        "loot": {
+            "credits": 11.0,
+            "data_scraps": 8.5,
+            "compute": 8.0,
+            "hacking_xp": 9.0
+        },
+        "special": [
+            "shield_regen",
+            "leech",
+            "overclock"
+        ]
     }
 }

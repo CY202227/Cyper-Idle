@@ -7,7 +7,10 @@
         "depth_10",
         "core_breach",
         "echo_stable",
-        "abyss_watch"
+        "abyss_watch",
+        "ascension_ready",
+        "region_pioneer",
+        "region_conqueror"
     ],
     "milestones": {
         "boot": {
@@ -83,6 +86,30 @@
             "require": { "prestige": 3, "boss_kills": 5 },
             "unlock": { "story_flag": "milestone_abyss" },
             "reward": { "credits": 3000, "hacking_xp": 1500, "compute": 120 }
+        },
+        "ascension_ready": {
+            "name": "Kernel Ascension",
+            "desc": "Achieve 3 protocol reboots, 3 core guardian kills, and reach dungeon floor 20.",
+            "hint": "You may now perform a Kernel Ascension: wipe all protocol research (including persist slots) for permanent Architecture Points.",
+            "require": { "prestige": 3, "boss_kills": 3, "dungeon_level": 20 },
+            "unlock": { "story_flag": "milestone_ascension" },
+            "reward": { "credits": 5000, "hacking_xp": 2500, "compute": 200 }
+        },
+        "region_pioneer": {
+            "name": "Cross-Border Migration",
+            "desc": "Perform your first network migration into another network region.",
+            "hint": "Unlock and migrate to a new region from the Network Regions panel.",
+            "require": { "migrations": 1 },
+            "unlock": { "story_flag": "milestone_region_pioneer" },
+            "reward": { "credits": 2500, "compute": 80 }
+        },
+        "region_conqueror": {
+            "name": "Region Conqueror",
+            "desc": "Clear the region cores of 2 network regions.",
+            "hint": "Every region has a different core: defeat the core of the region you are in to clear it.",
+            "require": { "regions_cleared": 2 },
+            "unlock": { "story_flag": "milestone_region_conqueror" },
+            "reward": { "credits": 6000, "hacking_xp": 3000, "compute": 250 }
         }
     }
 }

@@ -14,6 +14,8 @@
             "python/engine/progress.py",
             "python/engine/protocols.py",
             "python/engine/architecture.py",
+            "python/engine/ascension.py",
+            "python/engine/network.py",
             "python/utils/rng.py",
             "python/utils/storage.py",
             "python/utils/i18n.py"
@@ -32,6 +34,8 @@
             "data/zh/protocols.json",
             "data/zh/modifiers.json",
             "data/zh/architectures.json",
+            "data/zh/ascension.json",
+            "data/zh/networks.json",
             "data/en/resources.json",
             "data/en/story.json",
             "data/en/events.json",
@@ -43,7 +47,9 @@
             "data/en/enemies.json",
             "data/en/protocols.json",
             "data/en/modifiers.json",
-            "data/en/architectures.json"
+            "data/en/architectures.json",
+            "data/en/ascension.json",
+            "data/en/networks.json"
         ] }
     ]
 }

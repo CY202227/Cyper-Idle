@@ -51,6 +51,15 @@ class GameState:
         self.traits = []
         # 玩家手动锁定、转生后必定保留的持久协议（受槽位上限约束）
         self.protocol_keep = []
+        # 内核跃迁（第 2 层转生）：永久货币与永久升级等级
+        self.arch_points = 0
+        self.ascension_upgrades = {}
+        self.ascension_count = 0
+        # 网络区域（第 3 层）：当前所在区域、已攻克区域与各区域最深记录
+        self.network_region = "local"
+        self.regions_cleared = []
+        self.region_depths = {}
+        self.migrations = 0
 
     @property
     def hacking_level(self):
@@ -75,7 +84,8 @@ class GameState:
         self.auto_explore = False
         self.combat_wins = 0
         self.threat_tier = min(2, self.prestige)
-        self.boss_available = False
+        # boss_available 由 depth_10 里程碑授予；里程碑不会重复触发，
+        # 因此这里不能清掉，否则第一次重启后核心突袭将永久失效。
         self.pending_floor_boss = False
         self.max_dungeon_level = 1
         self.active_floor_modifier = None
@@ -89,6 +99,70 @@ class GameState:
         }
         if "protocol_reboot_done" not in self.story_flags:
             self.story_flags.append("protocol_reboot_done")
+
+    def ascension_reset(self, gain=0, threat_floor=0):
+        """内核跃迁：比协议重启更深一层。
+
+        代价：**清空全部协议研究**（包括持久槽位）并把转生计数归零——
+        放弃这一轮积累的协议栈。
+        保留：架构构筑、Trait、已购永久升级、里程碑与剧情标记
+        （里程碑不会重复触发，清掉会造成解锁死锁）。
+        """
+        self.ascension_count = int(getattr(self, "ascension_count", 0)) + 1
+        self.arch_points = int(getattr(self, "arch_points", 0)) + max(0, int(gain))
+        self.prestige = 0
+        # 跃迁代价：协议全清
+        self.protocols = []
+        self.protocol_keep = []
+        self.resources = {
+            "energy": 150,
+            "data_scraps": 0,
+            "credits": 0,
+            "compute": 0,
+            "hacking_xp": 0,
+        }
+        self.buildings = {}
+        self.missions = []
+        self.active_quests = []
+        self.completed_quests = []
+        self.auto_combat = False
+        self.auto_explore = False
+        self.combat_wins = 0
+        self.boss_kills = 0
+        self.pending_floor_boss = False
+        self.max_dungeon_level = 1
+        self.active_floor_modifier = None
+        # 跃迁次数抬升起始威胁阶：越跃迁越硬，但掉落更好
+        self.threat_tier = max(0, int(threat_floor))
+        self.storage_caps = {
+            "energy": 500,
+            "data_scraps": 500,
+            "credits": 5000,
+            "compute": 200,
+        }
+        if "kernel_ascended" not in self.story_flags:
+            self.story_flags.append("kernel_ascended")
+
+    def network_migrate(self, target, threat_floor=0):
+        """网络跃迁：把节点迁往目标区域（第 3 层推进，不是转生）。
+
+        代价：跃迁费用（由 NetworkManager 在调用前扣除），并放弃当前一轮的
+        地牢进度与在途行动——新网络要从第 1 层重新爬。
+        保留：转生次数、协议栈、架构/Trait、跃迁永久升级、里程碑、剧情标记
+        以及所有区域的攻克记录（这是跨区域累积的永久进度）。
+        """
+        self.network_region = target
+        self.migrations = int(getattr(self, "migrations", 0)) + 1
+        # 只重置「这一轮」的进度，不动资源/建筑/协议/转生
+        self.missions = []
+        self.combat_wins = 0
+        self.pending_floor_boss = False
+        self.max_dungeon_level = 1
+        self.active_floor_modifier = None
+        # 目标区域的威胁基线：越深的区域起步越硬
+        self.threat_tier = max(int(getattr(self, "threat_tier", 0)), int(threat_floor))
+        if "network_migrated" not in self.story_flags:
+            self.story_flags.append("network_migrated")
 
     def to_json(self):
         return json.dumps({
@@ -124,6 +198,13 @@ class GameState:
             "architecture_chosen": self.architecture_chosen,
             "traits": self.traits,
             "protocol_keep": self.protocol_keep,
+            "arch_points": self.arch_points,
+            "ascension_upgrades": self.ascension_upgrades,
+            "ascension_count": self.ascension_count,
+            "network_region": self.network_region,
+            "regions_cleared": self.regions_cleared,
+            "region_depths": self.region_depths,
+            "migrations": self.migrations,
         })
 
     def from_json(self, json_str):
@@ -180,3 +261,16 @@ class GameState:
         self.traits = list(raw_traits) if isinstance(raw_traits, list) else []
         raw_keep = data.get("protocol_keep", [])
         self.protocol_keep = list(raw_keep) if isinstance(raw_keep, list) else []
+        self.arch_points = int(data.get("arch_points", 0) or 0)
+        raw_ups = data.get("ascension_upgrades", {})
+        self.ascension_upgrades = dict(raw_ups) if isinstance(raw_ups, dict) else {}
+        self.ascension_count = int(data.get("ascension_count", 0) or 0)
+        # 旧存档没有区域字段：留默认值，由 NetworkManager.ensure_default() 迁移
+        self.network_region = data.get("network_region", "local")
+        raw_cleared = data.get("regions_cleared", [])
+        self.regions_cleared = (
+            list(raw_cleared) if isinstance(raw_cleared, list) else []
+        )
+        raw_depths = data.get("region_depths", {})
+        self.region_depths = dict(raw_depths) if isinstance(raw_depths, dict) else {}
+        self.migrations = int(data.get("migrations", 0) or 0)

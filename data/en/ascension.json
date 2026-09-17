@@ -1,0 +1,89 @@
+{
+    "rules": {
+        "unlock_prestige": 3,
+        "unlock_boss_kills": 3,
+        "unlock_dungeon_level": 20,
+        "gain_base": 1,
+        "gain_per_prestige": 2,
+        "gain_per_depth": 0.25,
+        "gain_per_boss_kill": 1,
+        "gain_per_protocol": 0.5,
+        "threat_per_ascension": 2
+    },
+    "upgrades": {
+        "deep_slots": {
+            "id": "deep_slots",
+            "name": "Deep Slots",
+            "desc": "+1 persistent protocol slot per level after a Kernel Ascension.",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "special": "protocol_slots",
+            "effects": {}
+        },
+        "trait_capacity": {
+            "id": "trait_capacity",
+            "name": "Build Capacity",
+            "desc": "+1 Trait budget cap per level, making every build stronger.",
+            "max_level": 3,
+            "cost": [4, 5, 6],
+            "special": "trait_budget",
+            "effects": {}
+        },
+        "resonance": {
+            "id": "resonance",
+            "name": "Resonance Matrix",
+            "desc": "All output +8% per level.",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "all_gen_pct": 0.08 }
+        },
+        "predator": {
+            "id": "predator",
+            "name": "Predator Instinct",
+            "desc": "Intrusion +10% per level.",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "intrusion_pct": 0.10 }
+        },
+        "aegis_mem": {
+            "id": "aegis_mem",
+            "name": "Aegis Memory",
+            "desc": "Node integrity +12% and firewall +6% per level.",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "integrity_pct": 0.12, "firewall_pct": 0.06 }
+        },
+        "scavenger": {
+            "id": "scavenger",
+            "name": "Scavenger Memory",
+            "desc": "Loot +10% per level.",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "loot_pct": 0.10 }
+        },
+        "silence_mem": {
+            "id": "silence_mem",
+            "name": "Silence Memory",
+            "desc": "Dungeon floor modifier resistance +10% per level.",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "effects": { "modifier_resist": 0.10 }
+        },
+        "synergy_mem": {
+            "id": "synergy_mem",
+            "name": "Synergy Memory",
+            "desc": "Building synergy effects +15% per level.",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "effects": { "synergy_boost": 0.15 }
+        },
+        "cold_start": {
+            "id": "cold_start",
+            "name": "Cold Start",
+            "desc": "Storage cap +15% and purge cooldown -8% per level.",
+            "max_level": 3,
+            "cost": [2, 3, 4],
+            "effects": { "storage_pct": 0.15, "combat_cooldown_pct": -0.08 }
+        }
+    }
+}

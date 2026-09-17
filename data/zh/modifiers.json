@@ -54,5 +54,70 @@
             "xp_bonus_pct": 0.40,
             "enemy_hp_pct": -0.15
         }
+    },
+    "corp_firewall": {
+        "name": "企业防火墙",
+        "desc": "合规网关全面收紧：敌方防火墙 +45%，但战利品 +35%。",
+        "weight": 16,
+        "effects": {
+            "enemy_firewall_pct": 0.45,
+            "loot_pct": 0.35
+        }
+    },
+    "audit_sweep": {
+        "name": "合规审计",
+        "desc": "审计机器人地毯式扫描：敌方入侵 +28%，黑客经验 +40%。",
+        "weight": 15,
+        "effects": {
+            "enemy_intrusion_pct": 0.28,
+            "xp_bonus_pct": 0.40
+        }
+    },
+    "black_market": {
+        "name": "黑市喧嚣",
+        "desc": "赃物与竞价挤满链路：战利品 +50%，敌人血量 +25%。",
+        "weight": 18,
+        "effects": {
+            "loot_pct": 0.50,
+            "enemy_hp_pct": 0.25
+        }
+    },
+    "signal_jam": {
+        "name": "信号压制",
+        "desc": "窄带干扰覆盖全区：敌人速度 +40%，我方防火墙 +25%。",
+        "weight": 15,
+        "effects": {
+            "enemy_speed_pct": 0.40,
+            "player_firewall_pct": 0.25
+        }
+    },
+    "orbital_drift": {
+        "name": "轨道漂移",
+        "desc": "中继站偏离轨道：所有单位速度 -30%，黑客经验 +40%。",
+        "weight": 15,
+        "effects": {
+            "all_speed_pct": -0.30,
+            "xp_bonus_pct": 0.40
+        }
+    },
+    "hard_vacuum": {
+        "name": "硬真空",
+        "desc": "舱段失压：敌人血量 -25%，敌方入侵 +25%，战利品 +25%。",
+        "weight": 14,
+        "effects": {
+            "enemy_hp_pct": -0.25,
+            "enemy_intrusion_pct": 0.25,
+            "loot_pct": 0.25
+        }
+    },
+    "kernel_pressure": {
+        "name": "内核高压",
+        "desc": "根权限的注视：敌方入侵 +35%，战利品 +35%，黑客经验 +45%。",
+        "weight": 16,
+        "effects": {
+            "enemy_intrusion_pct": 0.35,
+            "loot_pct": 0.35,
+            "xp_bonus_pct": 0.45
+        }
     }
 }

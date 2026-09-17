@@ -1,0 +1,89 @@
+{
+    "rules": {
+        "unlock_prestige": 3,
+        "unlock_boss_kills": 3,
+        "unlock_dungeon_level": 20,
+        "gain_base": 1,
+        "gain_per_prestige": 2,
+        "gain_per_depth": 0.25,
+        "gain_per_boss_kill": 1,
+        "gain_per_protocol": 0.5,
+        "threat_per_ascension": 2
+    },
+    "upgrades": {
+        "deep_slots": {
+            "id": "deep_slots",
+            "name": "深层槽位",
+            "desc": "内核跃迁后每级额外保留 1 个持久协议槽位。",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "special": "protocol_slots",
+            "effects": {}
+        },
+        "trait_capacity": {
+            "id": "trait_capacity",
+            "name": "构筑容量",
+            "desc": "每级 +1 Trait 预算上限，让每轮构筑更强。",
+            "max_level": 3,
+            "cost": [4, 5, 6],
+            "special": "trait_budget",
+            "effects": {}
+        },
+        "resonance": {
+            "id": "resonance",
+            "name": "共鸣矩阵",
+            "desc": "全产出 +8% / 级。",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "all_gen_pct": 0.08 }
+        },
+        "predator": {
+            "id": "predator",
+            "name": "掠食本能",
+            "desc": "入侵强度 +10% / 级。",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "intrusion_pct": 0.10 }
+        },
+        "aegis_mem": {
+            "id": "aegis_mem",
+            "name": "壁垒记忆",
+            "desc": "节点完整性 +12%、防火墙 +6% / 级。",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "integrity_pct": 0.12, "firewall_pct": 0.06 }
+        },
+        "scavenger": {
+            "id": "scavenger",
+            "name": "拾荒记忆",
+            "desc": "战利品 +10% / 级。",
+            "max_level": 5,
+            "cost": [2, 2, 3, 3, 4],
+            "effects": { "loot_pct": 0.10 }
+        },
+        "silence_mem": {
+            "id": "silence_mem",
+            "name": "静默记忆",
+            "desc": "地牢修饰词抗性 +10% / 级。",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "effects": { "modifier_resist": 0.10 }
+        },
+        "synergy_mem": {
+            "id": "synergy_mem",
+            "name": "协同记忆",
+            "desc": "建筑协同效果 +15% / 级。",
+            "max_level": 3,
+            "cost": [3, 4, 5],
+            "effects": { "synergy_boost": 0.15 }
+        },
+        "cold_start": {
+            "id": "cold_start",
+            "name": "冷启动",
+            "desc": "存储上限 +15%、清剿冷却 -8% / 级。",
+            "max_level": 3,
+            "cost": [2, 3, 4],
+            "effects": { "storage_pct": 0.15, "combat_cooldown_pct": -0.08 }
+        }
+    }
+}
