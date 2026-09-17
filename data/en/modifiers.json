@@ -54,5 +54,70 @@
             "xp_bonus_pct": 0.40,
             "enemy_hp_pct": -0.15
         }
+    },
+    "corp_firewall": {
+        "name": "Corporate Firewall",
+        "desc": "Compliance gateways lock down: enemy firewall +45%, but loot +35%.",
+        "weight": 16,
+        "effects": {
+            "enemy_firewall_pct": 0.45,
+            "loot_pct": 0.35
+        }
+    },
+    "audit_sweep": {
+        "name": "Compliance Audit",
+        "desc": "Audit bots sweep the mesh: enemy intrusion +28%, hacking XP +40%.",
+        "weight": 15,
+        "effects": {
+            "enemy_intrusion_pct": 0.28,
+            "xp_bonus_pct": 0.40
+        }
+    },
+    "black_market": {
+        "name": "Black Market Din",
+        "desc": "Loot and bidding clog the links: loot +50%, enemy HP +25%.",
+        "weight": 18,
+        "effects": {
+            "loot_pct": 0.50,
+            "enemy_hp_pct": 0.25
+        }
+    },
+    "signal_jam": {
+        "name": "Signal Jam",
+        "desc": "Narrowband interference blankets the region: enemy speed +40%, our firewall +25%.",
+        "weight": 15,
+        "effects": {
+            "enemy_speed_pct": 0.40,
+            "player_firewall_pct": 0.25
+        }
+    },
+    "orbital_drift": {
+        "name": "Orbital Drift",
+        "desc": "Relay stations drift off-orbit: all unit speed -30%, hacking XP +40%.",
+        "weight": 15,
+        "effects": {
+            "all_speed_pct": -0.30,
+            "xp_bonus_pct": 0.40
+        }
+    },
+    "hard_vacuum": {
+        "name": "Hard Vacuum",
+        "desc": "A module loses pressure: enemy HP -25%, enemy intrusion +25%, loot +25%.",
+        "weight": 14,
+        "effects": {
+            "enemy_hp_pct": -0.25,
+            "enemy_intrusion_pct": 0.25,
+            "loot_pct": 0.25
+        }
+    },
+    "kernel_pressure": {
+        "name": "Kernel Pressure",
+        "desc": "The gaze of root access: enemy intrusion +35%, loot +35%, hacking XP +45%.",
+        "weight": 16,
+        "effects": {
+            "enemy_intrusion_pct": 0.35,
+            "loot_pct": 0.35,
+            "xp_bonus_pct": 0.45
+        }
     }
 }

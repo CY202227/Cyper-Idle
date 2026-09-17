@@ -41,6 +41,7 @@ from engine.progress import ProgressManager
 from engine.protocols import ProtocolManager
 from engine.architecture import ArchitectureManager, protocol_slots
 from engine.ascension import AscensionManager
+from engine.network import NetworkManager
 from engine.power import calc_player_power
 from utils.rng import SeededRNG
 from utils.storage import save_to_local, load_from_local, export_save_string, import_save_string
@@ -56,6 +57,7 @@ mission_mgr = MissionManager(state)
 protocol_mgr = ProtocolManager(state)
 arch_mgr = ArchitectureManager(state)
 asc_mgr = AscensionManager(state)
+net_mgr = NetworkManager(state)
 progress_mgr = ProgressManager(state)
 combat_eng = CombatEngine(state, manager, None, mission_mgr, i18n, protocol_mgr)
 quest_mgr = QuestManager(state)
@@ -64,8 +66,10 @@ manager.set_protocol_manager(protocol_mgr)
 mission_mgr.set_protocol_manager(protocol_mgr)
 protocol_mgr.set_architecture_manager(arch_mgr)
 protocol_mgr.set_ascension_manager(asc_mgr)
+protocol_mgr.set_network_manager(net_mgr)
 arch_mgr.set_ascension_manager(asc_mgr)
 combat_eng.set_protocol_manager(protocol_mgr)
+combat_eng.set_network_manager(net_mgr)
 
 
 def _ensure_glitch_layers(el):
@@ -141,6 +145,18 @@ def sync_architecture_effects():
     dungeon.set_modifier_resist(pe.get("modifier_resist", 0))
 
 
+def sync_network_effects():
+    """把当前网络区域的配置同步到需要独立缓存的子系统。
+
+    - 地牢修饰词池：每个区域只 roll 本区域允许的修饰词。
+    - 区域深度记录：用于展示与攻克进度。
+    """
+    if net_mgr is None:
+        return
+    dungeon.set_modifier_pool(net_mgr.modifier_pool())
+    net_mgr.record_depth()
+
+
 async def load_game_data():
     lang = state.language
     try:
@@ -172,6 +188,8 @@ async def load_game_data():
             architectures_data = f.read()
         with open(f"data/{lang}/ascension.json", "r", encoding="utf-8") as f:
             ascension_data = f.read()
+        with open(f"data/{lang}/networks.json", "r", encoding="utf-8") as f:
+            networks_data = f.read()
 
         manager.load_definitions(res_data, evt_data, buildings_data, artifacts_data)
         story.load_nodes(story_data)
@@ -181,12 +199,15 @@ async def load_game_data():
         protocol_mgr.load_definitions(protocols_data)
         arch_mgr.load_definitions(architectures_data)
         asc_mgr.load_definitions(ascension_data)
+        net_mgr.load_definitions(networks_data)
         combat_eng.load_enemies(enemies_data)
         combat_eng.set_i18n(i18n)
         dungeon.load_modifiers(modifiers_data)
         combat_eng.set_dungeon(dungeon)
         arch_mgr.ensure_default()
+        net_mgr.ensure_default()
         sync_architecture_effects()
+        sync_network_effects()
         manager.update_storage_caps()
     except Exception as e:
         print(f"配置文件加载失败 ({lang}): {e}")
@@ -228,6 +249,7 @@ def apply_dungeon_result(result, msg):
         state.max_dungeon_level = max(
             getattr(state, "max_dungeon_level", 1), next_level
         )
+        net_mgr.record_depth(next_level)
         quest_mgr.update_progress("explore", amount=next_level)
         # 新层修饰词播报
         if dungeon.active_modifier:
@@ -375,6 +397,9 @@ def update_ui():
         f"{i18n.get('hacking_level')}: {state.hacking_level} · "
         f"{i18n.get('floor_label')}: {dungeon.current_level}"
     )
+    # 当前网络区域常驻显示
+    if net_mgr is not None:
+        level_text += f" · {i18n.get('network_short')}: {net_mgr.name()}"
     # 当前层修饰词常驻显示
     if dungeon.active_modifier:
         mdef = dungeon.modifier_defs.get(dungeon.active_modifier, {})
@@ -402,6 +427,7 @@ def update_ui():
 
     update_power_ui()
     update_progress_ui()
+    update_network_ui()
     update_ascension_ui()
     update_architecture_ui()
     update_protocols_ui()
@@ -519,6 +545,201 @@ def update_progress_ui():
 
         reboot_btn.onclick = create_proxy(do_reboot_ui)
         panel.appendChild(reboot_btn)
+
+
+# ---- 网络区域（第 3 层：网络跃迁）----
+_REGION_REQ_LABELS = {
+    "region": "network_req_region",
+    "prestige": "network_req_prestige",
+    "boss_kills": "network_req_boss_kills",
+    "dungeon_level": "network_req_dungeon_level",
+    "ascension_count": "network_req_ascension",
+}
+
+# 不带 _pct 后缀但语义上是百分比的比例型效果键
+_RATIO_EFFECT_KEYS = ("modifier_resist", "synergy_boost")
+
+
+def _fmt_region_effects(effects):
+    """把区域效果渲染成「名称 +x% · 名称 -y%」的简短说明。"""
+    if not effects:
+        return ""
+    parts = []
+    for key, val in effects.items():
+        try:
+            num = float(val)
+        except (TypeError, ValueError):
+            continue
+        if abs(num) < 1e-9:
+            continue
+        label = i18n.get("region_eff_" + key, key)
+        sign = "+" if num > 0 else ""
+        if key.endswith("_pct") or key in _RATIO_EFFECT_KEYS:
+            parts.append(f"{label} {sign}{round(num * 100)}%")
+        else:
+            parts.append(f"{label} {sign}{round(num, 2)}")
+    return " · ".join(parts)
+
+
+def _fmt_region_reqs(rid):
+    """未满足的解锁条件，例如「企业网格未攻克 · 转生 1/2」。"""
+    parts = []
+    for key, info in net_mgr.unlock_status(rid).items():
+        if info["met"]:
+            continue
+        if key == "region":
+            parts.append(
+                i18n.get("network_req_region", name=net_mgr.name(info["need"]))
+            )
+        else:
+            label = i18n.get(_REGION_REQ_LABELS.get(key, key), key)
+            parts.append(f"{label} {info['have']}/{info['need']}")
+    return " · ".join(parts)
+
+
+def _make_migrate_handler(rid):
+    def handler(event):
+        if combat_eng.status == "fighting":
+            notify(i18n.get("region_busy"))
+            update_ui()
+            return
+        ok, reason = net_mgr.migrate(rid)
+        if not ok:
+            notify(
+                i18n.get(
+                    "network_err_" + reason, i18n.get("network_err_network_locked")
+                )
+            )
+            update_ui()
+            return
+        # 新网络从第 1 层重新开始
+        dungeon.generate_level(1)
+        sync_network_effects()
+        manager.update_storage_caps()
+        tip = i18n.get("network_migrated", name=net_mgr.name(rid))
+        notify(tip)
+        append_story_log(tip)
+        update_ui()
+
+    return handler
+
+
+def update_network_ui():
+    title = document.getElementById("network-title")
+    if title:
+        title.innerText = i18n.get("network_title")
+    list_div = document.getElementById("network-list")
+    if not list_div:
+        return
+    list_div.innerHTML = ""
+
+    cur = net_mgr.current_region()
+    head = document.createElement("div")
+    head.className = "mission-meta"
+    head.innerText = (
+        i18n.get("network_current", name=net_mgr.name(cur))
+        + " · "
+        + i18n.get("network_migrations", n=int(getattr(state, "migrations", 0)))
+    )
+    list_div.appendChild(head)
+
+    cleared = net_mgr.cleared_regions()
+    if cleared:
+        bonus = _fmt_region_effects(net_mgr.clear_bonus_effects())
+        line = i18n.get(
+            "network_cleared_list",
+            names=", ".join(net_mgr.name(r) for r in cleared),
+        )
+        if bonus:
+            line += f" · {i18n.get('network_clear_bonus')}: {bonus}"
+        note = document.createElement("div")
+        note.className = "arch-slot-note"
+        note.innerText = line
+        list_div.appendChild(note)
+
+    for info in net_mgr.progress():
+        card = document.createElement("div")
+        cls = "region-card"
+        if info["current"]:
+            cls += " is-current"
+        elif not info["unlocked"]:
+            # 当前所在区域永远不算「锁定」（异常存档兜底）
+            cls += " is-locked"
+        if info["cleared"]:
+            cls += " is-cleared"
+        card.className = cls
+
+        if info["current"]:
+            badge_key = "network_badge_current"
+        elif info["cleared"]:
+            badge_key = "network_badge_cleared"
+        elif info["unlocked"]:
+            badge_key = "network_badge_open"
+        else:
+            badge_key = "network_badge_locked"
+
+        meta = i18n.get("network_threat", n=info["threat_offset"])
+        if info["depth"]:
+            meta += " · " + i18n.get("network_depth", n=info["depth"])
+        card.innerHTML = (
+            f'<div class="region-head"><span>{info["name"]}</span>'
+            f'<span>{i18n.get(badge_key)}</span></div>'
+            f'<div class="mission-desc">{info["desc"]}</div>'
+            f'<div class="mission-meta">{meta}</div>'
+        )
+
+        eff = _fmt_region_effects(info["effects"])
+        if eff:
+            row = document.createElement("div")
+            row.className = "region-effects"
+            row.innerText = f'{i18n.get("network_effects")}: {eff}'
+            card.appendChild(row)
+        cb = _fmt_region_effects(info["clear_bonus"])
+        if cb:
+            row = document.createElement("div")
+            row.className = "region-effects is-bonus"
+            row.innerText = f'{i18n.get("network_clear_bonus")}: {cb}'
+            card.appendChild(row)
+
+        if info["current"]:
+            tag = document.createElement("div")
+            tag.className = "region-note"
+            tag.innerText = i18n.get("network_here")
+            card.appendChild(tag)
+        elif not info["unlocked"]:
+            req = document.createElement("div")
+            req.className = "region-req is-missing"
+            req.innerText = (
+                i18n.get("network_req") + ": " + _fmt_region_reqs(info["id"])
+            )
+            card.appendChild(req)
+        else:
+            note = document.createElement("div")
+            note.className = "region-note"
+            note.innerText = i18n.get(
+                "network_cost", cost=_fmt_res_cost(info["cost"])
+            )
+            card.appendChild(note)
+
+            btn = document.createElement("button")
+            btn.innerText = i18n.get("network_migrate")
+            ok, reason = net_mgr.can_migrate(info["id"])
+            set_locked(
+                btn,
+                not ok,
+                i18n.get(
+                    "network_err_" + reason, i18n.get("network_err_network_locked")
+                ),
+            )
+            btn.onclick = create_proxy(_make_migrate_handler(info["id"]))
+            card.appendChild(btn)
+
+        list_div.appendChild(card)
+
+    hint = document.createElement("div")
+    hint.className = "region-note"
+    hint.innerText = i18n.get("network_hint")
+    list_div.appendChild(hint)
 
 
 # ---- 内核跃迁（第二层转生）----
@@ -1391,6 +1612,8 @@ async def game_loop():
         # 架构/Trait 的全局修正同步到地牢修饰词抗性（低频即可）
         if state.tick_count % 20 == 0:
             sync_architecture_effects()
+            # 区域深度记录（随探索推进刷新）
+            net_mgr.record_depth()
 
         farm_level = max(
             state.hacking_level,
@@ -1457,6 +1680,13 @@ async def game_loop():
             for edesc in manager.event_log:
                 append_story_log(edesc)
             manager.event_log = []
+
+        # 战斗播报（区域攻克等）
+        if getattr(combat_eng, "pending_notices", None):
+            for notice in combat_eng.pending_notices:
+                notify(notice)
+                append_story_log(notice)
+            combat_eng.pending_notices = []
 
         quest_mgr.update_progress("collect", "data_scraps")
         quest_mgr.update_progress("protocol")
@@ -1806,7 +2036,9 @@ async def start_game():
 
     # 旧存档迁移：没有架构字段时落到默认范式，并同步修饰词抗性
     arch_mgr.ensure_default()
+    net_mgr.ensure_default()
     sync_architecture_effects()
+    sync_network_effects()
     manager.update_storage_caps()
 
     start_floor = max(1, getattr(state, "max_dungeon_level", 1))

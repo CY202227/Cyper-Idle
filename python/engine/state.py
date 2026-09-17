@@ -55,6 +55,11 @@ class GameState:
         self.arch_points = 0
         self.ascension_upgrades = {}
         self.ascension_count = 0
+        # 网络区域（第 3 层）：当前所在区域、已攻克区域与各区域最深记录
+        self.network_region = "local"
+        self.regions_cleared = []
+        self.region_depths = {}
+        self.migrations = 0
 
     @property
     def hacking_level(self):
@@ -138,6 +143,27 @@ class GameState:
         if "kernel_ascended" not in self.story_flags:
             self.story_flags.append("kernel_ascended")
 
+    def network_migrate(self, target, threat_floor=0):
+        """网络跃迁：把节点迁往目标区域（第 3 层推进，不是转生）。
+
+        代价：跃迁费用（由 NetworkManager 在调用前扣除），并放弃当前一轮的
+        地牢进度与在途行动——新网络要从第 1 层重新爬。
+        保留：转生次数、协议栈、架构/Trait、跃迁永久升级、里程碑、剧情标记
+        以及所有区域的攻克记录（这是跨区域累积的永久进度）。
+        """
+        self.network_region = target
+        self.migrations = int(getattr(self, "migrations", 0)) + 1
+        # 只重置「这一轮」的进度，不动资源/建筑/协议/转生
+        self.missions = []
+        self.combat_wins = 0
+        self.pending_floor_boss = False
+        self.max_dungeon_level = 1
+        self.active_floor_modifier = None
+        # 目标区域的威胁基线：越深的区域起步越硬
+        self.threat_tier = max(int(getattr(self, "threat_tier", 0)), int(threat_floor))
+        if "network_migrated" not in self.story_flags:
+            self.story_flags.append("network_migrated")
+
     def to_json(self):
         return json.dumps({
             "resources": self.resources,
@@ -175,6 +201,10 @@ class GameState:
             "arch_points": self.arch_points,
             "ascension_upgrades": self.ascension_upgrades,
             "ascension_count": self.ascension_count,
+            "network_region": self.network_region,
+            "regions_cleared": self.regions_cleared,
+            "region_depths": self.region_depths,
+            "migrations": self.migrations,
         })
 
     def from_json(self, json_str):
@@ -235,3 +265,12 @@ class GameState:
         raw_ups = data.get("ascension_upgrades", {})
         self.ascension_upgrades = dict(raw_ups) if isinstance(raw_ups, dict) else {}
         self.ascension_count = int(data.get("ascension_count", 0) or 0)
+        # 旧存档没有区域字段：留默认值，由 NetworkManager.ensure_default() 迁移
+        self.network_region = data.get("network_region", "local")
+        raw_cleared = data.get("regions_cleared", [])
+        self.regions_cleared = (
+            list(raw_cleared) if isinstance(raw_cleared, list) else []
+        )
+        raw_depths = data.get("region_depths", {})
+        self.region_depths = dict(raw_depths) if isinstance(raw_depths, dict) else {}
+        self.migrations = int(data.get("migrations", 0) or 0)

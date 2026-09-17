@@ -1,0 +1,184 @@
+{
+    "rules": {
+        "migrate_credits_base": 2500,
+        "migrate_credits_per_order": 4000,
+        "migrate_compute_base": 50,
+        "migrate_compute_per_order": 70,
+        "migrate_scraps_base": 900,
+        "migrate_scraps_per_order": 1400
+    },
+    "regions": {
+        "local": {
+            "order": 0,
+            "name": "Local Subnet",
+            "desc": "The network your own rack sits on. Sparse enemies and steady returns — barely enough to get by.",
+            "threat_offset": 0,
+            "enemy_pool": [
+                "sentry",
+                "scanner",
+                "firewall_wall",
+                "tracker",
+                "elite",
+                "mirror_fiend",
+                "quarantine_bulwark",
+                "null_crawler"
+            ],
+            "boss": "core_guardian",
+            "modifiers": [
+                "magnetic_storm",
+                "silent_zone",
+                "data_tide",
+                "frost_lock",
+                "mirror_static",
+                "ghost_traffic"
+            ],
+            "effects": {},
+            "clear_bonus": {
+                "loot_pct": 0.03
+            },
+            "unlock": {}
+        },
+        "corp_mesh": {
+            "order": 1,
+            "name": "Corporate Mesh",
+            "desc": "The merged backbone of three multinationals. Contracts everywhere, firewalls everywhere.",
+            "threat_offset": 1,
+            "enemy_pool": [
+                "sentry",
+                "scanner",
+                "firewall_wall",
+                "elite",
+                "quarantine_bulwark",
+                "mesh_daemon",
+                "audit_drone"
+            ],
+            "boss": "mesh_overseer",
+            "modifiers": [
+                "magnetic_storm",
+                "silent_zone",
+                "mirror_static",
+                "corp_firewall",
+                "audit_sweep"
+            ],
+            "effects": {
+                "credits_gen_pct": 0.28,
+                "loot_pct": 0.12,
+                "build_cost_pct": -0.12
+            },
+            "clear_bonus": {
+                "credits_gen_pct": 0.06
+            },
+            "unlock": {
+                "region": "local",
+                "prestige": 1,
+                "dungeon_level": 8
+            }
+        },
+        "dark_web": {
+            "order": 2,
+            "name": "Dark Web Bazaar",
+            "desc": "An underground market stacked out of anonymous relays. Plenty of loot and intel, but nobody takes a blade for you.",
+            "threat_offset": 2,
+            "enemy_pool": [
+                "scanner",
+                "tracker",
+                "mirror_fiend",
+                "null_crawler",
+                "bounty_hunter",
+                "data_fence"
+            ],
+            "boss": "black_market_broker",
+            "modifiers": [
+                "silent_zone",
+                "data_tide",
+                "ghost_traffic",
+                "black_market",
+                "signal_jam"
+            ],
+            "effects": {
+                "loot_pct": 0.35,
+                "firewall_pct": -0.12
+            },
+            "clear_bonus": {
+                "loot_pct": 0.06
+            },
+            "unlock": {
+                "region": "corp_mesh",
+                "prestige": 2,
+                "boss_kills": 2
+            }
+        },
+        "orbital_relay": {
+            "order": 3,
+            "name": "Orbital Relay",
+            "desc": "A chain of relay stations on a low-orbit satellite link. Signals impossibly fast — and vacuum always ready to tear your node open.",
+            "threat_offset": 3,
+            "enemy_pool": [
+                "scanner",
+                "mirror_fiend",
+                "quarantine_bulwark",
+                "null_crawler",
+                "relay_sentinel",
+                "gravity_well"
+            ],
+            "boss": "relay_tyrant",
+            "modifiers": [
+                "magnetic_storm",
+                "frost_lock",
+                "orbital_drift",
+                "hard_vacuum"
+            ],
+            "effects": {
+                "speed_pct": 0.18,
+                "mission_duration_pct": -0.18,
+                "xp_bonus_pct": 0.28,
+                "integrity_pct": -0.08
+            },
+            "clear_bonus": {
+                "speed_pct": 0.05
+            },
+            "unlock": {
+                "region": "dark_web",
+                "ascension_count": 1,
+                "dungeon_level": 15
+            }
+        },
+        "kernel_core": {
+            "order": 4,
+            "name": "Kernel Core",
+            "desc": "The root of the entire network. There is no \"outside\" here — only the kernel, watching you.",
+            "threat_offset": 4,
+            "enemy_pool": [
+                "elite",
+                "mirror_fiend",
+                "quarantine_bulwark",
+                "null_crawler",
+                "kernel_warden",
+                "null_shard"
+            ],
+            "boss": "kernel_sovereign",
+            "modifiers": [
+                "corp_firewall",
+                "black_market",
+                "orbital_drift",
+                "hard_vacuum",
+                "kernel_pressure"
+            ],
+            "effects": {
+                "all_gen_pct": 0.25,
+                "loot_pct": 0.30,
+                "xp_bonus_pct": 0.35,
+                "integrity_pct": -0.15,
+                "modifier_resist": -0.15
+            },
+            "clear_bonus": {
+                "all_gen_pct": 0.08
+            },
+            "unlock": {
+                "region": "orbital_relay",
+                "ascension_count": 2,
+                "boss_kills": 5
+            }
+        }
+    }
+}

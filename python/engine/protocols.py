@@ -9,12 +9,17 @@ class ProtocolManager:
         self.arch_mgr = None
         # 内核跃迁永久升级聚合器（可选注入）
         self.asc_mgr = None
+        # 网络区域聚合器（可选注入）
+        self.net_mgr = None
 
     def set_architecture_manager(self, arch_mgr):
         self.arch_mgr = arch_mgr
 
     def set_ascension_manager(self, asc_mgr):
         self.asc_mgr = asc_mgr
+
+    def set_network_manager(self, net_mgr):
+        self.net_mgr = net_mgr
 
     def load_definitions(self, protocols_json):
         self.definitions = json.loads(protocols_json)
@@ -45,6 +50,10 @@ class ProtocolManager:
         # 内核跃迁永久升级：同一条通道
         if self.asc_mgr is not None:
             for k, v in self.asc_mgr.aggregate_effects().items():
+                effects[k] = effects.get(k, 0) + v
+        # 网络区域效果 + 已攻克区域的永久加成：同一条通道
+        if self.net_mgr is not None:
+            for k, v in self.net_mgr.aggregate_effects().items():
                 effects[k] = effects.get(k, 0) + v
         return effects
 

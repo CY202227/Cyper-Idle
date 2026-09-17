@@ -22,6 +22,7 @@ class CombatEngine:
         self.mission_mgr = mission_mgr
         self.i18n = i18n
         self.protocol_mgr = protocol_mgr
+        self.network_mgr = None
         self.enemy_defs = {}
 
         self.status = "idle"
@@ -41,6 +42,8 @@ class CombatEngine:
         self.vs_boss = False
         self.win_streak = 0
         self.dungeon = None
+        # 待展示的战斗播报（main 消费后清空），例如区域攻克
+        self.pending_notices = []
 
     def set_dungeon(self, dungeon):
         self.dungeon = dungeon
@@ -50,6 +53,9 @@ class CombatEngine:
 
     def set_protocol_manager(self, protocol_mgr):
         self.protocol_mgr = protocol_mgr
+
+    def set_network_manager(self, network_mgr):
+        self.network_mgr = network_mgr
 
     def load_enemies(self, enemies_json):
         self.enemy_defs = json.loads(enemies_json)
@@ -63,6 +69,15 @@ class CombatEngine:
         if self.protocol_mgr:
             return self.protocol_mgr.aggregate_effects()
         return {}
+
+    def _region_threat_floor(self):
+        """当前区域的威胁阶下限（区域越深，起步越硬）。"""
+        if self.network_mgr is None:
+            return 0
+        try:
+            return int(self.network_mgr.threat_offset())
+        except Exception:
+            return 0
 
     @property
     def is_active(self):
@@ -80,10 +95,16 @@ class CombatEngine:
         syn = {}
         if self.manager is not None and hasattr(self.manager, "synergy_effects"):
             syn = self.manager.synergy_effects()
+        # 本层地牢修饰词中的我方修正（player_intrusion_pct / player_firewall_pct
+        # 等）必须并入玩家侧效果，否则这些键永远不会生效。
+        effects = dict(self._effects())
+        if self.dungeon is not None:
+            for k, v in self.dungeon.modifier_effects().items():
+                effects[k] = effects.get(k, 0) + v
         return calc_player_power(
             self.state,
             self._buildings(),
-            protocol_effects=self._effects(),
+            protocol_effects=effects,
             vs_boss=vs_boss,
             synergy_effects=syn,
         )
@@ -109,8 +130,16 @@ class CombatEngine:
         if force_id and force_id in self.enemy_defs:
             return self.enemy_defs[force_id]
         pool = []
+        allowed = None
+        if self.network_mgr is not None:
+            try:
+                allowed = self.network_mgr.enemy_pool()
+            except Exception:
+                allowed = None
         for eid, defn in self.enemy_defs.items():
             if defn.get("boss"):
+                continue
+            if allowed is not None and eid not in allowed:
                 continue
             tmin = defn.get("tier_min", 0)
             if tmin > tier:
@@ -119,6 +148,14 @@ class CombatEngine:
             weight = float(defn.get("weight", 1))
             decay = max(0.0, 1.0 - (tier - tmin) * 0.22)
             pool.append((defn, weight * decay))
+        if not pool:
+            # 区域过滤后没有可用敌人时，退回到全表，避免刷不出怪
+            for eid, defn in self.enemy_defs.items():
+                if defn.get("boss") or defn.get("tier_min", 0) > tier:
+                    continue
+                weight = float(defn.get("weight", 1))
+                decay = max(0.0, 1.0 - (tier - defn.get("tier_min", 0)) * 0.22)
+                pool.append((defn, weight * decay))
         if not pool:
             return self.enemy_defs.get("sentry") or {
                 "id": "sentry",
@@ -142,6 +179,23 @@ class CombatEngine:
                 return defn
         return pool[-1][0]
 
+    def _region_boss_id(self):
+        """当前区域的区域核心 id（回退到通用核心守卫）。"""
+        if self.network_mgr is None:
+            return None
+        try:
+            return self.network_mgr.boss_id()
+        except Exception:
+            return None
+
+    def _region_id(self):
+        if self.network_mgr is None:
+            return None
+        try:
+            return self.network_mgr.current_region()
+        except Exception:
+            return None
+
     def _enemy_label(self, defn):
         lang = getattr(self.state, "language", "zh")
         if lang == "en" and defn.get("name_en"):
@@ -159,9 +213,10 @@ class CombatEngine:
         tier = max(
             int(getattr(self.state, "threat_tier", 0)),
             min(5, level // 3),
+            self._region_threat_floor(),
         )
         if is_boss:
-            force_id = "core_guardian"
+            force_id = self._region_boss_id() or "core_guardian"
             is_boss = True
         elif is_elite:
             force_id = force_id or "elite"
@@ -195,6 +250,7 @@ class CombatEngine:
         # 修饰词：敌方三维调整
         base_hp *= 1.0 + float(meff.get("enemy_hp_pct", 0))
         base_intrusion *= 1.0 + float(meff.get("enemy_intrusion_pct", 0))
+        base_firewall *= 1.0 + float(meff.get("enemy_firewall_pct", 0))
         base_speed *= 1.0 + float(meff.get("all_speed_pct", 0)) + float(
             meff.get("enemy_speed_pct", 0)
         )
@@ -207,6 +263,7 @@ class CombatEngine:
             "level": level,
             "tier": tier,
             "boss": self.vs_boss,
+            "region": self._region_id(),
             "max_hp": base_hp * float(defn.get("hp_mult", 1)),
             "intrusion": base_intrusion * float(defn.get("intrusion_mult", 1)),
             "firewall": base_firewall * float(defn.get("firewall_mult", 1)),
@@ -356,6 +413,24 @@ class CombatEngine:
             self.enemy_hp = min(self.enemy["max_hp"], self.enemy_hp + heal)
             self.log.append(self._t("enemy_leech", heal=int(heal)))
 
+    def _handle_region_boss(self):
+        """击败区域核心：首次攻克时记录并播报永久加成。"""
+        if self.network_mgr is None:
+            return
+        try:
+            bonus = self.network_mgr.on_region_boss_defeated(
+                (self.enemy or {}).get("id")
+            )
+        except Exception:
+            bonus = None
+        if bonus is None:
+            return
+        rid = (self.enemy or {}).get("region") or ""
+        self.log.append(self._t("region_cleared_log"))
+        self.pending_notices.append(
+            self._t("region_cleared_notice", name=self.network_mgr.name(rid))
+        )
+
     def end_combat(self, victory):
         level = self.enemy["level"] if self.enemy else 1
         was_boss = bool(self.enemy and self.enemy.get("boss"))
@@ -392,12 +467,13 @@ class CombatEngine:
                 1,
                 int((1 + level // 3) * loot_m.get("compute", 1) * loot_m_all),
             )
-            # 经验曲线：高等级击杀经验小幅加速 + 修饰词经验加成
+            # 经验曲线：高等级击杀经验小幅加速 + 修饰词/区域经验加成
             hxp = int(
                 (10 + level * 4 + (level * level) // 40)
                 * loot_m.get("hacking_xp", 1)
                 * loot_m_all
                 * (1.0 + float(meff.get("xp_bonus_pct", 0)))
+                * (1.0 + float(effects.get("xp_bonus_pct", 0)))
             )
             if was_boss:
                 credits = int(credits * 1.5)
@@ -434,6 +510,7 @@ class CombatEngine:
             if was_boss:
                 self.state.boss_kills = getattr(self.state, "boss_kills", 0) + 1
                 self.log.append(self._t("combat_boss_down"))
+                self._handle_region_boss()
             # 层事件封锁在任意胜利后解除
             if getattr(self.state, "pending_floor_boss", False):
                 self.state.pending_floor_boss = False

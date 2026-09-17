@@ -16,11 +16,17 @@ class DungeonEngine:
         # 地牢修饰词
         self.modifier_defs = {}
         self.active_modifier = None
+        # 当前网络区域允许 roll 的修饰词 id 集合；None = 不限
+        self.modifier_pool = None
         # 修饰词抗性：>0 削弱负面效果，<0 放大负面效果（架构/Trait 提供）
         self.modifier_resist = 0.0
 
     def load_modifiers(self, modifiers_json):
         self.modifier_defs = json.loads(modifiers_json)
+
+    def set_modifier_pool(self, ids):
+        """限定本区域可出现的修饰词；传 None 表示不限。"""
+        self.modifier_pool = set(ids) if ids else None
 
     def set_modifier_resist(self, value):
         self.modifier_resist = float(value or 0.0)
@@ -49,8 +55,14 @@ class DungeonEngine:
         pool = [
             (mid, float(defn.get("weight", 1)))
             for mid, defn in self.modifier_defs.items()
+            if self.modifier_pool is None or mid in self.modifier_pool
         ]
+        if not pool:
+            return None
         total = sum(w for _, w in pool)
+        if total <= 0:
+            pool = [(mid, 1.0) for mid, _ in pool]
+            total = float(len(pool))
         roll = self.rng.rng.random() * total
         acc = 0.0
         for mid, w in pool:

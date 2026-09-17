@@ -70,10 +70,29 @@ def calc_player_power(
     integrity = (base_integrity + bonus["integrity"]) * mult
     speed = (base_speed + bonus["speed"]) * mult
 
-    intrusion *= 1.0 + float(effects.get("intrusion_pct", 0))
-    firewall *= 1.0 + float(effects.get("firewall_pct", 0))
-    integrity *= 1.0 + float(effects.get("integrity_pct", 0))
-    speed *= 1.0 + float(effects.get("speed_pct", 0))
+    # 协议/架构效果与地牢修饰词都可能给出 player_* 前缀的同类修正
+    # （例如修饰词 data_tide 的 player_intrusion_pct、mirror_static 的
+    #  player_firewall_pct），两者与 intrusion_pct / firewall_pct 同义累加。
+    intrusion *= (
+        1.0
+        + float(effects.get("intrusion_pct", 0))
+        + float(effects.get("player_intrusion_pct", 0))
+    )
+    firewall *= (
+        1.0
+        + float(effects.get("firewall_pct", 0))
+        + float(effects.get("player_firewall_pct", 0))
+    )
+    integrity *= (
+        1.0
+        + float(effects.get("integrity_pct", 0))
+        + float(effects.get("player_integrity_pct", 0))
+    )
+    speed *= (
+        1.0
+        + float(effects.get("speed_pct", 0))
+        + float(effects.get("player_speed_pct", 0))
+    )
     if vs_boss:
         intrusion *= 1.0 + float(effects.get("boss_intrusion_pct", 0))
 

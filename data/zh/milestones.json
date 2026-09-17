@@ -8,7 +8,9 @@
         "core_breach",
         "echo_stable",
         "abyss_watch",
-        "ascension_ready"
+        "ascension_ready",
+        "region_pioneer",
+        "region_conqueror"
     ],
     "milestones": {
         "boot": {
@@ -92,6 +94,22 @@
             "require": { "prestige": 3, "boss_kills": 3, "dungeon_level": 20 },
             "unlock": { "story_flag": "milestone_ascension" },
             "reward": { "credits": 5000, "hacking_xp": 2500, "compute": 200 }
+        },
+        "region_pioneer": {
+            "name": "越境迁移",
+            "desc": "首次执行网络跃迁，把节点迁入另一个网络区域。",
+            "hint": "在「网络区域」面板解锁并跃迁到新的区域。",
+            "require": { "migrations": 1 },
+            "unlock": { "story_flag": "milestone_region_pioneer" },
+            "reward": { "credits": 2500, "compute": 80 }
+        },
+        "region_conqueror": {
+            "name": "区域征服者",
+            "desc": "攻克 2 个网络区域的区域核心。",
+            "hint": "每个区域的核心守卫都不同：击败所在区域的核心即可攻克该区域。",
+            "require": { "regions_cleared": 2 },
+            "unlock": { "story_flag": "milestone_region_conqueror" },
+            "reward": { "credits": 6000, "hacking_xp": 3000, "compute": 250 }
         }
     }
 }
