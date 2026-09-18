@@ -88,10 +88,16 @@ def calc_player_power(
         + float(effects.get("integrity_pct", 0))
         + float(effects.get("player_integrity_pct", 0))
     )
+    # all_speed_pct 名义上是「所有单位速度」：这里作用于玩家侧，
+    # combat.py 里同一键作用于敌方侧。注意速度是阈值判定
+    # （超过对方 1.25 倍才得双动），对称缩放不改变双方速度比，
+    # 因此 all_speed_pct 的战斗净效果接近中性，危害应向必须用
+    # enemy_speed_pct / player_speed_pct 分别指定。
     speed *= (
         1.0
         + float(effects.get("speed_pct", 0))
         + float(effects.get("player_speed_pct", 0))
+        + float(effects.get("all_speed_pct", 0))
     )
     if vs_boss:
         intrusion *= 1.0 + float(effects.get("boss_intrusion_pct", 0))

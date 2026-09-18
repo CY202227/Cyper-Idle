@@ -1,7 +1,73 @@
 import json
+import math
 import random
 
 from engine.power import calc_player_power
+
+# 防火墙减伤曲线：低于拐点时用 value/(value+const)，
+# 高于拐点后不再硬截断，而是平滑趋近 asymptote。
+# 原来的 min(0.55, fw/(fw+45)) 在 fw>=55 后完全失效，
+# 导致「堆防火墙」和 firewall_pct 类修饰词在中期以后毫无作用。
+_PLAYER_FW = (45.0, 55.0, 0.75, 90.0)   # const, knee, asymptote, span
+_ENEMY_FW = (40.0, 40.0, 0.70, 80.0)
+
+# 敌人池权重衰减：低于池内最高档位的敌人按指数淡出。
+#
+# 历史：最初是 max(0, 1-(tier-tmin)*0.22)（无下限），tier 在 15 层封顶后
+# 池逐字节冻结；改成 max(0.06, ...) 后解决了冻结，但**硬下限本身有缺陷**：
+# ref（池内最高档）是无上界的，而 gap*0.22 一旦超过 (1-0.06)/0.22 ≈ 4.3，
+# 该怪就永久钉死在下限。实测深度 27 时池总权重从 104.9 崩到 41.7、
+# tmin<=4 的敌人全部落到 0.06，池的「档位梯度」被抹平 —— 于是新增 3 只
+# 深层敌人后它们独占 44.9% 的份额，把 kernel_warden 从 11.9% 压到 4.6%。
+# 指数衰减没有这个悬崖：它单调、永不归零、任意深度都保留梯度。
+_POOL_DECAY = 0.30
+
+# 护盾再生：回补「上一回合受到的伤害」的 35%，而不是最大生命的固定比例。
+# 1.2%*max_hp 会随层数线性增长，而玩家输出与层数无关（战力只由 hacking_xp
+# 的平方根决定），于是净 DPS 会在某层转负、敌人变得数学上不可击杀：
+# 实测 quarantine_bulwark 在 26 层净 DPS=-0.6，35 层时 6/6 带此词条的敌人
+# 都不可击杀（含 tier_min=5 的区域核心 kernel_sovereign，会卡死区域攻克）。
+# 改成伤害比例后净 DPS 恒 >= 65% 玩家输出，永不出现僵局。
+_SHIELD_REGEN_RATE = 0.35
+
+
+def pool_decay(tier_min, ref_tier):
+    """敌人在池内的权重衰减系数（指数，单调递减，永不为 0）。
+
+    语义：衰减衡量这只怪比「池内最深档位」落后多少。
+
+    **注意 ref_tier 在指数形式下是公共因子**：
+        exp(-(ref - t) * k) == exp(-ref * k) * exp(t * k)
+    所以 ref 取任何值都不改变池的成分，只等比缩放总权重，而 _pick_template
+    会归一化。等价说法：池成分 = 按 tier_min 的静态权重 `w * exp(k * tier_min)`。
+    参数保留只是让「越深的怪越常见」这层语义显式
+    （旧公式带硬下限时 ref 是**必须**取池内最高档的，换 exp 后这个约束消失）。
+
+    为什么用 exp 而不是 max(floor, 1-gap*k)：后者的下限是个悬崖，gap 一旦
+    越过 (1-floor)/k，所有浅层怪就被压成同一个数、池的梯度消失，新增深层
+    内容会一次性夺走全部份额。实测深度 27 时池总权重从 104.9 崩到 41.7、
+    tmin<=4 全部落到 0.06，3 只新怪独占 44.9%，kernel_warden 从 11.9% 压到 4.6%。
+    exp 在 gap 小的时候与原式几乎一致（gap=0 -> 1.00，gap=1 -> 0.74 vs 0.78，
+    gap=2 -> 0.55 vs 0.56），在 gap 大时温和得多（gap=6 -> 0.17 vs 0.06），
+    因此对「新增更深档位」不敏感。实测加入 3 只深层敌人后新怪份额 45% -> 25%，
+    8/8 个采样格子的难度偏差都更接近基线。
+
+    推论：池成分只在 pool_tier 跨过某个 tier_min（新怪解锁）时改变；一旦
+    pool_tier >= 池内最高档位，成分就固定（层 27 之后逐字节相同）。
+    这是档位制设计的固有性质，要靠**加内容**推进，不要靠调 ref。
+    """
+    gap = max(0, int(ref_tier) - int(tier_min))
+    return math.exp(-gap * _POOL_DECAY)
+
+
+def mitigation(value, const, knee, asymptote, span):
+    """防火墙减伤率：拐点前沿用 value/(value+const)，拐点后平滑趋近 asymptote。"""
+    value = max(0.0, float(value))
+    if value <= knee:
+        return value / (value + const)
+    base = knee / (knee + const)
+    over = value - knee
+    return base + (asymptote - base) * over / (over + span)
 
 
 class CombatEngine:
@@ -31,6 +97,8 @@ class CombatEngine:
         self.player_hp = 0.0
         self.player_max_hp = 100.0
         self.player_power = {}
+        # 本回合敌人累计受到的伤害，供 shield_regen 结算（每回合清空）
+        self._enemy_damage_taken = 0.0
         self.turn = 0
         self.log = []
         self.cooldown_remaining = 0.0
@@ -79,6 +147,36 @@ class CombatEngine:
         except Exception:
             return 0
 
+    def _region_challenge_effects(self):
+        """当前区域挑战修饰词的效果（含挑战产出加成）。
+
+        与地牢修饰词走同一条 meff 通道：这样 enemy_* 这类敌方侧键才会生效。
+        不要把它并进 _effects()/aggregate_effects()——那条通道只通向玩家侧。
+
+        挑战同样吃 modifier_resist，与地牢修饰词保持一致；否则同一个修饰词
+        作为地牢修饰词时被抗性削弱、作为挑战时却不受影响。
+        产出加成（loot_pct / xp_bonus_pct 正值）是增益项，不会被缩放。
+        """
+        if self.network_mgr is None:
+            return {}
+        try:
+            eff = dict(self.network_mgr.challenge_effects())
+        except Exception:
+            return {}
+        if self.dungeon is not None:
+            eff = self.dungeon.scale_hazards(eff)
+        return eff
+
+    def _layer_effects(self):
+        """本层生效的全部修饰词效果 = 地牢本层修饰词 + 当前区域挑战修饰词。"""
+        effects = {}
+        if self.dungeon is not None:
+            for k, v in self.dungeon.modifier_effects().items():
+                effects[k] = effects.get(k, 0) + float(v)
+        for k, v in self._region_challenge_effects().items():
+            effects[k] = effects.get(k, 0) + float(v)
+        return effects
+
     @property
     def is_active(self):
         return self.status == "fighting"
@@ -95,12 +193,12 @@ class CombatEngine:
         syn = {}
         if self.manager is not None and hasattr(self.manager, "synergy_effects"):
             syn = self.manager.synergy_effects()
-        # 本层地牢修饰词中的我方修正（player_intrusion_pct / player_firewall_pct
-        # 等）必须并入玩家侧效果，否则这些键永远不会生效。
+        # 本层地牢修饰词与区域挑战修饰词中的我方修正
+        # （player_intrusion_pct / player_firewall_pct 等）必须并入玩家侧效果，
+        # 否则这些键永远不会生效。
         effects = dict(self._effects())
-        if self.dungeon is not None:
-            for k, v in self.dungeon.modifier_effects().items():
-                effects[k] = effects.get(k, 0) + v
+        for k, v in self._layer_effects().items():
+            effects[k] = effects.get(k, 0) + v
         return calc_player_power(
             self.state,
             self._buildings(),
@@ -126,37 +224,33 @@ class CombatEngine:
         self._pending_boss = True
         self._pending_floor_elite = False
 
+    def _pool_candidates(self, tier, allowed):
+        """筛出当前池威胁阶下可用的敌人：排除 boss、未解锁档位与区域外敌人。"""
+        out = []
+        for eid, defn in self.enemy_defs.items():
+            if defn.get("boss"):
+                continue
+            if allowed is not None and eid not in allowed:
+                continue
+            if defn.get("tier_min", 0) > tier:
+                continue
+            out.append(defn)
+        return out
+
     def _pick_template(self, tier, force_id=None):
         if force_id and force_id in self.enemy_defs:
             return self.enemy_defs[force_id]
-        pool = []
         allowed = None
         if self.network_mgr is not None:
             try:
                 allowed = self.network_mgr.enemy_pool()
             except Exception:
                 allowed = None
-        for eid, defn in self.enemy_defs.items():
-            if defn.get("boss"):
-                continue
-            if allowed is not None and eid not in allowed:
-                continue
-            tmin = defn.get("tier_min", 0)
-            if tmin > tier:
-                continue
-            # 权重衰减：威胁阶远超怪物档位时，低级怪淡出
-            weight = float(defn.get("weight", 1))
-            decay = max(0.0, 1.0 - (tier - tmin) * 0.22)
-            pool.append((defn, weight * decay))
-        if not pool:
+        cands = self._pool_candidates(tier, allowed)
+        if not cands:
             # 区域过滤后没有可用敌人时，退回到全表，避免刷不出怪
-            for eid, defn in self.enemy_defs.items():
-                if defn.get("boss") or defn.get("tier_min", 0) > tier:
-                    continue
-                weight = float(defn.get("weight", 1))
-                decay = max(0.0, 1.0 - (tier - defn.get("tier_min", 0)) * 0.22)
-                pool.append((defn, weight * decay))
-        if not pool:
+            cands = self._pool_candidates(tier, None)
+        if not cands:
             return self.enemy_defs.get("sentry") or {
                 "id": "sentry",
                 "name": "Sentry",
@@ -167,6 +261,12 @@ class CombatEngine:
                 "reflect": 0,
                 "loot": {},
             }
+        # 以池内最高档位为衰减基准，保证「越深的怪越常见」在任意深度都成立
+        best = max(int(d.get("tier_min", 0)) for d in cands)
+        pool = [
+            (d, float(d.get("weight", 1)) * pool_decay(d.get("tier_min", 0), best))
+            for d in cands
+        ]
         total = sum(w for _, w in pool)
         if total <= 0:
             pool = [(d, 1.0) for d, _ in pool]
@@ -215,6 +315,12 @@ class CombatEngine:
             min(5, level // 3),
             self._region_threat_floor(),
         )
+        # 敌人池的威胁阶与数值威胁阶必须分开：
+        #   tier      -> 敌人数值缩放，绑在 threat_tier / 区域基线上，封顶 5；
+        #   pool_tier -> 敌人池成分，必须随层数继续推进，不封顶。
+        # 两者共用一个变量时，min(5, level//3) 会让 15 层之后的池彻底冻结，
+        # 而且 tier_min=6 的 null_crawler 永远刷不出来（6 > 5 被直接排除）。
+        pool_tier = max(tier, level // 3)
         if is_boss:
             force_id = self._region_boss_id() or "core_guardian"
             is_boss = True
@@ -223,17 +329,21 @@ class CombatEngine:
         elif enemy_type and enemy_type in self.enemy_defs:
             force_id = enemy_type
 
-        defn = self._pick_template(tier, force_id=force_id)
+        defn = self._pick_template(pool_tier, force_id=force_id)
         self.vs_boss = bool(defn.get("boss") or is_boss)
         power = self.get_power(vs_boss=self.vs_boss)
         self.player_power = power
         self.status = "fighting"
         self.turn = 0
+        self._enemy_damage_taken = 0.0
 
         # 地牢修饰词（若有）
         meff = {}
         if self.dungeon is not None:
             meff = self.dungeon.modifier_effects()
+        # 区域挑战修饰词与地牢修饰词同通道生效（含敌方侧键）
+        for k, v in self._region_challenge_effects().items():
+            meff[k] = meff.get(k, 0) + float(v)
 
         # 拉长场次：常规约 8–20 tick，Boss 约 45–90 tick
         scale = 1.0 + tier * 0.15 + max(0, level - 1) * 0.06
@@ -251,6 +361,8 @@ class CombatEngine:
         base_hp *= 1.0 + float(meff.get("enemy_hp_pct", 0))
         base_intrusion *= 1.0 + float(meff.get("enemy_intrusion_pct", 0))
         base_firewall *= 1.0 + float(meff.get("enemy_firewall_pct", 0))
+        # all_speed_pct 是「所有单位」：敌方这一半在此生效，
+        # 玩家那一半在 power.py 的 calc_player_power 里生效。
         base_speed *= 1.0 + float(meff.get("all_speed_pct", 0)) + float(
             meff.get("enemy_speed_pct", 0)
         )
@@ -262,6 +374,7 @@ class CombatEngine:
             "label": label,
             "level": level,
             "tier": tier,
+            "pool_tier": pool_tier,
             "boss": self.vs_boss,
             "region": self._region_id(),
             "max_hp": base_hp * float(defn.get("hp_mult", 1)),
@@ -329,11 +442,13 @@ class CombatEngine:
         self.player_power = power
         self.turn += 1
 
-        # 词条：护盾再生——每回合回 1.2% 最大生命
+        # 词条：护盾再生——回补上一回合受到伤害的 35%
+        # （按伤害而非最大生命，见文件头 _SHIELD_REGEN_RATE 的说明）
         if "shield_regen" in self.enemy.get("special", []):
-            if self.enemy_hp > 0 and self.enemy_hp < self.enemy["max_hp"]:
-                heal = self.enemy["max_hp"] * 0.012
+            if self.enemy_hp > 0 and self._enemy_damage_taken > 0:
+                heal = self._enemy_damage_taken * _SHIELD_REGEN_RATE
                 self.enemy_hp = min(self.enemy["max_hp"], self.enemy_hp + heal)
+            self._enemy_damage_taken = 0.0
 
         # 词条：超频——血量低于 30% 时速度视为 +60%
         e_spd = self.enemy["speed"]
@@ -369,13 +484,16 @@ class CombatEngine:
 
     def _player_strike(self, power):
         e_fw = self.enemy.get("firewall", 0)
-        mitigate = min(0.5, e_fw / (e_fw + 40))
+        mitigate = mitigation(e_fw, *_ENEMY_FW)
         variance = 0.85 + random.random() * 0.3
         energy = self.state.resources.get("energy", 0)
         if energy < 20:
             variance *= 0.85
         damage = power["intrusion"] * (1.0 - mitigate) * variance
+        hp_before = self.enemy_hp
         self.enemy_hp = max(0.0, self.enemy_hp - damage)
+        # 只累计实际打掉的血量，避免溢出伤害被 shield_regen 当成治疗量
+        self._enemy_damage_taken += hp_before - self.enemy_hp
         self.log.append(
             self._t(
                 "combat_player_hit",
@@ -391,7 +509,7 @@ class CombatEngine:
 
     def _enemy_strike(self, power):
         fw = power["firewall"]
-        mitigate = min(0.55, fw / (fw + 45))
+        mitigate = mitigation(fw, *_PLAYER_FW)
         variance = 0.9 + random.random() * 0.25
         damage = self.enemy["intrusion"] * (1.0 - mitigate) * variance
         if self.vs_boss or self.enemy.get("boss"):
@@ -450,6 +568,9 @@ class CombatEngine:
             meff = {}
             if self.dungeon is not None:
                 meff = self.dungeon.modifier_effects()
+            # 区域挑战修饰词同样影响掉落/经验（含挑战产出加成）
+            for k, v in self._region_challenge_effects().items():
+                meff[k] = meff.get(k, 0) + float(v)
             loot_m_all = (
                 loot_pct
                 * streak_mult

@@ -60,6 +60,7 @@ class GameState:
         self.regions_cleared = []
         self.region_depths = {}
         self.migrations = 0
+        self.region_challenges = []
 
     @property
     def hacking_level(self):
@@ -159,6 +160,8 @@ class GameState:
         self.pending_floor_boss = False
         self.max_dungeon_level = 1
         self.active_floor_modifier = None
+        # 挑战修饰词随跃迁重抽，由 NetworkManager 随后写入
+        self.region_challenges = []
         # 目标区域的威胁基线：越深的区域起步越硬
         self.threat_tier = max(int(getattr(self, "threat_tier", 0)), int(threat_floor))
         if "network_migrated" not in self.story_flags:
@@ -205,6 +208,7 @@ class GameState:
             "regions_cleared": self.regions_cleared,
             "region_depths": self.region_depths,
             "migrations": self.migrations,
+            "region_challenges": self.region_challenges,
         })
 
     def from_json(self, json_str):
@@ -274,3 +278,7 @@ class GameState:
         raw_depths = data.get("region_depths", {})
         self.region_depths = dict(raw_depths) if isinstance(raw_depths, dict) else {}
         self.migrations = int(data.get("migrations", 0) or 0)
+        raw_challenges = data.get("region_challenges", [])
+        self.region_challenges = (
+            list(raw_challenges) if isinstance(raw_challenges, list) else []
+        )

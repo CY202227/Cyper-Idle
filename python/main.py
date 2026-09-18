@@ -200,6 +200,7 @@ async def load_game_data():
         arch_mgr.load_definitions(architectures_data)
         asc_mgr.load_definitions(ascension_data)
         net_mgr.load_definitions(networks_data)
+        net_mgr.load_modifiers(modifiers_data)
         combat_eng.load_enemies(enemies_data)
         combat_eng.set_i18n(i18n)
         dungeon.load_modifiers(modifiers_data)
@@ -617,11 +618,23 @@ def _make_migrate_handler(rid):
         sync_network_effects()
         manager.update_storage_caps()
         tip = i18n.get("network_migrated", name=net_mgr.name(rid))
+        chal = net_mgr.challenge_names()
+        if chal:
+            tip += " · " + _fmt_challenges(chal)
         notify(tip)
         append_story_log(tip)
         update_ui()
 
     return handler
+
+
+def _fmt_challenges(names):
+    """挑战修饰词提示文案：列出名字并标出额外产出加成。"""
+    return i18n.get(
+        "network_challenges",
+        names=" · ".join(names),
+        n=int(round(net_mgr.challenge_bonus() * 100)),
+    )
 
 
 def update_network_ui():
@@ -699,6 +712,11 @@ def update_network_ui():
             row = document.createElement("div")
             row.className = "region-effects is-bonus"
             row.innerText = f'{i18n.get("network_clear_bonus")}: {cb}'
+            card.appendChild(row)
+        if info["challenges"]:
+            row = document.createElement("div")
+            row.className = "region-effects is-challenge"
+            row.innerText = _fmt_challenges(net_mgr.challenge_names())
             card.appendChild(row)
 
         if info["current"]:

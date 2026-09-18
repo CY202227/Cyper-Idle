@@ -119,7 +119,7 @@
         "boss_locked": "[ 抵达地牢第 10 层后解锁核心突袭 ]",
         "enemy_special_leech": "> [词条] 汲取：敌方命中将回复自身生命",
         "enemy_special_overclock": "> [词条] 超频：敌方低血量时速度大幅提升",
-        "enemy_special_shield_regen": "> [词条] 护盾再生：敌方每回合回复少量生命",
+        "enemy_special_shield_regen": "> [词条] 护盾再生：敌方回补上回合受到伤害的 35%",
         "enemy_leech": "> 敌方汲取回复 {heal}",
         "floor_mod_prefix": "本层修饰",
         "floor_mod_active": "[{name}] {desc}",
@@ -207,7 +207,8 @@
         "region_eff_mission_duration_pct": "行动耗时",
         "region_eff_xp_bonus_pct": "黑客经验",
         "region_eff_integrity_pct": "完整性",
-        "region_eff_modifier_resist": "修饰词抗性"
+        "region_eff_modifier_resist": "修饰词抗性",
+        "network_challenges": "挑战修饰词：{names}（额外产出 +{n}%）"
     },
     "en": {
         "export_save": "Export Save",
@@ -329,7 +330,7 @@
         "boss_locked": "[ Reach dungeon floor 10 to unlock Core Raid ]",
         "enemy_special_leech": "> [TRAIT] Leech: enemy hits heal themselves",
         "enemy_special_overclock": "> [TRAIT] Overclock: enemy speeds up at low HP",
-        "enemy_special_shield_regen": "> [TRAIT] Shield Regen: enemy heals each turn",
+        "enemy_special_shield_regen": "> [TRAIT] Shield Regen: enemy heals 35% of the damage it took last turn",
         "enemy_leech": "> Enemy leeches {heal} HP",
         "floor_mod_prefix": "Floor Mod",
         "floor_mod_active": "[{name}] {desc}",
@@ -417,6 +418,7 @@
         "region_eff_mission_duration_pct": "Op duration",
         "region_eff_xp_bonus_pct": "Hacking XP",
         "region_eff_integrity_pct": "Integrity",
-        "region_eff_modifier_resist": "Modifier resist"
+        "region_eff_modifier_resist": "Modifier resist",
+        "network_challenges": "Challenges: {names} (extra output +{n}%)"
     }
 }

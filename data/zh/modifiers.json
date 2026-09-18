@@ -1,10 +1,10 @@
 {
     "magnetic_storm": {
         "name": "磁暴层",
-        "desc": "敌方链路过载：敌人速度 +30%，但战利品 +50%。",
+        "desc": "敌方链路过载：敌人入侵 +28%，但战利品 +50%。",
         "weight": 20,
         "effects": {
-            "enemy_speed_pct": 0.30,
+            "enemy_intrusion_pct": 0.28,
             "loot_pct": 0.50
         }
     },
@@ -29,10 +29,11 @@
     },
     "frost_lock": {
         "name": "冻结锁",
-        "desc": "子网被低温封存：所有单位速度 -20%，经验和碎片 +25%。",
+        "desc": "子网被低温封存：你的攻击链路迟滞（我方入侵 -22%），敌人也变迟钝（敌方入侵 -10%），但战利品与碎片 +25%。",
         "weight": 15,
         "effects": {
-            "all_speed_pct": -0.20,
+            "player_intrusion_pct": -0.22,
+            "enemy_intrusion_pct": -0.10,
             "loot_pct": 0.25,
             "scrap_bonus_pct": 0.25
         }
@@ -84,29 +85,28 @@
     },
     "signal_jam": {
         "name": "信号压制",
-        "desc": "窄带干扰覆盖全区：敌人速度 +40%，我方防火墙 +25%。",
+        "desc": "窄带干扰覆盖全区：敌人防火墙 +30%（更难穿透），我方防火墙 +25%。",
         "weight": 15,
         "effects": {
-            "enemy_speed_pct": 0.40,
+            "enemy_firewall_pct": 0.30,
             "player_firewall_pct": 0.25
         }
     },
     "orbital_drift": {
         "name": "轨道漂移",
-        "desc": "中继站偏离轨道：所有单位速度 -30%，黑客经验 +40%。",
+        "desc": "中继站偏离轨道：你难以锁定敌人弱点（敌方血量 +28%），黑客经验 +40%。",
         "weight": 15,
         "effects": {
-            "all_speed_pct": -0.30,
+            "enemy_hp_pct": 0.28,
             "xp_bonus_pct": 0.40
         }
     },
     "hard_vacuum": {
         "name": "硬真空",
-        "desc": "舱段失压：敌人血量 -25%，敌方入侵 +25%，战利品 +25%。",
+        "desc": "舱段失压：敌人趁隙全力输出（敌方入侵 +50%），但战利品 +25%。",
         "weight": 14,
         "effects": {
-            "enemy_hp_pct": -0.25,
-            "enemy_intrusion_pct": 0.25,
+            "enemy_intrusion_pct": 0.50,
             "loot_pct": 0.25
         }
     },

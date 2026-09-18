@@ -5,7 +5,25 @@
         "migrate_compute_base": 50,
         "migrate_compute_per_order": 70,
         "migrate_scraps_base": 900,
-        "migrate_scraps_per_order": 1400
+        "migrate_scraps_per_order": 1400,
+        "challenge_count": 1,
+        "challenge_extra_chance": 0.25,
+        "challenge_extra_per_order": 0.10,
+        "challenge_max": 2,
+        "challenge_bonus_per": 0.10,
+        "challenge_pool": [
+            "magnetic_storm",
+            "data_tide",
+            "frost_lock",
+            "mirror_static",
+            "corp_firewall",
+            "audit_sweep",
+            "black_market",
+            "signal_jam",
+            "orbital_drift",
+            "hard_vacuum",
+            "kernel_pressure"
+        ]
     },
     "regions": {
         "local": {
@@ -21,7 +39,8 @@
                 "elite",
                 "mirror_fiend",
                 "quarantine_bulwark",
-                "null_crawler"
+                "null_crawler",
+                "daemon_hydra"
             ],
             "boss": "core_guardian",
             "modifiers": [
@@ -50,7 +69,9 @@
                 "elite",
                 "quarantine_bulwark",
                 "mesh_daemon",
-                "audit_drone"
+                "audit_drone",
+                "daemon_hydra",
+                "quantum_watcher"
             ],
             "boss": "mesh_overseer",
             "modifiers": [
@@ -85,7 +106,11 @@
                 "mirror_fiend",
                 "null_crawler",
                 "bounty_hunter",
-                "data_fence"
+                "data_fence",
+                "syndicate_enforcer",
+                "black_ice",
+                "quantum_watcher",
+                "root_arbiter"
             ],
             "boss": "black_market_broker",
             "modifiers": [
@@ -97,7 +122,7 @@
             ],
             "effects": {
                 "loot_pct": 0.35,
-                "firewall_pct": -0.12
+                "integrity_pct": -0.15
             },
             "clear_bonus": {
                 "loot_pct": 0.06
@@ -119,7 +144,9 @@
                 "quarantine_bulwark",
                 "null_crawler",
                 "relay_sentinel",
-                "gravity_well"
+                "gravity_well",
+                "daemon_hydra",
+                "root_arbiter"
             ],
             "boss": "relay_tyrant",
             "modifiers": [
@@ -154,7 +181,10 @@
                 "quarantine_bulwark",
                 "null_crawler",
                 "kernel_warden",
-                "null_shard"
+                "null_shard",
+                "daemon_hydra",
+                "quantum_watcher",
+                "root_arbiter"
             ],
             "boss": "kernel_sovereign",
             "modifiers": [

@@ -1,10 +1,10 @@
 {
     "magnetic_storm": {
         "name": "Magnetic Storm",
-        "desc": "Overloaded links: enemy speed +30%, but loot +50%.",
+        "desc": "Overloaded links: enemy intrusion +28%, but loot +50%.",
         "weight": 20,
         "effects": {
-            "enemy_speed_pct": 0.30,
+            "enemy_intrusion_pct": 0.28,
             "loot_pct": 0.50
         }
     },
@@ -29,10 +29,11 @@
     },
     "frost_lock": {
         "name": "Frost Lock",
-        "desc": "Subnet frozen: all unit speed -20%, XP and scrap +25%.",
+        "desc": "Subnet frozen: your attack chain stalls (your intrusion -22%), enemies slow too (enemy intrusion -10%), but loot and scrap +25%.",
         "weight": 15,
         "effects": {
-            "all_speed_pct": -0.20,
+            "player_intrusion_pct": -0.22,
+            "enemy_intrusion_pct": -0.10,
             "loot_pct": 0.25,
             "scrap_bonus_pct": 0.25
         }
@@ -84,29 +85,28 @@
     },
     "signal_jam": {
         "name": "Signal Jam",
-        "desc": "Narrowband interference blankets the region: enemy speed +40%, our firewall +25%.",
+        "desc": "Narrowband interference blankets the region: enemy firewall +30% (harder to punch through), our firewall +25%.",
         "weight": 15,
         "effects": {
-            "enemy_speed_pct": 0.40,
+            "enemy_firewall_pct": 0.30,
             "player_firewall_pct": 0.25
         }
     },
     "orbital_drift": {
         "name": "Orbital Drift",
-        "desc": "Relay stations drift off-orbit: all unit speed -30%, hacking XP +40%.",
+        "desc": "Relays drift off-orbit: you struggle to lock onto enemy weak points (enemy HP +28%), hacking XP +40%.",
         "weight": 15,
         "effects": {
-            "all_speed_pct": -0.30,
+            "enemy_hp_pct": 0.28,
             "xp_bonus_pct": 0.40
         }
     },
     "hard_vacuum": {
         "name": "Hard Vacuum",
-        "desc": "A module loses pressure: enemy HP -25%, enemy intrusion +25%, loot +25%.",
+        "desc": "Hull depressurized: enemies pour everything into their attack (enemy intrusion +50%), but loot +25%.",
         "weight": 14,
         "effects": {
-            "enemy_hp_pct": -0.25,
-            "enemy_intrusion_pct": 0.25,
+            "enemy_intrusion_pct": 0.50,
             "loot_pct": 0.25
         }
     },

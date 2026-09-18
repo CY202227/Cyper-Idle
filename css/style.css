@@ -1186,6 +1186,11 @@ button.is-locked:hover {
     opacity: 0.95;
 }
 
+.region-effects.is-challenge {
+    color: var(--accent-color);
+    opacity: 0.95;
+}
+
 .region-req {
     font-size: 0.78rem;
     margin-top: 4px;

@@ -2,6 +2,24 @@ import json
 import random
 from collections import deque
 
+# 修饰词效果键中「属于敌方侧」的键：这些键**正值**代表敌人变强 = 对玩家有害。
+# 其余键（loot_pct / player_* / xp_bonus_pct 等）**负值**才代表对玩家有害。
+# all_speed_pct 不在此列：它对称作用于敌我双方，净效果接近中性，不参与抗性缩放。
+_ENEMY_SIDE_KEYS = frozenset((
+    "enemy_hp_pct",
+    "enemy_intrusion_pct",
+    "enemy_firewall_pct",
+    "enemy_speed_pct",
+    "enemy_spawn_pct",
+))
+
+
+def _is_hazard(key, value):
+    """判断一个修饰词效果是否『对玩家不利』。"""
+    if key in _ENEMY_SIDE_KEYS:
+        return value > 0
+    return value < 0
+
 
 class DungeonEngine:
     def __init__(self, state, rng, width=20, height=10):
@@ -34,18 +52,32 @@ class DungeonEngine:
     def modifier_effects(self):
         """当前层修饰词效果（无修饰词返回空 dict）。
 
-        负向效果按 modifier_resist 缩放：resist 0.5 → 负面只生效一半；
-        resist -0.3 → 负面加重 30%。正向效果不受影响。
+        只对「危害项」按 modifier_resist 缩放：resist 0.5 → 危害只生效一半；
+        resist -0.3 → 危害加重 30%。增益项不受影响。
+
+        注意：不能按数值符号判断危害——`enemy_hp_pct: -0.25` 是负值，
+        但对玩家是**有利**的（敌人变弱）。危害方向由键的归属决定：
+        敌方侧键（见 _ENEMY_SIDE_KEYS）取正值为危害，其余键取负值为危害。
         """
         if not self.active_modifier:
             return {}
         defn = self.modifier_defs.get(self.active_modifier)
         if not defn:
             return {}
+        return self.scale_hazards(defn.get("effects", {}))
+
+    def scale_hazards(self, effects):
+        """按 modifier_resist 缩放一组效果里的危害项（增益项原样返回）。
+
+        地牢修饰词与**区域挑战修饰词**共用这套语义。否则同一个修饰词作为
+        地牢修饰词时吃抗性、作为挑战时不吃，玩家堆的抗性就对挑战无效，
+        而区域自带的 modifier_resist（如内核核心 -0.15）也管不到挑战。
+        """
         scale = max(0.0, 1.0 - self.modifier_resist)
         out = {}
-        for k, v in defn.get("effects", {}).items():
-            out[k] = float(v) * scale if float(v) < 0 else v
+        for k, v in effects.items():
+            fv = float(v)
+            out[k] = fv * scale if _is_hazard(k, fv) else fv
         return out
 
     def _roll_modifier(self, level_num):
