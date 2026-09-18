@@ -503,7 +503,23 @@ class CombatEngine:
         )
         reflect = float(self.enemy.get("reflect", 0))
         if reflect > 0 and damage > 0:
-            back = damage * reflect
+            # 反伤是「玩家受到的伤害」，必须和敌人普攻走同一条减伤通道。
+            # 原来直接扣 player_hp、完全绕过防火墙，有两个后果：
+            #   1) 唯一的防御属性对它无效，没有 counter-play；
+            #   2) 整场反伤总量 = reflect × 敌人最大生命 —— 玩家输出 D 在
+            #      「回合数 T = H/D」与「每回合 r*D」里约掉，与 D 无关，
+            #      所以它是按敌人血量计价的固定税，∝ 层数^2，而玩家生命只
+            #      随 sqrt(XP) 增长，深层必然反超。
+            # 实测：17/26 只怪带反射；去掉反射后层 30 胜率 +48~63pt
+            # （轨道中继 L25 20.0% -> 83.3%），是深层难度的最大单一来源。
+            # 接入减伤后解析税从「L45 = 158% 玩家生命（单独就能致死）」
+            # 降到 57.4%，各等级全部 < 100%，「单独致死」被消除。
+            # 注意：这不等于它是一个有效的「构筑区分器」——firewall 的等级
+            # 基底（5+level*2）在 L25 左右已越过减伤曲线的拐点，可达区间在
+            # 深层塌缩到 ~0.06（L45 满堆防御 vs 零防御的反伤税只差 4~5pt）。
+            # 反伤仍带「按敌人血量计价的固定税」性质（L15 46% -> L60 65%
+            # 玩家生命）；若要它真正惩罚高爆发，需改为按单次伤害占比计价。
+            back = damage * reflect * (1.0 - mitigation(power["firewall"], *_PLAYER_FW))
             self.player_hp = max(0.0, self.player_hp - back)
             self.log.append(self._t("combat_reflect", dmg=int(back)))
 
